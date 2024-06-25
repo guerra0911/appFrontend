@@ -42,6 +42,7 @@ const EditProfileForm = ({ setModalVisible }) => {
         placeholder="Username"
         handleChangeText={setUsername}
         otherStyles="mt-0"
+        multiline={false}
       />
       
       <CustomButton

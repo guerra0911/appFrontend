@@ -83,6 +83,7 @@ const SignIn = () => {
               value={username}
               handleChangeText={(e) => setUsername(e)}
               otherStyles="mt-7"
+              multiline={false}
             />
 
             <FormField
@@ -90,6 +91,7 @@ const SignIn = () => {
               value={password}
               handleChangeText={(e) => setPassword(e)}
               otherStyles="mt-7"
+              multiline={false}
             />
 
             <CustomButton

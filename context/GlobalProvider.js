@@ -16,14 +16,14 @@ const GlobalProvider = ({ children }) => {
       const token = await AsyncStorage.getItem('authToken');
       if (token) {
         api.setAuthToken(token);
-        const res = await api.get('/api/user/me/');
+        const res = await api.get('/api/user/me/'); 
         if (res.status === 200) {
           setIsLogged(true);
           setUser(res.data);
         } else {
           setIsLogged(false);
           setUser(null);
-          await AsyncStorage.removeItem('authToken'); // Remove invalid token
+          // await AsyncStorage.removeItem('authToken'); // Remove invalid token
         }
       } else {
         setIsLogged(false);
@@ -33,7 +33,7 @@ const GlobalProvider = ({ children }) => {
       console.error('Error fetching user data:', error);
       setIsLogged(false);
       setUser(null);
-      await AsyncStorage.removeItem('authToken'); // Remove invalid token on error
+      // await AsyncStorage.removeItem('authToken'); // Remove invalid token on error
     } finally {
       setLoading(false);
     }

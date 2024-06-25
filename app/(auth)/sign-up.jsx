@@ -6,45 +6,53 @@ import { KeyboardAvoidingView, Platform } from "react-native";
 
 import { images } from "../../constants";
 import { CustomButton, FormField } from "../../components";
-// import api from "../../api";
 import { apiWithoutAuth as api } from "../../api";
 
 const SignUp = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState(""); 
   const [isLoading, setIsLoading] = useState(false);
 
-  // SignUp Component
+  const validateUsername = (username) => {
+    const regex = /^[a-zA-Z0-9._]{1,25}$/;
+    return regex.test(username);
+  };
+
+  const validatePassword = (password) => {
+    const regex = /^(?=.*\d).{6,}$/;
+    return regex.test(password);
+  };
+
   const handleSubmit = async () => {
+    if (!validateUsername(username)) {
+      Alert.alert("Error", "Username must be between 1 and 25 characters and can only contain letters, numbers, periods, and underscores.");
+      return;
+    }
+    if (!validatePassword(password)) {
+      Alert.alert("Error", "Password must be at least 6 characters long and contain at least one number.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match.");
+      return;
+    }
+
     setIsLoading(true);
     try {
-      console.log('Sending request with data:', {
-        username: username.trim(),
-        password: password.trim(),
-      });
-
       const res = await api.post("/api/user/register/", {
         username: username.trim(),
         password: password.trim(),
+        confirm_password: confirmPassword.trim(),
       });
-      console.log('Response received:', res);
-      // Ensure the response is successful before navigating
+
       if (res.status === 200 || res.status === 201) {
+        Alert.alert("Registration Success", res.message);
         router.replace("/sign-in");
       } else {
-        // Handle unsuccessful registration
         Alert.alert("Registration Failed", res.message);
       }
     } catch (error) {
-      if (error.response) {
-        console.log(error.response.data);
-        console.log(error.response.status);
-        console.log(error.response.headers);
-      } else if (error.request) {
-        console.log(error.request);
-      } else {
-        console.log('Error', error.message);
-      }
       Alert.alert("Error", "An error occurred while processing your request.");
     } finally {
       setIsLoading(false);
@@ -79,6 +87,7 @@ const SignUp = () => {
               value={username}
               handleChangeText={(e) => setUsername(e)}
               otherStyles="mt-7"
+              multiline={false} 
             />
 
             <FormField
@@ -86,6 +95,15 @@ const SignUp = () => {
               value={password}
               handleChangeText={(e) => setPassword(e)}
               otherStyles="mt-7"
+              multiline={false} 
+            />
+
+            <FormField
+              title="Confirm Password" 
+              value={confirmPassword}
+              handleChangeText={(e) => setConfirmPassword(e)}
+              otherStyles="mt-7"
+              multiline={false} 
             />
 
             <CustomButton

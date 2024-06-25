@@ -68,6 +68,7 @@ const CreateNoteForm = ({ setModalVisible }) => {
           handleChangeText={(e) => setForm({ ...form, content: e })}
           otherStyles="mt-0"
           height={200}
+          multiline={true}
         />
 
         <CustomButton
