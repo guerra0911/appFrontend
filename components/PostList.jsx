@@ -29,12 +29,14 @@ const PostList = ({ posts, setPosts }) => {
         posts.map((post) => (
           <PostCard
             key={post.id}
-            username={post.author}
+            profilePicture={post.author.profile.image}
+            username={post.author.username}
             date={post.created_at}
             content={post.content}
             likes={post.likes}
             dislikes={post.dislikes}
             comments={post.comments}
+            post={post}
           />
         ))
       ) : (

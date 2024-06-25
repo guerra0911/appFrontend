@@ -134,22 +134,6 @@ const TabLayout = () => {
           }}
         />
 
-        {/* <Tabs.Screen
-          name="profile"
-          options={{
-            title: "Profile",
-            headerShown: false,
-            tabBarIcon: ({ color, focused }) => (
-              <TabIcon color={color} name="Profile" focused={focused}>
-                <Ionicons name="person" size={24} color={color} />
-              </TabIcon>
-            ),
-            tabBarButton: (props) => (
-              <TouchableOpacity {...props} onPress={navigateToProfile} />
-            ),
-          }}
-        /> */}
-
         <Tabs.Screen
           name="profile"
           options={{
@@ -157,11 +141,9 @@ const TabLayout = () => {
             headerShown: false,
             tabBarIcon: ({ color, focused }) => (
               <TabIcon color={color} name="Profile" focused={focused}>
-                {user?.profile?.profile_picture ? (
+                {user?.profile?.image ? (
                   <Image
-                    // source={{ uri: user.profile.image }}
-                    source={ "https://nickguerrabucket.s3.us-east-2.amazonaws.com/profile_pics/default.jpg" }
-                    
+                    source={{ uri: user.profile.image }}
                     style={{ width: 24, height: 24, borderRadius: 12 }}
                   />
                 ) : (
