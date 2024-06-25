@@ -40,6 +40,8 @@
     "react-native-appwrite": "^0.4.0",
     "react-native-async-storage": "^0.0.1",
     "react-native-dotenv": "^3.4.11",
+    "react-native-expo-image-cache": "^4.1.0",
+    "react-native-fast-image": "^8.6.3",
     "react-native-gesture-handler": "~2.16.1",
     "react-native-image-picker": "^7.1.2",
     "react-native-keychain": "^8.2.0",

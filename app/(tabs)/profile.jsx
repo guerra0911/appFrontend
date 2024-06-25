@@ -1,3 +1,4 @@
+// Profile.jsx
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -36,6 +37,9 @@ const Profile = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [profilePic, setProfilePic] = useState(null);
 
+  console.log("User:", user);
+  console.log("Profile Picture URL:", user?.profile?.image);
+
   const fetchUserProfile = async (id) => {
     setLoading(true);
     try {
@@ -43,15 +47,16 @@ const Profile = () => {
       setUserData(response.data.userData);
       setUserProfile(response.data.profile);
       setPosts(response.data.posts);
-      setProfilePic(response.data.profile.image);
-      
+      const timestamp = new Date().getTime();
+      setProfilePic(`${response.data.profile.image}?timestamp=${timestamp}`);
     } catch (error) {
       console.error("Error fetching user profile:", error);
       Alert.alert("Error", "Failed to fetch user profile.");
     } finally {
       setLoading(false);
     }
-  };
+  };  
+  
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -60,11 +65,11 @@ const Profile = () => {
         await fetchUserProfile(id);
       }
     };
-
+  
     if (user) {
       fetchProfile();
     }
-  }, [userId, user]);
+  }, [userId, user]);  
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);

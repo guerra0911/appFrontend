@@ -47,8 +47,8 @@ const TabLayout = () => {
   };
 
    // Log the user object and profile picture URL for debugging
-   console.log('User:', user);
-   console.log('Profile Picture URL:', user?.profile?.image);
+  //  console.log('User:', user);
+  //  console.log('Profile Picture URL:', user?.profile?.image);
 
   if (!loading && !isLogged) return <Redirect href="/sign-in" />;
 
