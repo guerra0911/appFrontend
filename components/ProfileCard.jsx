@@ -35,7 +35,7 @@ const ProfileCard = ({image, username, posts, followers, following, rating, butt
           <Text className="text-gray-100 font-pregular text-lg">Following</Text>
         </View>
       </View>
-      <View>
+      <View className="w-full mt-4">
           {button}
         </View>
     </View>

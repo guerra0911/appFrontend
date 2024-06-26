@@ -26,8 +26,9 @@ const PostCard = ({
   const [modalVisible, setModalVisible] = useState(false);
   const [modalTitle, setModalTitle] = useState('');
 
-  const navigateToProfile = () => {
-    navigation.navigate("profile", { userId: post.author.id });
+  const navigateToProfile = (userId) => {
+    setModalVisible(false);
+    navigation.navigate("profile", { userId });
   };
 
   const updatePostLikesDislikes = (updatedPost) => {
@@ -94,7 +95,7 @@ const PostCard = ({
     <View className="w-full bg-black-200 rounded-xl p-6 mb-4">
       <View className="flex flex-row items-center mb-4">
         <TouchableOpacity
-          onPress={navigateToProfile}
+          onPress={() => navigateToProfile(post.author.id)}
           className="w-12 h-12 rounded-full overflow-hidden border-2 border-secondary mr-4"
         >
           <Image
@@ -106,7 +107,7 @@ const PostCard = ({
         <View>
           <Text
             className="text-white font-pbold text-lg"
-            onPress={navigateToProfile}
+            onPress={() => navigateToProfile(post.author.id)}
           >
             @{username}
           </Text>
@@ -120,7 +121,7 @@ const PostCard = ({
         <TouchableOpacity className="flex flex-row items-center" onPress={handleLike}>
           <FontAwesome name="thumbs-up" size={18} color="#80FFDB" />
           <TouchableOpacity onPress={openLikedByModal}>
-            <Text className="text-secondary-100 font-pregular text-lg ml-2">
+            <Text className="text-secondary-100 font-pregular text-lg ml-5">
               {likeCount}
             </Text>
           </TouchableOpacity>
@@ -128,27 +129,29 @@ const PostCard = ({
         <TouchableOpacity className="flex flex-row items-center" onPress={handleDislike}>
           <FontAwesome name="thumbs-down" size={18} color="#FF0000" />
           <TouchableOpacity onPress={openDislikedByModal}>
-            <Text className="text-secondary-100 font-pregular text-lg ml-2">
+            <Text className="text-secondary-100 font-pregular text-lg ml-5">
               {dislikeCount}
             </Text>
           </TouchableOpacity>
         </TouchableOpacity>
-        <TouchableOpacity className="flex flex-row items-center">
+        {/* <TouchableOpacity className="flex flex-row items-center">
           <FontAwesome name="comment" size={18} color="#FFFFFF" />
-          <Text className="text-secondary-100 font-pregular text-lg ml-2">
+          <Text className="text-secondary-100 font-pregular text-lg ml-5">
             {comments.length}
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       <RenderModal modalVisible={modalVisible} setModalVisible={setModalVisible}>
         <Text style={styles.modalTitle}>{modalTitle}</Text>
         <ScrollView>
           {(modalTitle === 'Liked By' ? likedBy : dislikedBy).map(user => (
-            <View key={user.id} style={styles.userContainer}>
-              <Image source={{ uri: user.profile.image }} style={styles.userImage} />
-              <Text style={styles.userName}>{user.username}</Text>
-            </View>
+            <TouchableOpacity key={user.id} onPress={() => navigateToProfile(user.id)}>
+              <View style={styles.userContainer}>
+                <Image source={{ uri: user.profile.image }} style={styles.userImage} />
+                <Text style={styles.userName}>{user.username}</Text>
+              </View>
+            </TouchableOpacity>
           ))}
         </ScrollView>
       </RenderModal>

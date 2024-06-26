@@ -122,7 +122,7 @@ const Profile = () => {
 
           {!loading && userProfile && userData && (
             <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-              <View className="w-full flex justify-center items-center mt-6 mb-12 px-4">
+              <View className="w-full flex justify-center items-center mt-2 mb-12 px-4">
                 <ProfileCard
                   image={profilePic}
                   username={userData.username}
@@ -131,17 +131,19 @@ const Profile = () => {
                   following={userProfile.following.length}
                   rating={userProfile.rating}
                   button={
-                    <CustomButton
-                      title="Edit Profile"
-                      handlePress={() => setModalVisible(true)}
-                      containerStyles="mt-4"
-                      isLoading={loading}
-                    />
+                    user?.id === userData.id && (
+                      <CustomButton
+                        title="Edit Profile"
+                        handlePress={() => setModalVisible(true)}
+                        containerStyles="mt-4 w-full flex justify-center items-center"
+                        isLoading={loading}
+                      />
+                    )
                   }
                 />
               </View>
               <View className="w-full px-4">
-              <PostList userId={user.id} />
+              <PostList userId={userData.id}/>
               </View>
             </ScrollView>
           )}

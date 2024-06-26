@@ -85,7 +85,7 @@ const Home = () => {
               </View>
               <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
                 <View>
-                  <PostList userId={null} />
+                  <PostList userId={null}/>
                 </View>
               </ScrollView>
             </>
