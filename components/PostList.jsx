@@ -4,14 +4,16 @@ import PostCard from "./PostCard";
 import api from "../api";
 import { formatDistanceToNow } from 'date-fns';
 
-const PostList = ({ posts, setPosts }) => {
+const PostList = ({ posts, setPosts, userId }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [sortBy, setSortBy] = useState('created_at');
 
   const fetchPosts = async (sortOption) => {
     setRefreshing(true);
     try {
-      const response = await api.get(`/api/notes/all/?sort_by=${sortOption}`);
+      const response = userId 
+        ? await api.get(`/api/notes/user/${userId}/?sort_by=${sortOption}`)
+        : await api.get(`/api/notes/all/?sort_by=${sortOption}`);
       setPosts(response.data);
     } catch (error) {
       console.error(error);
@@ -22,7 +24,7 @@ const PostList = ({ posts, setPosts }) => {
 
   useEffect(() => {
     fetchPosts(sortBy);
-  }, [sortBy]);
+  }, [sortBy, userId]);
 
   const handleSortChange = (newSortBy) => {
     setSortBy(newSortBy);

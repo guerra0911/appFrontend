@@ -141,7 +141,7 @@ const Profile = () => {
                 />
               </View>
               <View className="w-full px-4">
-                <PostList posts={posts} setPosts={setPosts} />
+                <PostList posts={posts} setPosts={setPosts} userId={userData.id}/>
               </View>
             </ScrollView>
           )}

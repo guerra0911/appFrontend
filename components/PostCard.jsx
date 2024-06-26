@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { View, Text, Image, TouchableOpacity } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import api from '../api'; // Ensure the correct path to your api.js
 import { useGlobalContext } from '../context/GlobalProvider'; // Ensure the correct path to your GlobalProvider.js
+import RenderModal from "../app/(tabs)/renderModal";
 
 const PostCard = ({
   profilePicture,
@@ -19,6 +20,10 @@ const PostCard = ({
   const { user } = useGlobalContext(); // Accessing the current user
   const [likeCount, setLikeCount] = useState(likes.length);
   const [dislikeCount, setDislikeCount] = useState(dislikes.length);
+  const [likedBy, setLikedBy] = useState([]);
+  const [dislikedBy, setDislikedBy] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
 
   const navigateToProfile = () => {
     navigation.navigate("profile", { userId: post.author.id });
@@ -42,6 +47,36 @@ const PostCard = ({
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const fetchLikedBy = async () => {
+    try {
+      const response = await api.get(`/api/notes/${post.id}/liked_by/`);
+      setLikedBy(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchDislikedBy = async () => {
+    try {
+      const response = await api.get(`/api/notes/${post.id}/disliked_by/`);
+      setDislikedBy(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const openLikedByModal = () => {
+    setModalTitle('Liked By');
+    fetchLikedBy();
+    setModalVisible(true);
+  };
+
+  const openDislikedByModal = () => {
+    setModalTitle('Disliked By');
+    fetchDislikedBy();
+    setModalVisible(true);
   };
 
   return (
@@ -73,25 +108,68 @@ const PostCard = ({
       <View className="flex flex-row justify-around mt-4">
         <TouchableOpacity className="flex flex-row items-center" onPress={handleLike}>
           <FontAwesome name="thumbs-up" size={18} color="#80FFDB" />
-          <Text className="text-secondary-100 font-pregular text-lg ml-2">
-            {likeCount}
-          </Text>
+          <TouchableOpacity onPress={openLikedByModal}>
+            <Text className="text-secondary-100 font-pregular text-lg ml-5">
+              {likeCount}
+            </Text>
+          </TouchableOpacity>
         </TouchableOpacity>
         <TouchableOpacity className="flex flex-row items-center" onPress={handleDislike}>
           <FontAwesome name="thumbs-down" size={18} color="#FF0000" />
-          <Text className="text-secondary-100 font-pregular text-lg ml-2">
-            {dislikeCount}
-          </Text>
+          <TouchableOpacity onPress={openDislikedByModal}>
+            <Text className="text-secondary-100 font-pregular text-lg ml-5">
+              {dislikeCount}
+            </Text>
+          </TouchableOpacity>
         </TouchableOpacity>
         <TouchableOpacity className="flex flex-row items-center">
           <FontAwesome name="comment" size={18} color="#FFFFFF" />
-          <Text className="text-secondary-100 font-pregular text-lg ml-2">
+          <Text className="text-secondary-100 font-pregular text-lg ml-5">
             {comments.length}
           </Text>
         </TouchableOpacity>
       </View>
+
+      <RenderModal modalVisible={modalVisible} setModalVisible={setModalVisible}>
+        <Text style={styles.modalTitle}>{modalTitle}</Text>
+        <ScrollView>
+          {(modalTitle === 'Liked By' ? likedBy : dislikedBy).map(user => (
+            <View key={user.id} style={styles.userContainer}>
+              <Image source={{ uri: user.profile.image }} style={styles.userImage} />
+              <Text style={styles.userName}>{user.username}</Text>
+            </View>
+          ))}
+        </ScrollView>
+      </RenderModal>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  modalTitle: {
+    fontSize: 24,
+    color: "#fff",
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  userContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    backgroundColor: "#444",
+    borderRadius: 10,
+    marginVertical: 5,
+  },
+  userImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  userName: {
+    color: "#fff",
+    fontSize: 18,
+  },
+});
 
 export default PostCard;
