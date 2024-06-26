@@ -9,6 +9,7 @@ const GlobalProvider = ({ children }) => {
   const [isLogged, setIsLogged] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [posts, setPosts] = useState([]);
 
   const checkCurrentUser = async () => {
     setLoading(true);
@@ -16,14 +17,13 @@ const GlobalProvider = ({ children }) => {
       const token = await AsyncStorage.getItem('authToken');
       if (token) {
         api.setAuthToken(token);
-        const res = await api.get('/api/user/me/'); 
+        const res = await api.get('/api/user/me/');
         if (res.status === 200) {
           setIsLogged(true);
           setUser(res.data);
         } else {
           setIsLogged(false);
           setUser(null);
-          // await AsyncStorage.removeItem('authToken'); // Remove invalid token
         }
       } else {
         setIsLogged(false);
@@ -33,9 +33,19 @@ const GlobalProvider = ({ children }) => {
       console.error('Error fetching user data:', error);
       setIsLogged(false);
       setUser(null);
-      // await AsyncStorage.removeItem('authToken'); // Remove invalid token on error
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPosts = async (userId, sortBy = 'created_at') => {
+    try {
+      const response = userId
+        ? await api.get(`/api/notes/user/${userId}/?sort_by=${sortBy}`)
+        : await api.get(`/api/notes/all/?sort_by=${sortBy}`);
+      setPosts(response.data);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
     }
   };
 
@@ -53,6 +63,9 @@ const GlobalProvider = ({ children }) => {
         loading,
         setLoading,
         checkCurrentUser,
+        posts,
+        setPosts,
+        fetchPosts,
       }}
     >
       {children}

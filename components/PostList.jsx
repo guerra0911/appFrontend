@@ -1,33 +1,33 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import { ScrollView, View, Text, RefreshControl, TouchableOpacity, StyleSheet } from "react-native";
+import { useFocusEffect } from '@react-navigation/native';
 import PostCard from "./PostCard";
-import api from "../api";
+import { useGlobalContext } from '../context/GlobalProvider';
 import { formatDistanceToNow } from 'date-fns';
 
-const PostList = ({ posts, setPosts, userId }) => {
+const PostList = ({ userId }) => {
+  const { posts, fetchPosts } = useGlobalContext();
   const [refreshing, setRefreshing] = useState(false);
   const [sortBy, setSortBy] = useState('created_at');
 
-  const fetchPosts = async (sortOption) => {
+  const fetchData = async (sortOption) => {
     setRefreshing(true);
-    try {
-      const response = userId 
-        ? await api.get(`/api/notes/user/${userId}/?sort_by=${sortOption}`)
-        : await api.get(`/api/notes/all/?sort_by=${sortOption}`);
-      setPosts(response.data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setRefreshing(false);
-    }
+    await fetchPosts(userId, sortOption);
+    setRefreshing(false);
   };
 
-  useEffect(() => {
-    fetchPosts(sortBy);
-  }, [sortBy, userId]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchData(sortBy);
+    }, [sortBy, userId])
+  );
 
   const handleSortChange = (newSortBy) => {
     setSortBy(newSortBy);
+  };
+
+  const onLikeDislikeUpdate = () => {
+    fetchData(sortBy);
   };
 
   return (
@@ -55,7 +55,7 @@ const PostList = ({ posts, setPosts, userId }) => {
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, padding: 16, paddingBottom: 50 }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => fetchPosts(sortBy)} />
+          <RefreshControl refreshing={refreshing} onRefresh={() => fetchData(sortBy)} />
         }
       >
         {posts.length > 0 ? (
@@ -70,6 +70,7 @@ const PostList = ({ posts, setPosts, userId }) => {
               dislikes={post.dislikes}
               comments={post.comments}
               post={post}
+              onLikeDislikeUpdate={onLikeDislikeUpdate}
             />
           ))
         ) : (

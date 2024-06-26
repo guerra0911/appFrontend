@@ -15,9 +15,10 @@ const PostCard = ({
   dislikes,
   comments,
   post,
+  onLikeDislikeUpdate,
 }) => {
   const navigation = useNavigation();
-  const { user } = useGlobalContext(); // Accessing the current user
+  const { user, posts, setPosts } = useGlobalContext(); // Accessing the current user and posts
   const [likeCount, setLikeCount] = useState(likes.length);
   const [dislikeCount, setDislikeCount] = useState(dislikes.length);
   const [likedBy, setLikedBy] = useState([]);
@@ -29,11 +30,19 @@ const PostCard = ({
     navigation.navigate("profile", { userId: post.author.id });
   };
 
+  const updatePostLikesDislikes = (updatedPost) => {
+    setPosts((prevPosts) => 
+      prevPosts.map((p) => (p.id === updatedPost.id ? updatedPost : p))
+    );
+  };
+
   const handleLike = async () => {
     try {
       const response = await api.post(`/api/notes/${post.id}/like/`);
       setLikeCount(response.data.likes);
       setDislikeCount(response.data.dislikes);
+      updatePostLikesDislikes(response.data); // Update global state
+      onLikeDislikeUpdate(); // Trigger a refresh of the posts
     } catch (error) {
       console.error(error);
     }
@@ -44,6 +53,8 @@ const PostCard = ({
       const response = await api.post(`/api/notes/${post.id}/dislike/`);
       setLikeCount(response.data.likes);
       setDislikeCount(response.data.dislikes);
+      updatePostLikesDislikes(response.data); // Update global state
+      onLikeDislikeUpdate(); // Trigger a refresh of the posts
     } catch (error) {
       console.error(error);
     }
@@ -109,7 +120,7 @@ const PostCard = ({
         <TouchableOpacity className="flex flex-row items-center" onPress={handleLike}>
           <FontAwesome name="thumbs-up" size={18} color="#80FFDB" />
           <TouchableOpacity onPress={openLikedByModal}>
-            <Text className="text-secondary-100 font-pregular text-lg ml-5">
+            <Text className="text-secondary-100 font-pregular text-lg ml-2">
               {likeCount}
             </Text>
           </TouchableOpacity>
@@ -117,14 +128,14 @@ const PostCard = ({
         <TouchableOpacity className="flex flex-row items-center" onPress={handleDislike}>
           <FontAwesome name="thumbs-down" size={18} color="#FF0000" />
           <TouchableOpacity onPress={openDislikedByModal}>
-            <Text className="text-secondary-100 font-pregular text-lg ml-5">
+            <Text className="text-secondary-100 font-pregular text-lg ml-2">
               {dislikeCount}
             </Text>
           </TouchableOpacity>
         </TouchableOpacity>
         <TouchableOpacity className="flex flex-row items-center">
           <FontAwesome name="comment" size={18} color="#FFFFFF" />
-          <Text className="text-secondary-100 font-pregular text-lg ml-5">
+          <Text className="text-secondary-100 font-pregular text-lg ml-2">
             {comments.length}
           </Text>
         </TouchableOpacity>
