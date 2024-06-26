@@ -2,6 +2,7 @@ import React, { useState, useCallback } from "react";
 import { ScrollView, View, Text, RefreshControl } from "react-native";
 import PostCard from "./PostCard";
 import api from "../api";
+import { formatDistanceToNow } from 'date-fns';
 
 const PostList = ({ posts, setPosts }) => {
   const [refreshing, setRefreshing] = useState(false);
@@ -31,7 +32,7 @@ const PostList = ({ posts, setPosts }) => {
             key={post.id}
             profilePicture={post.author.profile.image}
             username={post.author.username}
-            date={post.created_at}
+            date={formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
             content={post.content}
             likes={post.likes}
             dislikes={post.dislikes}
