@@ -122,7 +122,7 @@ const Profile = () => {
 
           {!loading && userProfile && userData && (
             <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-              <View className="w-full flex justify-center items-center mt-2 mb-12 px-4">
+              <View className="w-full flex justify-center items-center mt-2 mb-5 px-4">
                 <ProfileCard
                   image={profilePic}
                   username={userData.username}
