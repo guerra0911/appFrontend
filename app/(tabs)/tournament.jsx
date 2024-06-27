@@ -17,7 +17,8 @@ import {
 } from "react-native-gesture-handler";
 import CreateTournamentForm from "../../components/CreateTournamentForm";
 import { useGlobalContext } from "../../context/GlobalProvider";
-import Loader from "../../components/Loader"; // Ensure this is the correct path
+import Loader from "../../components/Loader";
+import TournamentList from "../../components/TournamentList";
 
 const Tournament = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -61,6 +62,9 @@ const Tournament = () => {
                         containerStyles="mt-4 w-full flex justify-center items-center"
                         isLoading={loading}
                       />
+              <View>
+                <TournamentList />
+              </View>
               <View>
                 <PredictTournamentForm />
               </View>

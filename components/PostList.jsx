@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from "react";
-import { ScrollView, View, Text, RefreshControl, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useState, useCallback, useEffect } from "react";
+import { ScrollView, View, Text, RefreshControl, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { useFocusEffect } from '@react-navigation/native';
 import PostCard from "./PostCard";
 import { useGlobalContext } from '../context/GlobalProvider';
@@ -9,10 +9,12 @@ const PostList = ({ userId }) => {
   const { posts, fetchPosts } = useGlobalContext();
   const [refreshing, setRefreshing] = useState(false);
   const [sortBy, setSortBy] = useState('created_at');
+  const [loading, setLoading] = useState(true);  // New loading state
 
   const fetchData = async (sortOption) => {
-    setRefreshing(true);
+    setLoading(true);  // Set loading to true
     await fetchPosts(userId, sortOption);
+    setLoading(false);  // Set loading to false after fetching
     setRefreshing(false);
   };
 
@@ -58,7 +60,9 @@ const PostList = ({ userId }) => {
           <RefreshControl refreshing={refreshing} onRefresh={() => fetchData(sortBy)} />
         }
       >
-        {posts.length > 0 ? (
+        {loading ? (
+          <ActivityIndicator size="large" color="#ffffff" />
+        ) : posts.length > 0 ? (
           posts.map((post) => (
             <PostCard
               key={post.id}

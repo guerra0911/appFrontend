@@ -28,7 +28,7 @@ const PostCard = ({
 
   const navigateToProfile = (userId) => {
     setModalVisible(false);
-    navigation.navigate("profile", { userId });
+    navigation.navigate("otherProfile", { userId });
   };
 
   const updatePostLikesDislikes = (updatedPost) => {

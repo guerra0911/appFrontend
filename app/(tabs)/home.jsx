@@ -5,7 +5,7 @@ import {
   GestureHandlerRootView,
   ScrollView,
 } from "react-native-gesture-handler";
-import { Image, Text, View, RefreshControl } from "react-native";
+import { Image, Text, View, RefreshControl, Alert } from "react-native";
 
 import { useGlobalContext } from "../../context/GlobalProvider";
 import { images } from "../../constants";
@@ -17,7 +17,7 @@ const Home = () => {
   const [refreshing, setRefreshing] = useState(false);
   const { userId } = useLocalSearchParams();
   const [username, setUsername] = useState(null);
-  const { user, setUser, setIsLogged, loading, setLoading } =
+  const { user, setUser, setIsLogged, loading, setLoading, setPosts } =
     useGlobalContext();
 
   const fetchUsername = async () => {
@@ -44,6 +44,11 @@ const Home = () => {
     if (user) {
       fetchUser();
     }
+
+    // Clear posts when navigating away
+    return () => {
+      setPosts([]); 
+    };
   }, [userId, user]);
 
   const onRefresh = useCallback(async () => {
