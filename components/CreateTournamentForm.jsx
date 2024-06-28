@@ -1,10 +1,8 @@
-// CreateTournamentForm.jsx
 import React, { useState } from "react";
-import { View, Image, Alert, Button, ScrollView } from "react-native";
+import { View, Image, Alert, Button, ScrollView, TouchableOpacity, Text } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import api from "../api";
 import { useGlobalContext } from "../context/GlobalProvider";
-
 import CustomButton from "./CustomButton";
 import FormField from "./FormField";
 
@@ -16,6 +14,7 @@ const CreateTournamentForm = ({ setModalVisible }) => {
   const [bonus, setBonus] = useState("");
   const [winnerReward, setWinnerReward] = useState("");
   const [loserForfeit, setLoserForfeit] = useState("");
+  const [teamSize, setTeamSize] = useState(16);  // New state for team size
   const [teams, setTeams] = useState(Array(16).fill({ name: "", logo: null }));
   const [uploading, setUploading] = useState(false);
   const { user } = useGlobalContext();
@@ -56,61 +55,68 @@ const CreateTournamentForm = ({ setModalVisible }) => {
     }
   };
 
+  const handleTeamSizeChange = (size) => {
+    setTeamSize(size);
+    setTeams(Array(size).fill({ name: "", logo: null }));
+  };
+
   const handleSubmit = async () => {
     setUploading(true);
-  
+
     try {
-      const formData = new FormData();
-      formData.append("author", user.id)
-      formData.append("name", name);
-      formData.append("point_system", JSON.stringify(points));
-      formData.append("correct_score_bonus", bonus);
-      formData.append("winner_reward", winnerReward);
-      formData.append("loser_forfeit", loserForfeit);
-  
-      if (banner) {
-        formData.append("banner", {
-          uri: banner,
-          name: `banner.jpg`,
-          type: "image/jpeg",
-        });
-      }
-  
-      if (logo) {
-        formData.append("logo", {
-          uri: logo,
-          name: `logo.jpg`,
-          type: "image/jpeg",
-        });
-      }
-  
-      teams.forEach((team, index) => {
-        formData.append(`teams[${index}][name]`, team.name);
-        if (team.logo) {
-          formData.append(`teams[${index}][logo]`, {
-            uri: team.logo,
-            name: `team${index + 1}.jpg`,
-            type: "image/jpeg",
-          });
+        const formData = new FormData();
+        formData.append("author", user.id);
+        formData.append("name", name);
+        formData.append("point_system", JSON.stringify(points));
+        formData.append("correct_score_bonus", bonus);
+        formData.append("winner_reward", winnerReward);
+        formData.append("loser_forfeit", loserForfeit);
+        formData.append("team_size", teamSize);  // Include team size in form data
+
+        if (banner) {
+            formData.append("banner", {
+                uri: banner,
+                name: `banner.jpg`,
+                type: "image/jpeg",
+            });
         }
-      });
-  
-      const response = await api.post("/api/tournaments/create/", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-  
-      Alert.alert("Tournament created successfully!");
-      setModalVisible(false);
+
+        if (logo) {
+            formData.append("logo", {
+                uri: logo,
+                name: `logo.jpg`,
+                type: "image/jpeg",
+            });
+        }
+
+        // Ensure unique teams are added
+        teams.forEach((team, index) => {
+            formData.append(`teams[${index}][name]`, team.name);
+            if (team.logo) {
+                formData.append(`teams[${index}][logo]`, {
+                    uri: team.logo,
+                    name: `team${index + 1}.jpg`,
+                    type: "image/jpeg",
+                });
+            }
+        });
+
+        const response = await api.post("/api/tournaments/create/", formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+
+        Alert.alert("Tournament created successfully!");
+        setModalVisible(false);
     } catch (error) {
-      console.error("Error:", error.response ? error.response.data : error.message);
-      Alert.alert("Error creating tournament. Please try again.");
+        console.error("Error:", error.response ? error.response.data : error.message);
+        Alert.alert("Error creating tournament. Please try again.");
     } finally {
-      setUploading(false);
+        setUploading(false);
     }
-  };
-  
+};
+
 
   return (
     <ScrollView style={{ padding: 20 }}>
@@ -166,6 +172,32 @@ const CreateTournamentForm = ({ setModalVisible }) => {
         otherStyles="mt-0"
         multiline={true}
       />
+
+      <View style={{ flexDirection: 'row', justifyContent: 'center', marginVertical: 20 }}>
+        <TouchableOpacity
+          style={{
+            backgroundColor: teamSize === 8 ? 'blue' : 'gray',
+            padding: 10,
+            margin: 5,
+            borderRadius: 5
+          }}
+          onPress={() => handleTeamSizeChange(8)}
+        >
+          <Text style={{ color: 'white' }}>8 Teams</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{
+            backgroundColor: teamSize === 16 ? 'blue' : 'gray',
+            padding: 10,
+            margin: 5,
+            borderRadius: 5
+          }}
+          onPress={() => handleTeamSizeChange(16)}
+        >
+          <Text style={{ color: 'white' }}>16 Teams</Text>
+        </TouchableOpacity>
+      </View>
+
       {teams.map((team, index) => (
         <View key={index} style={{ marginBottom: 20 }}>
           <FormField

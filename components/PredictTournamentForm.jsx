@@ -11,7 +11,7 @@ import {
 import api from "../api";
 import CustomButton from "./CustomButton";
 
-const placeholderLogo = "https://via.placeholder.com/50?text=+";
+const placeholderLogo = "https://nickguerrabucket.s3.us-east-2.amazonaws.com/admin/placeholder.png";
 
 const PredictTournamentForm = ({ tournament }) => {
   const [teams, setTeams] = useState({ left: [], right: [] });
@@ -31,9 +31,21 @@ const PredictTournamentForm = ({ tournament }) => {
       api
         .get(`/api/tournaments/${tournament.id}/`)
         .then((response) => {
-          const fetchedTeams = response.data.teams;
-          const leftTeams = fetchedTeams.slice(0, 8);
-          const rightTeams = fetchedTeams.slice(8, 16);
+          let fetchedTeams = response.data.teams;
+          console.log("Fetched Teams", fetchedTeams);
+
+          // Split the fetched data into two halves
+          const halfLength = Math.ceil(fetchedTeams.length / 2);
+          let uniqueTeams = fetchedTeams.slice(0, halfLength);
+          const uniquehalfLength = Math.floor(uniqueTeams.length / 2);
+
+          const leftTeams = uniqueTeams.slice(0, uniquehalfLength);
+          const rightTeams = uniqueTeams.slice(uniquehalfLength);
+
+          console.log("Unique Teams:", uniqueTeams);
+          console.log("Left Teams:", leftTeams);
+          console.log("Right Teams:", rightTeams);
+
           setTeams({ left: leftTeams, right: rightTeams });
         })
         .catch((error) => {
@@ -41,6 +53,11 @@ const PredictTournamentForm = ({ tournament }) => {
         });
     }
   }, [tournament]);
+
+  useEffect(() => {
+    console.log("LEFT = ", teams.left);
+    console.log("RIGHT = ", teams.right);
+  }, [teams]);
 
   const handleSelect = (round, index, team) => {
     const newWinners = { ...winners };
@@ -52,7 +69,7 @@ const PredictTournamentForm = ({ tournament }) => {
         newWinners.LQF[Math.floor(currentIndex / 2)] = null;
       }
       if (currentRound === "LQF" || currentRound === "L16") {
-        newWinners.LSF[0] = null;  // Ensure LSF only has one item
+        newWinners.LSF[0] = null; // Ensure LSF only has one item
       }
       if (
         currentRound === "LSF" ||
@@ -66,7 +83,7 @@ const PredictTournamentForm = ({ tournament }) => {
         newWinners.RQF[Math.floor(currentIndex / 2)] = null;
       }
       if (currentRound === "RQF" || currentRound === "R16") {
-        newWinners.RSF[0] = null;  // Ensure RSF only has one item
+        newWinners.RSF[0] = null; // Ensure RSF only has one item
       }
       if (
         currentRound === "RSF" ||
@@ -80,10 +97,18 @@ const PredictTournamentForm = ({ tournament }) => {
     clearFutureRounds(round, index);
 
     setWinners(newWinners);
-    console.log(`Updated winners after selecting for round ${round}, index ${index}:`, newWinners);
+    console.log(
+      `Updated winners after selecting for round ${(round, index)}:`,
+      newWinners
+    );
   };
 
   const renderMatchup = (round, index, team1, team2, customStyle = "") => {
+    console.log("Round = ", round);
+    console.log("index = ", index);
+    console.log("team1 = ", team1);
+    console.log("team2 = ", team2);
+    console.log("Tournament team size = ", tournament.team_size);
     return (
       <View className={`my-2 ${customStyle}`} key={`${round}-${index}`}>
         <TouchableOpacity onPress={() => handleSelect(round, index, team1)}>
@@ -162,39 +187,58 @@ const PredictTournamentForm = ({ tournament }) => {
 
   const handleSubmitPrediction = async () => {
     setUploading(true);
-  
+    console.log(tournament.team_size);
     try {
+      let data = {
+        tournament_id: tournament.id,
+        left_side_round_of_16_teams: teams.left,
+        right_side_round_of_16_teams: teams.right,
+        left_side_quarter_finals: null,
+        right_side_quarter_finals: null,
+        left_side_semi_finals: winners.LQF,
+        right_side_semi_finals: winners.RQF,
+        finals: [winners.LSF[0], winners.RSF[0]],
+        winner: winners.F[0]?.id,
+        team_size: tournament.team_size,
+      };
+
+      if (tournament.team_size === 8) {
+        data.left_side_quarter_finals = teams.left;
+        data.right_side_quarter_finals = teams.right;
+      } else if (tournament.team_size === 16) {
+        data.left_side_quarter_finals = winners.L16;
+        data.right_side_quarter_finals = winners.R16;
+      }
+
+      console.log("SUBMITTED DATA = ", data);
+
       const validateData = () => {
         const valuesToCheck = [
-          ...winners.L16,
-          ...winners.LQF,
-          ...winners.LSF,
-          ...winners.R16,
-          ...winners.RQF,
-          ...winners.RSF,
-          winners.F[0],
+          ...data.left_side_round_of_16_teams,
+          ...data.left_side_quarter_finals,
+          ...data.left_side_semi_finals,
+          ...data.right_side_round_of_16_teams,
+          ...data.right_side_quarter_finals,
+          ...data.right_side_semi_finals,
+          ...data.finals,
+          data.winner,
         ];
-        return valuesToCheck.every(value => value !== null);
+        return valuesToCheck.every((value) => value !== null);
       };
-    
+
       if (!validateData()) {
-        Alert.alert("Error", "Please make sure all selections are made before submitting.");
+        Alert.alert(
+          "Error",
+          "Please make sure all selections are made before submitting."
+        );
         setUploading(false);
         return;
       }
-    
-      const data = {
-        tournament_id: tournament.id,
-        left_side_round_of_16_teams: teams.left,
-        left_side_quarter_finals: winners.L16,
-        left_side_semi_finals: winners.LQF,
-        right_side_round_of_16_teams: teams.right,
-        right_side_quarter_finals: winners.R16,
-        right_side_semi_finals: winners.RQF,
-        finals: [winners.LSF[0], winners.RSF[0]], 
-        winner: winners.F[0]?.id,
-      };
-      const response = await api.post(`/api/tournaments/${tournament.id}/submit_prediction/`, data);
+
+      const response = await api.post(
+        `/api/tournaments/${tournament.id}/submit_prediction/`,
+        data
+      );
       Alert.alert("Success", "Your prediction has been submitted!");
     } catch (error) {
       console.error("Error submitting prediction:", error);
@@ -203,22 +247,45 @@ const PredictTournamentForm = ({ tournament }) => {
       setUploading(false);
     }
   };
-  
 
   return (
     <SafeAreaView className="bg-primary h-full">
       <View className={`bg-black-200 p-10 rounded-lg`}>
         <ScrollView contentContainerStyle={{ flexDirection: "row" }}>
-          <View className="flex-1 items-center w-24 p-4 pt-12">
-            {renderMatchup("L16", 0, teams.left[0], teams.left[1], "my-2")}
-            {renderMatchup("L16", 1, teams.left[2], teams.left[3], "my-2")}
-            {renderMatchup("L16", 2, teams.left[4], teams.left[5], "my-2")}
-            {renderMatchup("L16", 3, teams.left[6], teams.left[7], "my-2")}
-          </View>
-          <View className="flex-1 items-center w-24 p-4 pt-12">
-            {renderMatchup("LQF", 0, winners.L16[0], winners.L16[1], "my-12")}
-            {renderMatchup("LQF", 1, winners.L16[2], winners.L16[3], "my-12")}
-          </View>
+          {tournament.team_size === 16 && (
+            <>
+              <View className="flex-1 items-center w-24 p-4 pt-12">
+                {renderMatchup("L16", 0, teams.left[0], teams.left[1], "my-2")}
+                {renderMatchup("L16", 1, teams.left[2], teams.left[3], "my-2")}
+                {renderMatchup("L16", 2, teams.left[4], teams.left[5], "my-2")}
+                {renderMatchup("L16", 3, teams.left[6], teams.left[7], "my-2")}
+              </View>
+              <View className="flex-1 items-center w-24 p-4 pt-12">
+                {renderMatchup(
+                  "LQF",
+                  0,
+                  winners.L16[0],
+                  winners.L16[1],
+                  "my-12"
+                )}
+                {renderMatchup(
+                  "LQF",
+                  1,
+                  winners.L16[2],
+                  winners.L16[3],
+                  "my-12"
+                )}
+              </View>
+            </>
+          )}
+          {tournament.team_size === 8 && (
+            <>
+              <View className="flex-1 items-center w-24 p-4 pt-12">
+                {renderMatchup("LQF", 0, teams.left[0], teams.left[1], "my-2")}
+                {renderMatchup("LQF", 1, teams.left[2], teams.left[3], "my-2")}
+              </View>
+            </>
+          )}
           <View className="flex-1 items-center w-24 p-4 pt-40">
             {renderMatchup("LSF", 0, winners.LQF[0], winners.LQF[1], "my-4")}
           </View>
@@ -228,16 +295,76 @@ const PredictTournamentForm = ({ tournament }) => {
           <View className="flex-1 items-center w-24 p-4 pt-40">
             {renderMatchup("RSF", 0, winners.RQF[0], winners.RQF[1], "my-4")}
           </View>
-          <View className="flex-1 items-center w-24 p-4 pt-12">
-            {renderMatchup("RQF", 0, winners.R16[0], winners.R16[1], "my-12")}
-            {renderMatchup("RQF", 1, winners.R16[2], winners.R16[3], "my-12")}
-          </View>
-          <View className="flex-1 items-center w-24 p-4 pt-12">
-            {renderMatchup("R16", 0, teams.right[0], teams.right[1], "my-2")}
-            {renderMatchup("R16", 1, teams.right[2], teams.right[3], "my-2")}
-            {renderMatchup("R16", 2, teams.right[4], teams.right[5], "my-2")}
-            {renderMatchup("R16", 3, teams.right[6], teams.right[7], "my-2")}
-          </View>
+          {tournament.team_size === 8 && (
+            <>
+              <View className="flex-1 items-center w-24 p-4 pt-12">
+                {renderMatchup(
+                  "RQF",
+                  0,
+                  teams.right[0],
+                  teams.right[1],
+                  "my-2"
+                )}
+                {renderMatchup(
+                  "RQF",
+                  1,
+                  teams.right[2],
+                  teams.right[3],
+                  "my-2"
+                )}
+              </View>
+            </>
+          )}
+          {tournament.team_size === 16 && (
+            <>
+              <View className="flex-1 items-center w-24 p-4 pt-12">
+                {renderMatchup(
+                  "RQF",
+                  0,
+                  winners.R16[0],
+                  winners.R16[1],
+                  "my-12"
+                )}
+                {renderMatchup(
+                  "RQF",
+                  1,
+                  winners.R16[2],
+                  winners.R16[3],
+                  "my-12"
+                )}
+              </View>
+              <View className="flex-1 items-center w-24 p-4 pt-12">
+                {renderMatchup(
+                  "R16",
+                  0,
+                  teams.right[0],
+                  teams.right[1],
+                  "my-2"
+                )}
+                {renderMatchup(
+                  "R16",
+                  1,
+                  teams.right[2],
+                  teams.right[3],
+                  "my-2"
+                )}
+                {renderMatchup(
+                  "R16",
+                  2,
+                  teams.right[4],
+                  teams.right[5],
+                  "my-2"
+                )}
+                {renderMatchup(
+                  "R16",
+                  3,
+                  teams.right[6],
+                  teams.right[7],
+                  "my-2"
+                )}
+              </View>
+            </>
+          )}
         </ScrollView>
       </View>
       <CustomButton

@@ -26,8 +26,8 @@ const BracketCard = ({ bracket }) => {
   };
 
   const renderFinalMatchup = () => {
-    const team1 = bracket.left_side_semi_finals[0] || null;
-    const team2 = bracket.right_side_semi_finals[0] || null;
+    const team1 = bracket.finals[0] || null;
+    const team2 = bracket.finals[1] || null;
     const winner = bracket.winner || null;
     const textWidth = 50 + 50; // Adjust this based on your layout needs
 
@@ -81,40 +81,46 @@ const BracketCard = ({ bracket }) => {
             <Text style={{ color: "white", fontSize: 20, fontWeight: "bold" }}>
               Score: {bracket.score || 0}
             </Text>
+            <Text style={{ color: "white", fontSize: 20, fontWeight: "bold" }}>
+              Size: {bracket.team_size}
+            </Text>
           </View>
+
         )}
 
         <ScrollView contentContainerStyle={{ flexDirection: "row" }}>
-          <View className="flex-1 items-center w-24 p-4 pt-12">
-            {renderMatchup(
-              "L16",
-              0,
-              bracket.left_side_round_of_16_teams[0],
-              bracket.left_side_round_of_16_teams[1],
-              "my-2"
-            )}
-            {renderMatchup(
-              "L16",
-              1,
-              bracket.left_side_round_of_16_teams[2],
-              bracket.left_side_round_of_16_teams[3],
-              "my-2"
-            )}
-            {renderMatchup(
-              "L16",
-              2,
-              bracket.left_side_round_of_16_teams[4],
-              bracket.left_side_round_of_16_teams[5],
-              "my-2"
-            )}
-            {renderMatchup(
-              "L16",
-              3,
-              bracket.left_side_round_of_16_teams[6],
-              bracket.left_side_round_of_16_teams[7],
-              "my-2"
-            )}
-          </View>
+          {bracket.team_size === 16 && (
+            <View className="flex-1 items-center w-24 p-4 pt-12">
+              {renderMatchup(
+                "L16",
+                0,
+                bracket.left_side_round_of_16_teams[0],
+                bracket.left_side_round_of_16_teams[1],
+                "my-2"
+              )}
+              {renderMatchup(
+                "L16",
+                1,
+                bracket.left_side_round_of_16_teams[2],
+                bracket.left_side_round_of_16_teams[3],
+                "my-2"
+              )}
+              {renderMatchup(
+                "L16",
+                2,
+                bracket.left_side_round_of_16_teams[4],
+                bracket.left_side_round_of_16_teams[5],
+                "my-2"
+              )}
+              {renderMatchup(
+                "L16",
+                3,
+                bracket.left_side_round_of_16_teams[6],
+                bracket.left_side_round_of_16_teams[7],
+                "my-2"
+              )}
+            </View>
+          )}
           <View className="flex-1 items-center w-24 p-4 pt-12">
             {renderMatchup(
               "LQF",
@@ -168,36 +174,38 @@ const BracketCard = ({ bracket }) => {
               "my-12"
             )}
           </View>
-          <View className="flex-1 items-center w-24 p-4 pt-12">
-            {renderMatchup(
-              "R16",
-              0,
-              bracket.right_side_round_of_16_teams[0],
-              bracket.right_side_round_of_16_teams[1],
-              "my-2"
-            )}
-            {renderMatchup(
-              "R16",
-              1,
-              bracket.right_side_round_of_16_teams[2],
-              bracket.right_side_round_of_16_teams[3],
-              "my-2"
-            )}
-            {renderMatchup(
-              "R16",
-              2,
-              bracket.right_side_round_of_16_teams[4],
-              bracket.right_side_round_of_16_teams[5],
-              "my-2"
-            )}
-            {renderMatchup(
-              "R16",
-              3,
-              bracket.right_side_round_of_16_teams[6],
-              bracket.right_side_round_of_16_teams[7],
-              "my-2"
-            )}
-          </View>
+          {bracket.team_size === 16 && (
+            <View className="flex-1 items-center w-24 p-4 pt-12">
+              {renderMatchup(
+                "R16",
+                0,
+                bracket.right_side_round_of_16_teams[0],
+                bracket.right_side_round_of_16_teams[1],
+                "my-2"
+              )}
+              {renderMatchup(
+                "R16",
+                1,
+                bracket.right_side_round_of_16_teams[2],
+                bracket.right_side_round_of_16_teams[3],
+                "my-2"
+              )}
+              {renderMatchup(
+                "R16",
+                2,
+                bracket.right_side_round_of_16_teams[4],
+                bracket.right_side_round_of_16_teams[5],
+                "my-2"
+              )}
+              {renderMatchup(
+                "R16",
+                3,
+                bracket.right_side_round_of_16_teams[6],
+                bracket.right_side_round_of_16_teams[7],
+                "my-2"
+              )}
+            </View>
+          )}
         </ScrollView>
       </View>
     </SafeAreaView>
