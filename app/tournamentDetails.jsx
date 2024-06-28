@@ -21,11 +21,9 @@ const TournamentDetails = () => {
   const [pointSystem, setPointSystem] = useState([]);
 
   useEffect(() => {
-    console.log(`Fetching actual bracket for tournament ID: ${tournament.id}`);
     api
       .get(`/api/tournaments/${tournament.id}/`)
       .then((response) => {
-        console.log("API Response:", response.data);
         setActualBracket(response.data.actual_bracket);
         // Parse the point system data here
         const points = JSON.parse(response.data.point_system);
@@ -36,9 +34,6 @@ const TournamentDetails = () => {
       });
   }, [tournament]);
 
-  useEffect(() => {
-    console.log("Actual Bracket State:", actualBracket);
-  }, [actualBracket]);
 
   const renderPointSystem = () => {
     if (!Array.isArray(pointSystem) || pointSystem.length !== 4) {

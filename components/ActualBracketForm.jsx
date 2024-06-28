@@ -32,7 +32,6 @@ const ActualBracketForm = ({ tournament, setActualBracket }) => {
         .get(`/api/tournaments/${tournament.id}/`)
         .then((response) => {
           let fetchedTeams = response.data.teams;
-          console.log("Fetched Teams", fetchedTeams);
 
           // Split the fetched data into two halves
           const halfLength = Math.ceil(fetchedTeams.length / 2);
@@ -41,10 +40,6 @@ const ActualBracketForm = ({ tournament, setActualBracket }) => {
 
           const leftTeams = uniqueTeams.slice(0, uniquehalfLength);
           const rightTeams = uniqueTeams.slice(uniquehalfLength);
-
-          console.log("Unique Teams:", uniqueTeams);
-          console.log("Left Teams:", leftTeams);
-          console.log("Right Teams:", rightTeams);
 
           setTeams({ left: leftTeams, right: rightTeams });
         })
@@ -91,10 +86,6 @@ const ActualBracketForm = ({ tournament, setActualBracket }) => {
     clearFutureRounds(round, index);
 
     setWinners(newWinners);
-    console.log(
-      `Updated winners after selecting for round ${round}, index ${index}:`,
-      newWinners
-    );
   };
 
   const renderMatchup = (round, index, team1, team2, customStyle = "") => {
@@ -193,13 +184,11 @@ const ActualBracketForm = ({ tournament, setActualBracket }) => {
         data.left_side_quarter_finals = winners.L16;
         data.right_side_quarter_finals = winners.R16;
       }
-      console.log("DATA = ", data);
       const response = await api.post(
         `/api/tournaments/${tournament.id}/update_actual_bracket/`,
         data
       );
       setActualBracket(response.data.bracket);
-      console.log("ACTUAL BRACKET = ", response.data.bracket);
       Alert.alert("Success", "Your prediction has been submitted!");
     } catch (error) {
       console.error("Error submitting prediction:", error);

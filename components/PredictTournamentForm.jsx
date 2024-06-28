@@ -32,7 +32,6 @@ const PredictTournamentForm = ({ tournament }) => {
         .get(`/api/tournaments/${tournament.id}/`)
         .then((response) => {
           let fetchedTeams = response.data.teams;
-          console.log("Fetched Teams", fetchedTeams);
 
           // Split the fetched data into two halves
           const halfLength = Math.ceil(fetchedTeams.length / 2);
@@ -42,9 +41,6 @@ const PredictTournamentForm = ({ tournament }) => {
           const leftTeams = uniqueTeams.slice(0, uniquehalfLength);
           const rightTeams = uniqueTeams.slice(uniquehalfLength);
 
-          console.log("Unique Teams:", uniqueTeams);
-          console.log("Left Teams:", leftTeams);
-          console.log("Right Teams:", rightTeams);
 
           setTeams({ left: leftTeams, right: rightTeams });
         })
@@ -54,10 +50,6 @@ const PredictTournamentForm = ({ tournament }) => {
     }
   }, [tournament]);
 
-  useEffect(() => {
-    console.log("LEFT = ", teams.left);
-    console.log("RIGHT = ", teams.right);
-  }, [teams]);
 
   const handleSelect = (round, index, team) => {
     const newWinners = { ...winners };
@@ -97,18 +89,10 @@ const PredictTournamentForm = ({ tournament }) => {
     clearFutureRounds(round, index);
 
     setWinners(newWinners);
-    console.log(
-      `Updated winners after selecting for round ${(round, index)}:`,
-      newWinners
-    );
+
   };
 
   const renderMatchup = (round, index, team1, team2, customStyle = "") => {
-    console.log("Round = ", round);
-    console.log("index = ", index);
-    console.log("team1 = ", team1);
-    console.log("team2 = ", team2);
-    console.log("Tournament team size = ", tournament.team_size);
     return (
       <View className={`my-2 ${customStyle}`} key={`${round}-${index}`}>
         <TouchableOpacity onPress={() => handleSelect(round, index, team1)}>
@@ -187,7 +171,6 @@ const PredictTournamentForm = ({ tournament }) => {
 
   const handleSubmitPrediction = async () => {
     setUploading(true);
-    console.log(tournament.team_size);
     try {
       let data = {
         tournament_id: tournament.id,
@@ -209,8 +192,6 @@ const PredictTournamentForm = ({ tournament }) => {
         data.left_side_quarter_finals = winners.L16;
         data.right_side_quarter_finals = winners.R16;
       }
-
-      console.log("SUBMITTED DATA = ", data);
 
       const validateData = () => {
         const valuesToCheck = [
