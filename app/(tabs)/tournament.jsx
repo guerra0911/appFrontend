@@ -65,9 +65,6 @@ const Tournament = () => {
               <View>
                 <TournamentList />
               </View>
-              <View>
-                <PredictTournamentForm />
-              </View>
             </ScrollView>
           )}
           {!loading && (

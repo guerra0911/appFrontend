@@ -1,21 +1,32 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  Alert,
-  Image,
-  TouchableOpacity,
-  ScrollView,
-  SafeAreaView,
-} from "react-native";
-import api from "../api";
-import CustomButton from "./CustomButton";
+import React, { useState } from "react";
+import { View, Text, Image, TouchableOpacity, ScrollView, SafeAreaView } from "react-native";
 
-const placeholderLogo = "https://via.placeholder.com/50?text=+";
+const teams = {
+  left: [
+    { id: "L1", name: "L1", logo: "https://via.placeholder.com/50" },
+    { id: "L2", name: "L2", logo: "https://via.placeholder.com/50" },
+    { id: "L3", name: "L3", logo: "https://via.placeholder.com/50" },
+    { id: "L4", name: "L4", logo: "https://via.placeholder.com/50" },
+    { id: "L5", name: "L5", logo: "https://via.placeholder.com/50" },
+    { id: "L6", name: "L6", logo: "https://via.placeholder.com/50" },
+    { id: "L7", name: "L7", logo: "https://via.placeholder.com/50" },
+    { id: "L8", name: "L8", logo: "https://via.placeholder.com/50" },
+  ],
+  right: [
+    { id: "R1", name: "R1", logo: "https://via.placeholder.com/50" },
+    { id: "R2", name: "R2", logo: "https://via.placeholder.com/50" },
+    { id: "R3", name: "R3", logo: "https://via.placeholder.com/50" },
+    { id: "R4", name: "R4", logo: "https://via.placeholder.com/50" },
+    { id: "R5", name: "R5", logo: "https://via.placeholder.com/50" },
+    { id: "R6", name: "R6", logo: "https://via.placeholder.com/50" },
+    { id: "R7", name: "R7", logo: "https://via.placeholder.com/50" },
+    { id: "R8", name: "R8", logo: "https://via.placeholder.com/50" },
+  ],
+};
 
-const PredictTournamentForm = ({ tournament }) => {
-  const [teams, setTeams] = useState({ left: [], right: [] });
-  const [uploading, setUploading] = useState(false);
+const placeholderLogo = "https://via.placeholder.com/50?text=+"; // Placeholder image URL
+
+const ActualTournamentForm = () => {
   const [winners, setWinners] = useState({
     L16: [null, null, null, null],
     LQF: [null, null],
@@ -26,21 +37,9 @@ const PredictTournamentForm = ({ tournament }) => {
     F: [null],
   });
 
-  useEffect(() => {
-    if (tournament && tournament.id) {
-      api
-        .get(`/api/tournaments/${tournament.id}/`)
-        .then((response) => {
-          const fetchedTeams = response.data.teams;
-          const leftTeams = fetchedTeams.slice(0, 8);
-          const rightTeams = fetchedTeams.slice(8, 16);
-          setTeams({ left: leftTeams, right: rightTeams });
-        })
-        .catch((error) => {
-          console.error("Error fetching teams:", error);
-        });
-    }
-  }, [tournament]);
+  const [padding, setPadding] = useState(10); // State for padding
+  const [winnerSize, setWinnerSize] = useState(50); // State for winner placeholder size
+  const [winnerTextSize, setWinnerTextSize] = useState(16); // State for winner text size
 
   const handleSelect = (round, index, team) => {
     const newWinners = { ...winners };
@@ -52,13 +51,9 @@ const PredictTournamentForm = ({ tournament }) => {
         newWinners.LQF[Math.floor(currentIndex / 2)] = null;
       }
       if (currentRound === "LQF" || currentRound === "L16") {
-        newWinners.LSF[0] = null;  // Ensure LSF only has one item
+        newWinners.LSF[Math.floor(currentIndex / 2)] = null;
       }
-      if (
-        currentRound === "LSF" ||
-        currentRound === "LQF" ||
-        currentRound === "L16"
-      ) {
+      if (currentRound === "LSF" || currentRound === "LQF" || currentRound === "L16") {
         newWinners.F[0] = null;
       }
 
@@ -66,13 +61,9 @@ const PredictTournamentForm = ({ tournament }) => {
         newWinners.RQF[Math.floor(currentIndex / 2)] = null;
       }
       if (currentRound === "RQF" || currentRound === "R16") {
-        newWinners.RSF[0] = null;  // Ensure RSF only has one item
+        newWinners.RSF[Math.floor(currentIndex / 2)] = null;
       }
-      if (
-        currentRound === "RSF" ||
-        currentRound === "RQF" ||
-        currentRound === "R16"
-      ) {
+      if (currentRound === "RSF" || currentRound === "RQF" || currentRound === "R16") {
         newWinners.F[0] = null;
       }
     };
@@ -80,7 +71,6 @@ const PredictTournamentForm = ({ tournament }) => {
     clearFutureRounds(round, index);
 
     setWinners(newWinners);
-    console.log(`Updated winners after selecting for round ${round}, index ${index}:`, newWinners);
   };
 
   const renderMatchup = (round, index, team1, team2, customStyle = "") => {
@@ -88,20 +78,12 @@ const PredictTournamentForm = ({ tournament }) => {
       <View className={`my-2 ${customStyle}`} key={`${round}-${index}`}>
         <TouchableOpacity onPress={() => handleSelect(round, index, team1)}>
           <View className="flex-row items-center my-1">
-            <Image
-              source={{ uri: team1 ? team1.logo : placeholderLogo }}
-              className="w-6 h-6 mr-2"
-            />
-            {/* <Text>{team1 ? team1.name : "TBD"}</Text> */}
+            <Image source={{ uri: team1 ? team1.logo : placeholderLogo }} className="w-6 h-6 mr-2" />
           </View>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => handleSelect(round, index, team2)}>
           <View className="flex-row items-center my-1">
-            <Image
-              source={{ uri: team2 ? team2.logo : placeholderLogo }}
-              className="w-6 h-6 mr-2"
-            />
-            {/* <Text>{team2 ? team2.name : "TBD"}</Text> */}
+            <Image source={{ uri: team2 ? team2.logo : placeholderLogo }} className="w-6 h-6 mr-2" />
           </View>
         </TouchableOpacity>
       </View>
@@ -112,18 +94,18 @@ const PredictTournamentForm = ({ tournament }) => {
     const team1 = winners.LSF[0];
     const team2 = winners.RSF[0];
     const winner = winners.F[0];
-    const textWidth = 50 + 50; // Adjust this based on your layout needs
-
+    const textWidth = winnerSize + 50;
+  
     return (
       <View className="items-center">
         {winner && (
           <Text
             className="text-white text-center font-psemibold"
             style={{
-              fontSize: 16,
+              fontSize: winnerTextSize,
               width: textWidth,
-              textAlign: "center",
-              position: "absolute",
+              textAlign: 'center',
+              position: 'absolute',
               top: -30,
             }}
           >
@@ -133,62 +115,29 @@ const PredictTournamentForm = ({ tournament }) => {
         <View className="mb-4">
           <Image
             source={{ uri: winner ? winner.logo : placeholderLogo }}
-            style={{ width: 50, height: 50 }}
+            style={{ width: winnerSize, height: winnerSize }}
           />
         </View>
         <View className="flex-row justify-between items-center ml-1 ">
-          <TouchableOpacity onPress={() => handleSelect("F", 0, team1)}>
-            <View className="flex-row items-center ml-0 mr-1.5">
-              <Image
-                source={{ uri: team1 ? team1.logo : placeholderLogo }}
-                className="w-6 h-6 mr-2"
-              />
-              {/* <Text>{team1 ? team1.name : "TBD"}</Text> */}
+          <TouchableOpacity onPress={() => handleSelect('F', 0, team1)}>
+            <View className="flex-row items-center mx-2">
+              <Image source={{ uri: team1 ? team1.logo : placeholderLogo }} className="w-6 h-6 mr-2" />
             </View>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleSelect("F", 0, team2)}>
-            <View className="flex-row items-center ml-0 mr-0">
-              <Image
-                source={{ uri: team2 ? team2.logo : placeholderLogo }}
-                className="w-6 h-6 mr-2"
-              />
-              {/* <Text>{team2 ? team2.name : "TBD"}</Text> */}
+          <TouchableOpacity onPress={() => handleSelect('F', 0, team2)}>
+            <View className="flex-row items-center mx-2">
+              <Image source={{ uri: team2 ? team2.logo : placeholderLogo }} className="w-6 h-6 mr-2" />
             </View>
           </TouchableOpacity>
         </View>
       </View>
     );
   };
-
-  const handleSubmitPrediction = async () => {
-    setUploading(true);
-  
-    try {
-      const data = {
-        tournament_id: tournament.id,
-        left_side_round_of_16_teams: teams.left,
-        left_side_quarter_finals: winners.L16,
-        left_side_semi_finals: winners.LQF,
-        right_side_round_of_16_teams: teams.right,
-        right_side_quarter_finals: winners.R16,
-        right_side_semi_finals: winners.RQF,
-        finals: [winners.LSF[0], winners.RSF[0]], 
-        winner: winners.F[0]?.id,
-      };
-      const response = await api.post(`/api/tournaments/${tournament.id}/submit_prediction/`, data);
-      Alert.alert("Success", "Your prediction has been submitted!");
-    } catch (error) {
-      console.error("Error submitting prediction:", error);
-      Alert.alert("Error", "There was a problem submitting your prediction.");
-    } finally {
-      setUploading(false);
-    }
-  };
   
 
   return (
     <SafeAreaView className="bg-primary h-full">
-      <View className={`bg-black-200 p-10 rounded-lg`}>
+      <View className={`bg-black-200 p-${padding} rounded-lg`}>
         <ScrollView contentContainerStyle={{ flexDirection: "row" }}>
           <View className="flex-1 items-center w-24 p-4 pt-12">
             {renderMatchup("L16", 0, teams.left[0], teams.left[1], "my-2")}
@@ -221,14 +170,8 @@ const PredictTournamentForm = ({ tournament }) => {
           </View>
         </ScrollView>
       </View>
-      <CustomButton
-        title="Submit Prediction"
-        handlePress={handleSubmitPrediction}
-        containerStyles="mt-4"
-        isLoading={uploading}
-      />
     </SafeAreaView>
   );
 };
 
-export default PredictTournamentForm;
+export default ActualTournamentForm;

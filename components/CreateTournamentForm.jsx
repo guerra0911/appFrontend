@@ -61,6 +61,7 @@ const CreateTournamentForm = ({ setModalVisible }) => {
   
     try {
       const formData = new FormData();
+      formData.append("author", user.id)
       formData.append("name", name);
       formData.append("point_system", JSON.stringify(points));
       formData.append("correct_score_bonus", bonus);
