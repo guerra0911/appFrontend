@@ -18,6 +18,7 @@ const TournamentDetails = () => {
   const [predictModalVisible, setPredictModalVisible] = useState(false);
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
   const [actualBracket, setActualBracket] = useState(null);
+  const [pointSystem, setPointSystem] = useState([]);
 
   useEffect(() => {
     console.log(`Fetching actual bracket for tournament ID: ${tournament.id}`);
@@ -26,6 +27,9 @@ const TournamentDetails = () => {
       .then((response) => {
         console.log("API Response:", response.data);
         setActualBracket(response.data.actual_bracket);
+        // Parse the point system data here
+        const points = JSON.parse(response.data.point_system);
+        setPointSystem(points);
       })
       .catch((error) => {
         console.error("Error fetching actual bracket:", error);
@@ -37,8 +41,6 @@ const TournamentDetails = () => {
   }, [actualBracket]);
 
   const renderPointSystem = () => {
-    const pointSystem = tournament.point_system;
-
     if (!Array.isArray(pointSystem) || pointSystem.length !== 4) {
       return <Text style={styles.text}>Point system data is unavailable.</Text>;
     }
@@ -74,10 +76,10 @@ const TournamentDetails = () => {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Actual Bracket</Text>
             <CustomButton
-                  title="Update Actual Bracket"
-                  handlePress={() => setUpdateModalVisible(true)}
-                  containerStyles="my-4"
-                />
+              title="Update Actual Bracket"
+              handlePress={() => setUpdateModalVisible(true)}
+              containerStyles="my-4"
+            />
             {actualBracket ? (
               <View style={styles.bracketContainer}>
                 <BracketCard bracket={actualBracket} isActual={true} />

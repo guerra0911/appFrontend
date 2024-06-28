@@ -76,6 +76,14 @@ const BracketCard = ({ bracket }) => {
   return (
     <SafeAreaView className="bg-primary h-full">
       <View className={`bg-black-200 p-10 rounded-lg`}>
+        {!bracket.is_actual && (
+          <View style={{ alignItems: "center", marginVertical: 10 }}>
+            <Text style={{ color: "white", fontSize: 20, fontWeight: "bold" }}>
+              Score: {bracket.score || 0}
+            </Text>
+          </View>
+        )}
+
         <ScrollView contentContainerStyle={{ flexDirection: "row" }}>
           <View className="flex-1 items-center w-24 p-4 pt-12">
             {renderMatchup(
@@ -197,64 +205,3 @@ const BracketCard = ({ bracket }) => {
 };
 
 export default BracketCard;
-
-// Before = {
-//   F: [null],
-//   L16: [
-//     null,
-//     null,
-//     null,
-//     {
-//       id: 152,
-//       logo: "https://nickguerrabucket.s3.us-east-2.amazonaws.com/tournaments/9/team8.jpg",
-//       name: "Bel",
-//     },
-//   ],
-//   LQF: [null, null],
-//   LSF: [null],
-//   R16: [
-//     {
-//       id: 153,
-//       logo: "https://nickguerrabucket.s3.us-east-2.amazonaws.com/tournaments/9/team9.jpg",
-//       name: "Rom",
-//     },
-//     null,
-//     null,
-//     {
-//       id: 160,
-//       logo: "https://nickguerrabucket.s3.us-east-2.amazonaws.com/tournaments/9/team16.jpg",
-//       name: "Ita",
-//     },
-//   ],
-//   RQF: [null, null],
-//   RSF: [null],
-// };
-
-// Actual = {
-//   author: 5,
-//   finals: [],
-//   id: 6,
-//   is_actual: true,
-//   left_side_quarter_finals: [
-//     {
-//       id: 152,
-//       logo: "https://nickguerrabucket.s3.us-east-2.amazonaws.com/tournaments/9/team8.jpg",
-//       name: "Bel",
-//     },
-//   ],
-//   left_side_semi_finals: [],
-//   right_side_quarter_finals: [
-//     {
-//       id: 153,
-//       logo: "https://nickguerrabucket.s3.us-east-2.amazonaws.com/tournaments/9/team9.jpg",
-//       name: "Rom",
-//     },
-//     {
-//       id: 160,
-//       logo: "https://nickguerrabucket.s3.us-east-2.amazonaws.com/tournaments/9/team16.jpg",
-//       name: "Ita",
-//     },
-//   ],
-//   right_side_semi_finals: [],
-//   winner: null,
-// };
