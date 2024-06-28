@@ -164,6 +164,25 @@ const PredictTournamentForm = ({ tournament }) => {
     setUploading(true);
   
     try {
+      const validateData = () => {
+        const valuesToCheck = [
+          ...winners.L16,
+          ...winners.LQF,
+          ...winners.LSF,
+          ...winners.R16,
+          ...winners.RQF,
+          ...winners.RSF,
+          winners.F[0],
+        ];
+        return valuesToCheck.every(value => value !== null);
+      };
+    
+      if (!validateData()) {
+        Alert.alert("Error", "Please make sure all selections are made before submitting.");
+        setUploading(false);
+        return;
+      }
+    
       const data = {
         tournament_id: tournament.id,
         left_side_round_of_16_teams: teams.left,

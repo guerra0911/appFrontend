@@ -197,3 +197,64 @@ const BracketCard = ({ bracket }) => {
 };
 
 export default BracketCard;
+
+// Before = {
+//   F: [null],
+//   L16: [
+//     null,
+//     null,
+//     null,
+//     {
+//       id: 152,
+//       logo: "https://nickguerrabucket.s3.us-east-2.amazonaws.com/tournaments/9/team8.jpg",
+//       name: "Bel",
+//     },
+//   ],
+//   LQF: [null, null],
+//   LSF: [null],
+//   R16: [
+//     {
+//       id: 153,
+//       logo: "https://nickguerrabucket.s3.us-east-2.amazonaws.com/tournaments/9/team9.jpg",
+//       name: "Rom",
+//     },
+//     null,
+//     null,
+//     {
+//       id: 160,
+//       logo: "https://nickguerrabucket.s3.us-east-2.amazonaws.com/tournaments/9/team16.jpg",
+//       name: "Ita",
+//     },
+//   ],
+//   RQF: [null, null],
+//   RSF: [null],
+// };
+
+// Actual = {
+//   author: 5,
+//   finals: [],
+//   id: 6,
+//   is_actual: true,
+//   left_side_quarter_finals: [
+//     {
+//       id: 152,
+//       logo: "https://nickguerrabucket.s3.us-east-2.amazonaws.com/tournaments/9/team8.jpg",
+//       name: "Bel",
+//     },
+//   ],
+//   left_side_semi_finals: [],
+//   right_side_quarter_finals: [
+//     {
+//       id: 153,
+//       logo: "https://nickguerrabucket.s3.us-east-2.amazonaws.com/tournaments/9/team9.jpg",
+//       name: "Rom",
+//     },
+//     {
+//       id: 160,
+//       logo: "https://nickguerrabucket.s3.us-east-2.amazonaws.com/tournaments/9/team16.jpg",
+//       name: "Ita",
+//     },
+//   ],
+//   right_side_semi_finals: [],
+//   winner: null,
+// };

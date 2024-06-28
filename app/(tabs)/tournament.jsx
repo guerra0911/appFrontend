@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { useEffect, useCallback, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import PredictTournamentForm from "../../components/PredictTournamentForm";
+import PredictBracketForm from "../../components/PredictTournamentForm";
 import CustomButton from "../../components/CustomButton";
 import RenderModal from "./renderModal";
 import {
@@ -66,13 +66,6 @@ const Tournament = () => {
                 <TournamentList />
               </View>
             </ScrollView>
-          )}
-          {!loading && (
-            <View className="flex-1 justify-center items-center">
-              <Text className="text-white font-psemibold text-lg">
-                No Data available
-              </Text>
-            </View>
           )}
         </ScrollView>
       </SafeAreaView>

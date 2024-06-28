@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, ScrollView, Text } from "react-native";
+import { View, ScrollView, Text, StyleSheet } from "react-native";
 import api from "../api";
 import BracketCard from "./BracketCard";
 import Loader from "./Loader";
@@ -29,24 +29,24 @@ const PredictedBracketList = ({ tournament }) => {
   }, [tournament]);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, maxHeight: 400 }}>
       <Loader isLoading={loading} />
       {!loading && error && (
-        <View className="flex-1 justify-center items-center">
-          <Text className="text-red-500">{error}</Text>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
         </View>
       )}
       {!loading && !error && (
-        <ScrollView contentContainerStyle={{ padding: 16 }}>
+        <ScrollView contentContainerStyle={styles.scrollViewContainer}>
           {predictedBrackets.length > 0 ? (
             predictedBrackets.map((bracket) => (
-              <View key={bracket.id} className="mb-4">
+              <View key={bracket.id} style={styles.bracketContainer}>
                 <BracketCard bracket={bracket} />
               </View>
             ))
           ) : (
-            <View className="flex-1 justify-center items-center">
-              <Text>No predicted brackets available.</Text>
+            <View style={styles.noBracketsContainer}>
+              <Text style={styles.noBracketsText}>No predicted brackets available. Be the first to make a prediction!</Text>
             </View>
           )}
         </ScrollView>
@@ -54,5 +54,30 @@ const PredictedBracketList = ({ tournament }) => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorText: {
+    color: "red",
+  },
+  scrollViewContainer: {
+    padding: 16,
+  },
+  bracketContainer: {
+    marginBottom: 16,
+  },
+  noBracketsContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  noBracketsText: {
+    color: "#fff",
+  },
+});
 
 export default PredictedBracketList;
