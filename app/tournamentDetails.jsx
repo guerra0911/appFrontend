@@ -152,8 +152,6 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   bracketContainer: {
-    borderColor: 'green',
-    borderWidth: 1,
     maxHeight: 400,
     overflow: 'hidden',
   },

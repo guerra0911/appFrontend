@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { View, ScrollView, Text, StyleSheet } from "react-native";
+import { View, ScrollView, Text, StyleSheet, Dimensions } from "react-native";
 import api from "../api";
 import BracketCard from "./BracketCard";
 import Loader from "./Loader";
+
+const { width } = Dimensions.get('window');
 
 const PredictedBracketList = ({ tournament }) => {
   const [predictedBrackets, setPredictedBrackets] = useState([]);
@@ -29,7 +31,7 @@ const PredictedBracketList = ({ tournament }) => {
   }, [tournament]);
 
   return (
-    <View style={{ flex: 1, maxHeight: 400 }}>
+    <View style={{ flex: 1 }}>
       <Loader isLoading={loading} />
       {!loading && error && (
         <View style={styles.errorContainer}>
@@ -37,7 +39,7 @@ const PredictedBracketList = ({ tournament }) => {
         </View>
       )}
       {!loading && !error && (
-        <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+        <ScrollView contentContainerStyle={styles.scrollViewContainer} horizontal>
           {predictedBrackets.length > 0 ? (
             predictedBrackets.map((bracket) => (
               <View key={bracket.id} style={styles.bracketContainer}>
@@ -57,6 +59,8 @@ const PredictedBracketList = ({ tournament }) => {
 
 const styles = StyleSheet.create({
   errorContainer: {
+    borderColor: "green",
+    borderWidth: 1,
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
@@ -65,12 +69,21 @@ const styles = StyleSheet.create({
     color: "red",
   },
   scrollViewContainer: {
+    borderColor: "green",
+    borderWidth: 1,
     padding: 16,
+    paddingRight: width * 0.1,
   },
-  bracketContainer: {
-    marginBottom: 16,
+  bracketContainer: {           //Header + Bracket
+    borderColor: "blue",
+    borderWidth: 1,
+    marginRight: 48,
+    borderRadius: 10,
+    width: width - 60,
   },
   noBracketsContainer: {
+    borderColor: "red",
+    borderWidth: 1,
     flex: 1,
     justifyContent: "center",
     alignItems: "center",

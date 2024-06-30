@@ -37,9 +37,6 @@ const Profile = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [profilePic, setProfilePic] = useState(null);
 
-  console.log("User:", user);
-  console.log("Profile Picture URL:", user?.profile?.image);
-
   const fetchUserProfile = async (id) => {
     setLoading(true);
     try {
