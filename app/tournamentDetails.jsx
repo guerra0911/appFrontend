@@ -1,7 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { useRoute } from "@react-navigation/native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  RefreshControl,
+} from "react-native";
+import { useRoute, useNavigation } from "@react-navigation/native";
 import PredictBracketForm from "../components/PredictTournamentForm";
 import { CustomButton } from "../components";
 import PredictedBracketList from "../components/PredictedBracketList";
@@ -10,71 +17,90 @@ import BracketCard from "../components/BracketCard";
 import RenderModal from "./(tabs)/renderModal";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import api from "../api";
+import { FontAwesome } from "@expo/vector-icons";
+import PointSystemModal from "../components/PointSystemModal";
+import TournamentLeaderboard from "../components/TournamentLeaderboard";
+import { useGlobalContext } from "../context/GlobalProvider";
 
 const TournamentDetails = () => {
   const route = useRoute();
+  const navigation = useNavigation();
   const { tournament } = route.params;
 
+  const { user } = useGlobalContext(); // Get current user from context
   const [predictModalVisible, setPredictModalVisible] = useState(false);
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
   const [actualBracket, setActualBracket] = useState(null);
   const [pointSystem, setPointSystem] = useState([]);
+  const [pointSystemModalVisible, setPointSystemModalVisible] = useState(false);
+  const [top3Brackets, setTop3Brackets] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     api
       .get(`/api/tournaments/${tournament.id}/`)
       .then((response) => {
         setActualBracket(response.data.actual_bracket);
-        // Parse the point system data here
         const points = JSON.parse(response.data.point_system);
         setPointSystem(points);
+
+        const predictedBrackets = response.data.predicted_brackets;
+        const top3Brackets = predictedBrackets
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 3);
+        setTop3Brackets(top3Brackets);
       })
       .catch((error) => {
         console.error("Error fetching actual bracket:", error);
       });
   }, [tournament]);
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      const response = await api.get(`/api/tournaments/${tournament.id}/`);
+      setActualBracket(response.data.actual_bracket);
+      const points = JSON.parse(response.data.point_system);
+      setPointSystem(points);
 
-  const renderPointSystem = () => {
-    if (!Array.isArray(pointSystem) || pointSystem.length !== 4) {
-      return <Text style={styles.text}>Point system data is unavailable.</Text>;
+      const predictedBrackets = response.data.predicted_brackets;
+      const top3Brackets = predictedBrackets
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3);
+      setTop3Brackets(top3Brackets);
+    } catch (error) {
+      console.error("Error fetching actual bracket:", error);
+    } finally {
+      setRefreshing(false);
     }
-
-    return (
-      <View style={styles.pointSystem}>
-        <Text style={styles.point}>✨ Round of 16: {pointSystem[0]} points for each correct guess</Text>
-        <Text style={styles.point}>✨ Quarterfinals: {pointSystem[1]} points for each correct guess</Text>
-        <Text style={styles.point}>✨ Semifinals: {pointSystem[2]} points for each correct guess</Text>
-        <Text style={styles.point}>🏆 Finals: {pointSystem[3]} points for each correct guess</Text>
-        <Text style={styles.point}>🎯 Correct Score Bonus: {tournament.correct_score_bonus} points</Text>
-      </View>
-    );
-  };
+  }, [tournament]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={styles.container}>
-          <Text style={styles.title}>{tournament.name}</Text>
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Point System</Text>
-            {renderPointSystem()}
+      <View style={styles.container}>
+        <ScrollView
+          contentContainerStyle={styles.scrollViewContainer}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>
+          }
+        >
+          <View style={styles.bannerContainer}>
+            <Image source={{ uri: tournament.banner }} style={styles.banner} />
+            <View style={styles.bannerOverlay} />
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => navigation.goBack()}
+            >
+              <FontAwesome name="arrow-left" size={24} color="#fff" />
+            </TouchableOpacity>
           </View>
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Reward</Text>
-            <Text style={styles.text}>{tournament.winner_reward}</Text>
+
+          <View style={styles.header}>
+            <Image source={{ uri: tournament.logo }} style={styles.logo} />
+            <Text style={styles.title}>{tournament.name}</Text>
           </View>
+
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Forfeit</Text>
-            <Text style={styles.text}>{tournament.loser_forfeit}</Text>
-          </View>
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Actual Bracket</Text>
-            <CustomButton
-              title="Update Actual Bracket"
-              handlePress={() => setUpdateModalVisible(true)}
-              containerStyles="my-4"
-            />
             {actualBracket ? (
               <View style={styles.bracketContainer}>
                 <BracketCard bracket={actualBracket} isActual={true} />
@@ -82,9 +108,39 @@ const TournamentDetails = () => {
             ) : (
               <Text>Loading actual bracket...</Text>
             )}
+
+            {user &&
+              user.id === tournament.author.id && ( // Conditionally render the button
+                <CustomButton
+                  title="Update Actual Bracket"
+                  handlePress={() => setUpdateModalVisible(true)}
+                  containerStyles="my-4"
+                />
+              )}
           </View>
+
+          <View style={styles.separator} />
+
+          <TournamentLeaderboard
+            top3Brackets={top3Brackets}
+            pointSystem={pointSystem}
+            setPointSystemModalVisible={setPointSystemModalVisible}
+          />
+
+          <View style={styles.cardsContainer}>
+            <View style={styles.card}>
+              <FontAwesome name="trophy" size={24} color="#ffd700" />
+              <Text style={styles.cardTitle}>Reward</Text>
+              <Text style={styles.cardText}>{tournament.winner_reward}</Text>
+            </View>
+            <View style={styles.card}>
+              <FontAwesome name="ban" size={24} color="#ff0000" />
+              <Text style={styles.cardTitle}>Forfeit</Text>
+              <Text style={styles.cardText}>{tournament.loser_forfeit}</Text>
+            </View>
+          </View>
+
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Predicted Brackets</Text>
             <CustomButton
               title="Make a Prediction"
               handlePress={() => setPredictModalVisible(true)}
@@ -93,6 +149,7 @@ const TournamentDetails = () => {
             <PredictedBracketList tournament={tournament} />
           </View>
         </ScrollView>
+
         <RenderModal
           modalVisible={predictModalVisible}
           setModalVisible={setPredictModalVisible}
@@ -110,28 +167,69 @@ const TournamentDetails = () => {
             setActualBracket={setActualBracket}
           />
         </RenderModal>
-      </SafeAreaView>
+        <PointSystemModal
+          modalVisible={pointSystemModalVisible}
+          setModalVisible={setPointSystemModalVisible}
+          pointSystem={pointSystem}
+        />
+      </View>
     </GestureHandlerRootView>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
+  container: {
     flex: 1,
     backgroundColor: "#1c1c1e",
   },
-  container: {
-    padding: 16,
+  scrollViewContainer: {
     flexGrow: 1,
+    paddingBottom: 20, // Add padding to ensure smooth scrolling
+  },
+  bannerContainer: {
+    position: "relative",
+  },
+  banner: {
+    width: "100%",
+    height: 130,
+  },
+  bannerOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Darker overlay
+  },
+  backButton: {
+    position: "absolute",
+    top: 50,
+    left: 20,
+    zIndex: 1, // Ensure the button is on top
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: 16,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.5)",
+    marginTop: 10,
+    marginBottom: 22,
+    marginHorizontal: 20,
+  },
+  logo: {
+    width: 40,
+    height: 40,
+    marginRight: 8,
+    borderRadius: 20, // Circular logo
   },
   title: {
     color: "#fff",
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 16,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 12,
+    paddingHorizontal: 16,
   },
   sectionTitle: {
     color: "#fff",
@@ -143,23 +241,48 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
   },
-  pointSystem: {
-    paddingLeft: 16,
+  cardsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 8,
   },
-  point: {
+  card: {
+    flex: 1,
+    backgroundColor: "#2c2c2e",
+    borderRadius: 8,
+    padding: 16,
+    alignItems: "center",
+    marginHorizontal: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+  cardTitle: {
     color: "#fff",
     fontSize: 16,
+    fontWeight: "bold",
+    marginTop: 8,
     marginBottom: 4,
   },
+  cardText: {
+    color: "#fff",
+    fontSize: 14,
+    textAlign: "center",
+  },
   bracketContainer: {
-    maxHeight: 400,
-    overflow: 'hidden',
+    maxHeight: 390,
+    overflow: "hidden",
+    paddingLeft: 5,
+    paddingRight: 5,
+    paddingTop: 3,
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#D0D0D0',
-    textAlign: 'center',
+    fontWeight: "bold",
+    color: "#D0D0D0",
+    textAlign: "center",
     marginBottom: 20,
   },
 });

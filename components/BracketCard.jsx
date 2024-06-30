@@ -336,15 +336,20 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   cardContainer: {
-    borderColor: "yellow",
-    borderWidth: 1,
+    // borderColor: "yellow",
+    // borderWidth: 1,
     backgroundColor: "#1c1c1c",
     padding: 0,
     borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    elevation: 5,
   },
   headerContainer: {
-    borderColor: "purple",
-    borderWidth: 1,
+    // borderColor: "purple",
+    // borderWidth: 1,
     flexDirection: "row",
     alignItems: "center",
     padding: 10,
@@ -372,21 +377,21 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   matchupWrapper: {
-    borderColor: "orange",
-    borderWidth: 0.5,
+    // borderColor: "orange",
+    // borderWidth: 0.5,
     flex: 1,
     alignItems: "center",
     width: 96,
     padding: 0,
   },
   matchupContainer: {
-    borderColor: "brown",
-    borderWidth: 1,
+    // borderColor: "brown",
+    // borderWidth: 1,
     marginVertical: 8,
   },
   teamContainer: {
-    borderColor: "red",
-    borderWidth: 1,
+    // borderColor: "red",
+    // borderWidth: 1,
     flexDirection: "row",
     alignItems: "center",
     marginVertical: 4,
@@ -399,8 +404,8 @@ const styles = StyleSheet.create({
     marginRight: 0,
   },
   teamLogo8: {
-    width: 48,
-    height: 48,
+    width: 42,
+    height: 42,
     marginRight: 0,
   },
   pt12_16: {
@@ -410,25 +415,25 @@ const styles = StyleSheet.create({
     paddingTop: 0, //QF
   },
   pt40_16: {
-    paddingTop: 139, //SF
+    paddingTop: 133, //SF
   },
   pt32_16: {
-    paddingTop: 108, //F
+    paddingTop: 99, //F
   },
   pt24_8: {
     paddingTop: 0, //QF
   },
   pt40_8: {
-    paddingTop: 130, //SF
+    paddingTop: 115, //SF
   },
   pt32_8: {
-    paddingTop: 95, //F
+    paddingTop: 75, //F
   },
   my2: {
     marginVertical: 10, //SPaces between R16 L16
   },
   my12_16: {
-    marginVertical: 60, //Spaces between QF
+    marginVertical: 55, //Spaces between QF
   },
   my12_8: {
     marginVertical: 40, //Spaces between QF
@@ -460,8 +465,8 @@ const styles = StyleSheet.create({
     height: 64,
   },
   finalMatchupContainer: {
-    borderColour: "black",
-    borderWidth: 1,
+    // borderColour: "black",
+    // borderWidth: 1,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
