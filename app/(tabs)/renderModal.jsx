@@ -1,26 +1,8 @@
 import React from "react";
-import { Modal, View, TouchableOpacity, StyleSheet, PanResponder } from "react-native";
+import { Modal, View, TouchableOpacity, StyleSheet, PanResponder, ScrollView } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 
 const RenderModal = ({ modalVisible, setModalVisible, children }) => {
-  // const panResponder = React.useRef(
-  //   PanResponder.create({
-  //     onMoveShouldSetPanResponder: (_, gestureState) => {
-  //       // If the user is swiping down
-  //       return gestureState.dy > 15;
-  //     },
-  //     onPanResponderMove: (_, gestureState) => {
-  //       // You can implement visual feedback while swiping here if needed
-  //     },
-  //     onPanResponderRelease: (_, gestureState) => {
-  //       // If the swipe was significant enough, close the modal
-  //       if (gestureState.dy > 60) {
-  //         setModalVisible(false);
-  //       }
-  //     },
-  //   })
-  // ).current;
-
   return (
     <Modal
       animationType="slide"
@@ -32,10 +14,12 @@ const RenderModal = ({ modalVisible, setModalVisible, children }) => {
         <View style={styles.modalContent}>
           <View style={styles.iconContainer}>
             <TouchableOpacity onPress={() => setModalVisible(false)}>
-              <AntDesign name="downcircle" size={24} color="#80FFDB" />
+              <AntDesign name="downcircle" size={24} color="#69C3FF" />
             </TouchableOpacity>
           </View>
-          {children}
+          <ScrollView contentContainerStyle={styles.scrollViewContent}>
+            {children}
+          </ScrollView>
         </View>
       </View>
     </Modal>
@@ -46,12 +30,12 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     justifyContent: "flex-end",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
   },
   modalContent: {
     width: "100%",
     height: "87%",
-    backgroundColor: "#5E60CE",
+    backgroundColor: "#F5F5F5",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
@@ -60,9 +44,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 10,
   },
+  scrollViewContent: {
+    paddingBottom: 20,
+  },
   modalText: {
     fontFamily: "pmedium",
-    color: "#D0D0D0",
+    color: "black",
   },
   // ... other styles
 });

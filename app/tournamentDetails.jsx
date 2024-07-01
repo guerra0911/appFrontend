@@ -81,7 +81,7 @@ const TournamentDetails = () => {
         <ScrollView
           contentContainerStyle={styles.scrollViewContainer}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         >
           <View style={styles.bannerContainer}>
@@ -110,7 +110,7 @@ const TournamentDetails = () => {
             )}
 
             {user &&
-              user.id === tournament.author.id && ( // Conditionally render the button
+              user.id === tournament.author && ( // Conditionally render the button
                 <CustomButton
                   title="Update Actual Bracket"
                   handlePress={() => setUpdateModalVisible(true)}
@@ -155,7 +155,10 @@ const TournamentDetails = () => {
           setModalVisible={setPredictModalVisible}
         >
           <Text style={styles.modalTitle}>Make a Prediction</Text>
-          <PredictBracketForm tournament={tournament} />
+          <PredictBracketForm
+            tournament={tournament}
+            setModalVisible={setPredictModalVisible}
+          />
         </RenderModal>
         <RenderModal
           modalVisible={updateModalVisible}
@@ -165,6 +168,7 @@ const TournamentDetails = () => {
           <ActualBracketForm
             tournament={tournament}
             setActualBracket={setActualBracket}
+            setModalVisible={setUpdateModalVisible}
           />
         </RenderModal>
         <PointSystemModal
@@ -180,7 +184,7 @@ const TournamentDetails = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#1c1c1e",
+    backgroundColor: "#F5F5F5",
   },
   scrollViewContainer: {
     flexGrow: 1,
@@ -211,9 +215,9 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.5)",
-    marginTop: 10,
-    marginBottom: 22,
+    backgroundColor: "#DCDCDC",
+    marginTop: 0,
+    marginBottom: 12,
     marginHorizontal: 20,
   },
   logo: {
@@ -223,8 +227,8 @@ const styles = StyleSheet.create({
     borderRadius: 20, // Circular logo
   },
   title: {
-    color: "#fff",
-    fontSize: 24,
+    color: "black",
+    fontSize: 29,
     fontWeight: "bold",
   },
   section: {
@@ -245,29 +249,31 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 8,
+    borderRadius: 10,
   },
   card: {
     flex: 1,
-    backgroundColor: "#2c2c2e",
-    borderRadius: 8,
+    // backgroundColor: "#2c2c2e",    DARK MODE
+    backgroundColor: "#F5F5F5",
+    borderRadius: 10,
     padding: 16,
     alignItems: "center",
     marginHorizontal: 8,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
+    shadowOpacity: 0.3,
     shadowRadius: 3,
     elevation: 5,
   },
   cardTitle: {
-    color: "#fff",
+    color: "black",
     fontSize: 16,
     fontWeight: "bold",
     marginTop: 8,
     marginBottom: 4,
   },
   cardText: {
-    color: "#fff",
+    color: "black",
     fontSize: 14,
     textAlign: "center",
   },
@@ -281,7 +287,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#D0D0D0",
+    color: "black",
     textAlign: "center",
     marginBottom: 20,
   },

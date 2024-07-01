@@ -7,6 +7,7 @@ import {
   Image,
   TouchableWithoutFeedback,
   Keyboard,
+  StyleSheet,
 } from "react-native";
 
 import { icons } from "../constants";
@@ -18,7 +19,7 @@ const FormField = ({
   handleChangeText,
   otherStyles,
   height = "auto",
-  multiline = false, // Add multiline prop with a default value
+  multiline = false,
   ...props
 }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -26,27 +27,18 @@ const FormField = ({
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View className={`space-y-2 ${otherStyles}`}>
-        <Text className="text-base text-gray-100 font-pmedium">{title}</Text>
+      <View style={[styles.container, otherStyles]}>
+        <Text style={styles.title}>{title}</Text>
 
-        <View
-          className={`w-full px-4 bg-black-100 rounded-2xl border-2 border-black-200 focus:border-secondary flex flex-row items-center`}
-        >
+        <View style={styles.inputContainer}>
           <TextInput
-            className="flex-1 text-white font-psemibold text-base"
+            style={[styles.textInput, { height: height }]}
             value={value}
             textAlignVertical="top"
             placeholder={placeholder}
             placeholderTextColor="#7B7B8B"
             onChangeText={handleChangeText}
             secureTextEntry={isPasswordField && !showPassword}
-            style={{
-              minHeight: 50,
-              height: height,
-              paddingTop: 10,
-              paddingBottom: 10,
-              textAlign: "left",
-            }}
             {...props}
             multiline={multiline} // Use the multiline prop
           />
@@ -55,7 +47,7 @@ const FormField = ({
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
               <Image
                 source={!showPassword ? icons.eyeHide : icons.eye}
-                className="w-6 h-6"
+                style={styles.icon}
                 resizeMode="contain"
               />
             </TouchableOpacity>
@@ -65,5 +57,37 @@ const FormField = ({
     </TouchableWithoutFeedback>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: 8,
+  },
+  title: {
+    fontSize: 16,
+    color: '#7B7B8B',
+    marginBottom: 8,
+  },
+  inputContainer: {
+    width: '100%',
+    paddingHorizontal: 16,
+    backgroundColor: '#DCDCDC',
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#DCDCDC',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  textInput: {
+    flex: 1,
+    color: 'black',
+    fontSize: 16,
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+  icon: {
+    width: 24,
+    height: 24,
+  },
+});
 
 export default FormField;

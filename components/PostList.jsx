@@ -102,10 +102,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
-    backgroundColor: '#333',
+    backgroundColor: '#69C3FF',
   },
   activeSortButton: {
-    backgroundColor: '#80FFDB',
+    backgroundColor: '#007EFF',
   },
   sortButtonText: {
     color: '#fff',

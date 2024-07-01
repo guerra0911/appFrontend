@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams } from "expo-router";
 import {
   GestureHandlerRootView,
   ScrollView,
 } from "react-native-gesture-handler";
-import { Image, Text, View, RefreshControl, Alert } from "react-native";
+import { Image, Text, View, RefreshControl, Alert, StyleSheet } from "react-native";
 
 import { useGlobalContext } from "../../context/GlobalProvider";
 import { images } from "../../constants";
@@ -58,10 +58,10 @@ const Home = () => {
   }, [userId, user]);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView className="bg-primary" style={{ flex: 1 }}>
+    <GestureHandlerRootView style={styles.flex1}>
+      <View style={styles.container}>
         <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
+          contentContainerStyle={styles.scrollViewContent}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
@@ -69,26 +69,26 @@ const Home = () => {
           <Loader isLoading={loading} />
           {!loading && username && (
             <>
-              <View className="flex mt-2 mb-0 px-4 space-y-6">
-                <View className="flex justify-between items-start flex-row mb-6">
+              <View style={styles.welcomeContainer}>
+                <View style={styles.headerContainer}>
                   <View>
-                    <Text className="font-pmedium text-sm text-gray-100">
+                    <Text style={styles.welcomeText}>
                       Welcome Back
                     </Text>
-                    <Text className="text-2xl font-psemibold text-white">
+                    <Text style={styles.usernameText}>
                       {username}
                     </Text>
                   </View>
-                  <View className="mt-1.5">
+                  <View style={styles.logoContainer}>
                     <Image
                       source={images.logoSmall}
-                      className="w-9 h-10"
+                      style={styles.logo}
                       resizeMode="contain"
                     />
                   </View>
                 </View>
               </View>
-              <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+              <ScrollView contentContainerStyle={styles.scrollViewContent}>
                 <View>
                   <PostList userId={null}/>
                 </View>
@@ -96,9 +96,57 @@ const Home = () => {
             </>
           )}
         </ScrollView>
-      </SafeAreaView>
+      </View>
     </GestureHandlerRootView>
   );
 };
+
+const styles = StyleSheet.create({
+  flex1: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "#F5F5F5",
+  },
+  safeArea: {
+    backgroundColor: '#F5F5F5', // Equivalent to bg-primary
+    flex: 1,
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+  },
+  welcomeContainer: {
+    marginTop: 65, // Equivalent to mt-2
+    marginBottom: 0, // Equivalent to mb-0
+    paddingHorizontal: 16, // Equivalent to px-4
+    spaceY: 24, // Equivalent to space-y-6
+  },
+  headerContainer: {
+    flexDirection: 'row', // Equivalent to flex-row
+    justifyContent: 'space-between', // Equivalent to justify-between
+    alignItems: 'flex-start', // Equivalent to items-start
+    marginBottom: 24, // Equivalent to mb-6
+  },
+  welcomeText: {
+    fontSize: 14,
+    color: 'black',
+    fontFamily: 'psemibold', // Equivalent to font-psemibold
+    fontWeight: "bold",
+  },
+  usernameText: {
+    fontSize: 24, // Equivalent to text-2xl
+    fontFamily: 'psemibold', // Equivalent to font-psemibold
+    color: 'black', 
+    fontWeight: "bold",
+  },
+  logoContainer: {
+    marginTop: 6, // Equivalent to mt-1.5
+  },
+  logo: {
+    width: 36, // Equivalent to w-9
+    height: 40, // Equivalent to h-10
+  },
+});
 
 export default Home;

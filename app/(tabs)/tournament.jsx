@@ -1,12 +1,12 @@
+import React, { useEffect, useCallback, useState } from "react";
 import {
   View,
-  Image,
+  Text,
   TouchableOpacity,
   Alert,
-  Text,
   RefreshControl,
+  StyleSheet,
 } from "react-native";
-import { useEffect, useCallback, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import PredictBracketForm from "../../components/PredictTournamentForm";
 import CustomButton from "../../components/CustomButton";
@@ -32,10 +32,10 @@ const Tournament = () => {
   }, []);
 
   return (
-    <GestureHandlerRootView className="flex-1">
-      <SafeAreaView className="bg-primary h-full">
+    <GestureHandlerRootView style={styles.flex1}>
+      <View style={styles.container}>
         <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
+          contentContainerStyle={styles.scrollViewContent}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
@@ -43,34 +43,72 @@ const Tournament = () => {
           <Loader isLoading={loading} />
 
           <View>
-                <RenderModal
-                  modalVisible={modalVisible}
-                  setModalVisible={setModalVisible}
-                >
-                  <CreateTournamentForm setModalVisible={setModalVisible} />
-                </RenderModal>
-              </View>
+            <RenderModal
+              modalVisible={modalVisible}
+              setModalVisible={setModalVisible}
+            >
+              <CreateTournamentForm setModalVisible={setModalVisible} />
+            </RenderModal>
+          </View>
 
           {!loading && (
-            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-              <Text className="text-2xl text-white font-psemibold px-4 my-6">
-                Tournament
-              </Text>
-              <CustomButton
-                        title="Create Tournament"
-                        handlePress={() => setModalVisible(true)}
-                        containerStyles="mt-4 w-full flex justify-center items-center"
-                        isLoading={loading}
-                      />
+            <ScrollView contentContainerStyle={styles.scrollViewContent}>
+              <View style={styles.headerRow}>
+                <Text style={styles.headerText}>
+                  Tournament
+                </Text>
+                <TouchableOpacity
+                  style={styles.createButton}
+                  onPress={() => setModalVisible(true)}
+                >
+                  <Text style={styles.createButtonText}>+</Text>
+                </TouchableOpacity>
+              </View>
               <View>
                 <TournamentList />
               </View>
             </ScrollView>
           )}
         </ScrollView>
-      </SafeAreaView>
+      </View>
     </GestureHandlerRootView>
   );
 };
+
+const styles = StyleSheet.create({
+  flex1: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "#F5F5F5",
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    marginTop: 72,
+    marginBottom: 8,
+  },
+  headerText: {
+    fontSize: 36,
+    color: 'black',
+    fontWeight: "bold",
+  },
+  createButton: {
+    backgroundColor: '#69C3FF',
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  createButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+});
 
 export default Tournament;

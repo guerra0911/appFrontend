@@ -18,7 +18,8 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#64DFDF', // secondary color from tailwind.config.js
+    backgroundColor: '#69C3FF', // secondary color from tailwind.config.js
+    marginBottom:5,
   },
 });
 

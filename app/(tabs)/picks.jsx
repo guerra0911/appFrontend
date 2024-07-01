@@ -35,13 +35,13 @@ const Picks = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#6200EE', // Replace with your primary color
+    backgroundColor: '#F5F5F5', // Replace with your primary color
     justifyContent: 'center',
     alignItems: 'center',
   },
   title: {
     fontSize: 24,
-    color: '#FFFFFF',
+    color: '#69C3FF',
     fontWeight: '600',
     marginTop: 16,
     marginBottom: 20,
@@ -50,11 +50,11 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: '#69C3FF',
   },
   comingSoonText: {
     fontSize: 28,
-    color: '#FFFFFF',
+    color: '#69C3FF',
     fontWeight: 'bold',
     textAlign: 'center',
   },

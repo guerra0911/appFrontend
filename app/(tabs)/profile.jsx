@@ -1,4 +1,3 @@
-// Profile.jsx
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -8,6 +7,7 @@ import {
   Alert,
   Text,
   RefreshControl,
+  StyleSheet,
 } from "react-native";
 import {
   GestureHandlerRootView,
@@ -90,25 +90,27 @@ const Profile = () => {
   };
 
   return (
-    <GestureHandlerRootView className="flex-1">
-      <SafeAreaView className="bg-primary h-full">
+    <GestureHandlerRootView style={styles.flex1}>
+      <View style={styles.container}>
         <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
+          contentContainerStyle={styles.scrollViewContent}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         >
           <Loader isLoading={loading} />
-          <TouchableOpacity
-            onPress={logout}
-            className="flex w-full items-end mb-3 px-4 mt-5"
-          >
-            <Image
-              source={icons.logout}
-              resizeMode="contain"
-              className="w-6 h-6"
-            />
-          </TouchableOpacity>
+          <View style={styles.headerRow}>
+            <TouchableOpacity
+              style={styles.logoutButton}
+              onPress={logout}
+            >
+              <Image
+                source={icons.logout}
+                resizeMode="contain"
+                style={styles.logoutIcon}
+              />
+            </TouchableOpacity>
+          </View>
 
           <RenderModal
             modalVisible={modalVisible}
@@ -118,8 +120,8 @@ const Profile = () => {
           </RenderModal>
 
           {!loading && userProfile && userData && (
-            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-              <View className="w-full flex justify-center items-center mt-2 mb-5 px-4">
+            <View style={styles.contentContainer}>
+              <View style={styles.profileContainer}>
                 <ProfileCard
                   image={profilePic}
                   username={userData.username}
@@ -127,34 +129,99 @@ const Profile = () => {
                   followers={userProfile.following.length}
                   following={userProfile.following.length}
                   rating={userProfile.rating}
+                  spotifyLink={userProfile.spotify_url}
+                  imdbLink={userProfile.imdb_url}
+                  websiteLink={userProfile.website_url}
+                  bio={userProfile.bio}
                   button={
                     user?.id === userData.id && (
                       <CustomButton
                         title="Edit Profile"
                         handlePress={() => setModalVisible(true)}
-                        containerStyles="mt-4 w-full flex justify-center items-center"
+                        containerStyles={styles.editButtonContainer}
                         isLoading={loading}
                       />
                     )
                   }
                 />
               </View>
-              <View className="w-full px-4">
-              <PostList userId={userData.id}/>
+              <View style={styles.postsContainer}>
+                <PostList userId={userData.id} />
               </View>
-            </ScrollView>
+            </View>
           )}
           {!loading && !userProfile && !userData && (
-            <View className="flex-1 justify-center items-center">
-              <Text className="text-white font-psemibold text-lg">
+            <View style={styles.noDataContainer}>
+              <Text style={styles.noDataText}>
                 No user data available
               </Text>
             </View>
           )}
         </ScrollView>
-      </SafeAreaView>
+      </View>
     </GestureHandlerRootView>
   );
 };
+
+const styles = StyleSheet.create({
+  flex1: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "#F5F5F5",
+    marginTop: 20,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    marginTop: 20,
+  },
+  backButton: {
+    padding: 10,
+  },
+  logoutButton: {
+    padding: 10,
+  },
+  logoutIcon: {
+    width: 24,
+    height: 24,
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+  },
+  contentContainer: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  profileContainer: {
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  editButtonContainer: {
+    marginTop: 16,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  postsContainer: {
+    marginTop: 10,
+  },
+  noDataContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noDataText: {
+    color: 'black',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  flexGrow1: {
+    flexGrow: 1,
+  },
+});
 
 export default Profile;

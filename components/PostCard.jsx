@@ -92,54 +92,48 @@ const PostCard = ({
   };
 
   return (
-    <View className="w-full bg-black-200 rounded-xl p-6 mb-4">
-      <View className="flex flex-row items-center mb-4">
+    <View style={styles.postCard}>
+      <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigateToProfile(post.author.id)}
-          className="w-12 h-12 rounded-full overflow-hidden border-2 border-secondary mr-4"
+          style={styles.profilePictureContainer}
         >
           <Image
             source={{ uri: profilePicture }}
-            className="w-full h-full"
+            style={styles.profilePicture}
             resizeMode="cover"
           />
         </TouchableOpacity>
         <View>
           <Text
-            className="text-white font-pbold text-lg"
+            style={styles.username}
             onPress={() => navigateToProfile(post.author.id)}
           >
             @{username}
           </Text>
-          <Text className="text-gray-100 font-pregular text-sm">{date}</Text>
+          <Text style={styles.date}>{date}</Text>
         </View>
       </View>
 
-      <Text className="text-white font-pregular text-lg mb-4">{content}</Text>
+      <Text style={styles.content}>{content}</Text>
 
-      <View className="flex flex-row justify-around mt-4">
-        <TouchableOpacity className="flex flex-row items-center" onPress={handleLike}>
-          <FontAwesome name="thumbs-up" size={18} color="#80FFDB" />
+      <View style={styles.actions}>
+        <TouchableOpacity style={styles.actionButton} onPress={handleLike}>
+          <FontAwesome name="thumbs-up" size={18} color="#69C3FF" />
           <TouchableOpacity onPress={openLikedByModal}>
-            <Text className="text-secondary-100 font-pregular text-lg ml-5">
-              {likeCount}
-            </Text>
+            <Text style={styles.actionText}>{likeCount}</Text>
           </TouchableOpacity>
         </TouchableOpacity>
-        <TouchableOpacity className="flex flex-row items-center" onPress={handleDislike}>
+        <TouchableOpacity style={styles.actionButton} onPress={handleDislike}>
           <FontAwesome name="thumbs-down" size={18} color="#FF0000" />
           <TouchableOpacity onPress={openDislikedByModal}>
-            <Text className="text-secondary-100 font-pregular text-lg ml-5">
-              {dislikeCount}
-            </Text>
+            <Text style={styles.actionText}>{dislikeCount}</Text>
           </TouchableOpacity>
         </TouchableOpacity>
-        {/* <TouchableOpacity className="flex flex-row items-center">
-          <FontAwesome name="comment" size={18} color="#FFFFFF" />
-          <Text className="text-secondary-100 font-pregular text-lg ml-5">
-            {comments.length}
-          </Text>
-        </TouchableOpacity> */}
+        <TouchableOpacity style={styles.actionButton}>
+          <FontAwesome name="comment" size={18} color="black" />
+          <Text style={styles.actionText}>{comments.length}</Text>
+        </TouchableOpacity>
       </View>
 
       <RenderModal modalVisible={modalVisible} setModalVisible={setModalVisible}>
@@ -160,6 +154,61 @@ const PostCard = ({
 };
 
 const styles = StyleSheet.create({
+  postCard: {
+    width: '100%',
+    backgroundColor: '#F5F5F5',
+    borderColor: "#DCDCDC",
+    borderRadius: 10,
+    borderWidth: 1,
+    padding: 16,
+    marginBottom: 16,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  profilePictureContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#69C3FF',
+    marginRight: 16,
+  },
+  profilePicture: {
+    width: '100%',
+    height: '100%',
+  },
+  username: {
+    color: 'black',
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  date: {
+    color: '#aaa',
+    fontSize: 14,
+  },
+  content: {
+    color: 'black',
+    fontSize: 16,
+    marginBottom: 16,
+  },
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 16,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  actionText: {
+    color: 'black',
+    fontSize: 16,
+    marginLeft: 8,
+  },
   modalTitle: {
     fontSize: 24,
     color: "#fff",
@@ -181,7 +230,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   userName: {
-    color: "#fff",
+    color: "black",
     fontSize: 18,
   },
 });

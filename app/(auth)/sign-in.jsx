@@ -2,15 +2,7 @@ import { useState } from "react";
 import { Link, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { KeyboardAvoidingView, Platform } from "react-native";
-import {
-  View,
-  Text,
-  ScrollView,
-  Dimensions,
-  Alert,
-  Image,
-  Keyboard,
-} from "react-native";
+import { View, Text, ScrollView, Dimensions, Alert, Image, StyleSheet } from "react-native";
 
 import { images } from "../../constants";
 import { CustomButton, FormField } from "../../components";
@@ -56,25 +48,20 @@ const SignIn = () => {
   };
 
   return (
-    <SafeAreaView className="bg-primary h-full">
+    <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
+        style={styles.keyboardView}
       >
         <ScrollView>
-          <View
-            className="w-full flex justify-center h-full px-4 my-0"
-            style={{
-              minHeight: Dimensions.get("window").height - 100,
-            }}
-          >
+          <View style={styles.mainView}>
             <Image
               source={images.logo}
               resizeMode="contain"
-              className="w-[115px] h-[34px]"
+              style={styles.logo}
             />
 
-            <Text className="text-2xl font-semibold text-white mt-10 font-psemibold">
+            <Text style={styles.title}>
               Log in to Stinky
             </Text>
 
@@ -101,22 +88,70 @@ const SignIn = () => {
               isLoading={isLoading}
             />
 
-            <View className="flex justify-center pt-5 flex-row gap-2">
-              <Text className="text-lg text-gray-100 font-pregular">
-                Don't have an account?
-              </Text>
-              <Link
-                href="/sign-up"
-                className="text-lg font-psemibold text-secondary"
-              >
-                Signup
-              </Link>
-            </View>
+<View style={styles.signupContainer}>
+  <Text style={styles.signupText}>
+    Don't have an account?
+  </Text>
+  <Link
+    href="/sign-up"
+    style={styles.signupLink}
+  >
+    Signup
+  </Link>
+</View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: 'primary', // Replace 'primary' with the actual color value
+    height: '100%',
+  },
+  keyboardView: {
+    flex: 1,
+  },
+  mainView: {
+    width: '100%',
+    justifyContent: 'center',
+    height: '100%',
+    paddingHorizontal: 24,
+    marginVertical: 0,
+    minHeight: Dimensions.get("window").height - 100,
+  },
+  logo: {
+    width: 115,
+    height: 34,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: 'black', // Replace 'black' with the actual color value
+    marginTop: 40,
+    marginBottom: 12,
+    fontFamily: 'Poppins-SemiBold', // Replace 'Poppins-SemiBold' with the actual font family
+  },
+  signupContainer: {
+    justifyContent: 'center',
+    paddingTop: 5,
+    flexDirection: 'row',
+    gap: 2,
+  },
+  signupText: {
+    fontSize: 18,
+    color: 'black', // Replace with the actual color value for the text
+    fontFamily: 'Poppins-Regular', // Replace with the actual font family
+    marginRight: 10,
+  },
+  signupLink: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#69C3FF', // New color for the 'Signup' link
+    fontFamily: 'Poppins-SemiBold', // Replace with the actual font family
+  },
+});
 
 export default SignIn;

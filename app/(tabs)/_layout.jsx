@@ -55,13 +55,13 @@ const TabLayout = () => {
     <>
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: "#FFA001", // Color for active tab icon and label
-          tabBarInactiveTintColor: "#CDCDE0", // Color for inactive tab icon and label
+          tabBarActiveTintColor: "#007EFF", // Color for active tab icon and label
+          tabBarInactiveTintColor: "black", // Color for inactive tab icon and label
           tabBarShowLabel: false, // Hide labels to only show icons
           tabBarStyle: {
-            backgroundColor: "#161622", // Background color of the tab bar
+            backgroundColor: "#F5F5F5", // Background color of the tab bar
             borderTopWidth: 1, // Width of the top border line
-            borderTopColor: "#232533", // Color of the top border line
+            borderTopColor: "#DCDCDC", // Color of the top border line
             height: 90, // Height of the tab bar
             paddingTop: 10, // **Add top padding here**
           },

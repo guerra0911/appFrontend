@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   noTournamentsText: {
-    color: 'white',
+    color: 'black',
     fontWeight: '600',
     fontSize: 18,
   },

@@ -14,7 +14,7 @@ import CustomButton from "./CustomButton";
 
 const placeholderLogo = "https://nickguerrabucket.s3.us-east-2.amazonaws.com/admin/placeholder.png";
 
-const ActualBracketForm = ({ tournament, setActualBracket }) => {
+const ActualBracketForm = ({ tournament, setActualBracket, setModalVisible }) => {
   const [teams, setTeams] = useState({ left: [], right: [] });
   const [uploading, setUploading] = useState(false);
   const [winners, setWinners] = useState({
@@ -187,6 +187,7 @@ const ActualBracketForm = ({ tournament, setActualBracket }) => {
         data
       );
       setActualBracket(response.data.bracket);
+      setModalVisible(false);
       Alert.alert("Success", "Your prediction has been submitted!");
     } catch (error) {
       console.error("Error submitting prediction:", error);
@@ -277,26 +278,33 @@ const ActualBracketForm = ({ tournament, setActualBracket }) => {
 
 const styles = StyleSheet.create({
   bgPrimary: {
-    backgroundColor: "#1c1c1c",     //Edges
+    backgroundColor: "#F5F5F5",     //Edges
     // height: "100%",
     borderRadius: 10,
   },
   cardContainer: {
-    borderColor: "yellow",
-    borderWidth: 1,
-    backgroundColor: "#1c1c1c",
+    // borderColor: "yellow",
+    // borderWidth: 1,
+    backgroundColor: "#F5F5F5",
     padding: 0,
+    marginLeft: 2,
+    marginRight:2,
     borderRadius: 10,
+    height: 400,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
   },
   headerContainer: {
-    borderColor: "purple",
-    borderWidth: 1,
     flexDirection: "row",
     alignItems: "center",
     padding: 10,
-    backgroundColor: "#2c2c2c",
+    backgroundColor: "#F5F5F5",
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
+    borderBottomColor: "#DCDCDC",
   },
   profileImage: {
     width: 50,
@@ -305,12 +313,12 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   usernameText: {
-    color: "white",
+    color: "black",
     fontSize: 20,
     fontWeight: "bold",
   },
   scoreText: {
-    color: "white",
+    color: "black",
     fontSize: 18,
     marginLeft: "auto",
   },
@@ -318,8 +326,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   matchupWrapper: {
-    borderColor: "orange",
-    borderWidth: 0.5,
+    // borderColor: "orange",
+    // borderWidth: 0.5,
     borderRadius: 10,
     flex: 1,
     alignItems: "center",
@@ -327,13 +335,13 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   matchupContainer: {
-    borderColor: "brown",
-    borderWidth: 1,
+    // borderColor: "brown",
+    // borderWidth: 1,
     marginVertical: 8,
   },
   teamContainer: {
-    borderColor: "red",
-    borderWidth: 1,
+    // borderColor: "red",
+    // borderWidth: 1,
     flexDirection: "row",
     alignItems: "center",
     marginVertical: 4,
@@ -357,7 +365,7 @@ const styles = StyleSheet.create({
     paddingTop: 0,     //QF
   },
   pt40: {
-    paddingTop: 140,    //SF
+    paddingTop: 145,    //SF
   },
   pt32: {
     paddingTop: 108,    //F
@@ -382,7 +390,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   championText: {
-    color: "white",
+    color: "black",
     fontSize: 16,
     textAlign: "center",
     position: "absolute",
@@ -401,8 +409,8 @@ const styles = StyleSheet.create({
     height: 64,
   },
   finalMatchupContainer: {
-    borderColour: "black",
-    borderWidth: 1,
+    // borderColour: "black",
+    // borderWidth: 1,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",

@@ -332,44 +332,48 @@ const BracketCard = ({ bracket }) => {
 
 const styles = StyleSheet.create({
   bgPrimary: {
-    backgroundColor: "#1c1c1c", //Edges
-    height: "100%",
+    backgroundColor: "#F5F5F5", //Edges
+    height: "97.5%",
+    borderRadius: 10,
   },
   cardContainer: {
     // borderColor: "yellow",
     // borderWidth: 1,
-    backgroundColor: "#1c1c1c",
+    backgroundColor: "#F5F5F5",
     padding: 0,
     borderRadius: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
+    shadowOpacity: 0.3,
     shadowRadius: 3,
     elevation: 5,
   },
   headerContainer: {
-    // borderColor: "purple",
-    // borderWidth: 1,
+    borderColor: "#F5F5F5",
+    borderWidth: 2,
     flexDirection: "row",
     alignItems: "center",
     padding: 10,
-    backgroundColor: "#2c2c2c",
+    backgroundColor: "#F5F5F5",
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
+    borderBottomColor: "#DCDCDC",
   },
   profileImage: {
     width: 50,
     height: 50,
     borderRadius: 25,
     marginRight: 10,
+    borderWidth: 2,
+    borderColor: '#69C3FF',
   },
   usernameText: {
-    color: "white",
+    color: "black",
     fontSize: 20,
     fontWeight: "bold",
   },
   scoreText: {
-    color: "white",
+    color: "black",
     fontSize: 18,
     marginLeft: "auto",
   },
@@ -446,7 +450,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   championText: {
-    color: "white",
+    color: "black",
     fontSize: 16,
     textAlign: "center",
     position: "absolute",

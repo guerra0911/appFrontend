@@ -29,13 +29,13 @@ const TournamentLeaderboard = ({ top3Brackets, pointSystem, setPointSystemModalV
 
 const styles = StyleSheet.create({
   leaderboardContainer: {
-    backgroundColor: "#2c2c2e",
+    backgroundColor: "#F5F5F5",
     borderRadius: 8,
     padding: 16,
     margin: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
+    shadowOpacity: 0.3,
     shadowRadius: 3,
     elevation: 5,
   },
@@ -45,18 +45,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   leaderboardTitle: {
-    color: "#fff",
+    color: "black",
     fontSize: 20,
     fontWeight: "bold",
   },
   pointSystemLink: {
-    color: "#ffd700",
+    color: "#69C3FF",
     fontSize: 16,
     textDecorationLine: 'underline',
   },
   separator: {
     height: 1,
-    backgroundColor: "#ccc",
+    backgroundColor: "#DCDCDC",
     marginVertical: 8,
   },
   leaderboardItem: {
@@ -73,13 +73,15 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     marginRight: 8,
+    borderWidth: 2,
+    borderColor: '#69C3FF',
   },
   profileName: {
-    color: "#fff",
+    color: "black",
     fontSize: 16,
   },
   profileScore: {
-    color: "#fff",
+    color: "black",
     fontSize: 16,
   },
 });

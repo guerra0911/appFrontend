@@ -1,4 +1,3 @@
-// TournamentCard.jsx
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -23,14 +22,23 @@ const TournamentCard = ({ tournament }) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#1c1c1e',
-    borderRadius: 10,
+    backgroundColor: '#F5F5F5',
     overflow: 'hidden',
     marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 3,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#DCDCDC', // Adding the thin border with color #DCDCDC
+    borderRadius: 5, // Adding border radius for a smooth edge
   },
   banner: {
     width: '100%',
     height: 150,
+    borderTopStartRadius: 5,
+    borderTopEndRadius: 5,
   },
   content: {
     padding: 16,
@@ -44,8 +52,8 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   name: {
-    color: '#fff',
-    fontSize: 18,
+    color: 'black',
+    fontSize: 22,
     fontWeight: 'bold',
   },
 });

@@ -18,7 +18,7 @@ const PointSystemModal = ({ modalVisible, setModalVisible, pointSystem }) => {
         <View style={styles.modalContent}>
           <View style={styles.iconContainer}>
             <TouchableOpacity onPress={() => setModalVisible(false)}>
-              <AntDesign name="downcircle" size={24} color="#80FFDB" />
+              <AntDesign name="downcircle" size={24} color="#69C3FF" />
             </TouchableOpacity>
           </View>
           <Text style={styles.title}>Point System</Text>
@@ -59,12 +59,12 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     justifyContent: "flex-end",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
   },
   modalContent: {
     width: "100%",
     height: "45%",
-    backgroundColor: "#5E60CE",
+    backgroundColor: "#F5F5F5",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   title: {
-    color: "#FFFFFF",
+    color: "black",
     fontSize: 35,
     fontWeight: "bold",
     marginBottom: 10,
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.5)",
+    backgroundColor: "#DCDCDC",
     marginVertical: 10,
     marginHorizontal: 0,
   },
@@ -95,15 +95,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   roundText: {
-    color: "#FFFFFF",
+    color: "black",
     fontSize: 20,
   },
   pointsText: {
-    color: "#00FF00",
+    color: "#A5DD9B",
     fontSize: 20,
   },
   finalsText: {
-    color: "#FFD700",
+    color: "black",
   },
   goldText: {
     color: "#FFD700",

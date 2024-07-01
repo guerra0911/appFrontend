@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Text, ScrollView, Dimensions, Alert, Image } from "react-native";
+import { View, Text, Alert, Image, Dimensions } from "react-native";
 import { KeyboardAvoidingView, Platform } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 import { images } from "../../constants";
 import { CustomButton, FormField } from "../../components";
@@ -11,7 +12,8 @@ import { apiWithoutAuth as api } from "../../api";
 const SignUp = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState(""); 
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const validateUsername = (username) => {
@@ -24,17 +26,32 @@ const SignUp = () => {
     return regex.test(password);
   };
 
+  const validateEmail = (email) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
   const handleSubmit = async () => {
     if (!validateUsername(username)) {
-      Alert.alert("Error", "Username must be between 1 and 25 characters and can only contain letters, numbers, periods, and underscores.");
+      Alert.alert(
+        "Error",
+        "Username must be between 1 and 25 characters and can only contain letters, numbers, periods, and underscores."
+      );
       return;
     }
     if (!validatePassword(password)) {
-      Alert.alert("Error", "Password must be at least 6 characters long and contain at least one number.");
+      Alert.alert(
+        "Error",
+        "Password must be at least 6 characters long and contain at least one number."
+      );
       return;
     }
     if (password !== confirmPassword) {
       Alert.alert("Error", "Passwords do not match.");
+      return;
+    }
+    if (!validateEmail(email)) {
+      Alert.alert("Error", "Invalid email address.");
       return;
     }
 
@@ -44,6 +61,9 @@ const SignUp = () => {
         username: username.trim(),
         password: password.trim(),
         confirm_password: confirmPassword.trim(),
+        profile: {
+          email: email.trim(),
+        },
       });
 
       if (res.status === 200 || res.status === 201) {
@@ -61,72 +81,78 @@ const SignUp = () => {
 
   return (
     <SafeAreaView className="bg-primary h-full">
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
+      <KeyboardAwareScrollView
+        extraScrollHeight={100} // Adjust this value as needed
+        contentContainerStyle={{ flexGrow: 1 }}
       >
-        <ScrollView>
-          <View
-            className="w-full flex justify-center h-full px-4 my-0"
-            style={{
-              minHeight: Dimensions.get("window").height - 100,
-            }}
-          >
-            <Image
-              source={images.logo}
-              resizeMode="contain"
-              className="w-[115px] h-[34px]"
-            />
+        <View
+          className="w-full flex justify-center h-full px-4 my-0"
+          style={{
+            minHeight: Dimensions.get("window").height - 100,
+          }}
+        >
+          <Image
+            source={images.logo}
+            resizeMode="contain"
+            className="w-[115px] h-[34px]"
+          />
 
-            <Text className="text-2xl font-semibold text-white mt-10 font-psemibold">
-              Sign Up to Stinky
+          <Text className="text-2xl font-semibold text-white mt-10 font-psemibold">
+            Sign Up to Stinky
+          </Text>
+
+          <FormField
+            title="Username"
+            value={username}
+            handleChangeText={(e) => setUsername(e)}
+            otherStyles="mt-7"
+            multiline={false}
+          />
+
+          <FormField
+            title="Email"
+            value={email}
+            handleChangeText={(e) => setEmail(e)}
+            otherStyles="mt-7"
+            multiline={false}
+          />
+
+          <FormField
+            title="Password"
+            value={password}
+            handleChangeText={(e) => setPassword(e)}
+            otherStyles="mt-7"
+            multiline={false}
+          />
+
+          <FormField
+            title="Confirm Password"
+            value={confirmPassword}
+            handleChangeText={(e) => setConfirmPassword(e)}
+            otherStyles="mt-7"
+            multiline={false}
+          />
+
+          <CustomButton
+            title="Sign Up"
+            handlePress={handleSubmit}
+            containerStyles="mt-7"
+            isLoading={isLoading}
+          />
+
+          <View className="flex justify-center pt-5 flex-row gap-2">
+            <Text className="text-lg text-gray-100 font-pregular">
+              Have an account already?
             </Text>
-
-            <FormField
-              title="Username"
-              value={username}
-              handleChangeText={(e) => setUsername(e)}
-              otherStyles="mt-7"
-              multiline={false} 
-            />
-
-            <FormField
-              title="Password"
-              value={password}
-              handleChangeText={(e) => setPassword(e)}
-              otherStyles="mt-7"
-              multiline={false} 
-            />
-
-            <FormField
-              title="Confirm Password" 
-              value={confirmPassword}
-              handleChangeText={(e) => setConfirmPassword(e)}
-              otherStyles="mt-7"
-              multiline={false} 
-            />
-
-            <CustomButton
-              title="Sign Up"
-              handlePress={handleSubmit}
-              containerStyles="mt-7"
-              isLoading={isLoading}
-            />
-
-            <View className="flex justify-center pt-5 flex-row gap-2">
-              <Text className="text-lg text-gray-100 font-pregular">
-                Have an account already?
-              </Text>
-              <Link
-                href="/sign-in"
-                className="text-lg font-psemibold text-secondary"
-              >
-                Login
-              </Link>
-            </View>
+            <Link
+              href="/sign-in"
+              className="text-lg font-psemibold text-secondary"
+            >
+              Login
+            </Link>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        </View>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 };

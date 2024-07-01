@@ -5,6 +5,7 @@ import {
   Text,
   Alert,
   ScrollView,
+  StyleSheet,
 } from "react-native";
 
 import api from "../api";
@@ -58,15 +59,15 @@ const CreateNoteForm = ({ setModalVisible }) => {
   };
 
   return (
-    <SafeAreaView className="bg-primary h-full">
-      <ScrollView className="px-4 my-6">
-        <Text className="text-2xl text-white font-psemibold">New Post</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <Text style={styles.title}>New Post</Text>
 
         <FormField
           value={form.content}
           placeholder="Tell the world your hottest take ..."
           handleChangeText={(e) => setForm({ ...form, content: e })}
-          otherStyles="mt-0"
+          otherStyles={styles.formField}
           height={200}
           multiline={true}
         />
@@ -74,12 +75,36 @@ const CreateNoteForm = ({ setModalVisible }) => {
         <CustomButton
           title="Post"
           handlePress={handleSubmit}
-          containerStyles="mt-7"
+          containerStyles={styles.buttonContainer}
           isLoading={uploading}
         />
       </ScrollView>
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  safeArea: {
+    backgroundColor: '#F5F5F5',
+    flex: 1,
+  },
+  scrollViewContent: {
+    paddingHorizontal: 16,
+    marginVertical: 24,
+  },
+  title: {
+    fontSize: 24,
+    color: 'black',
+    fontWeight: 'bold',
+    marginBottom: 0,
+    marginLeft: 2,
+  },
+  formField: {
+    marginTop: 0,
+  },
+  buttonContainer: {
+    marginTop: 28,
+  },
+});
 
 export default CreateNoteForm;
