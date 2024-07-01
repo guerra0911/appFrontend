@@ -142,14 +142,14 @@ const styles = StyleSheet.create({
   },
   signupText: {
     fontSize: 18,
-    color: 'black', // Replace with the actual color value for the text
+    color: '#888', // Replace with the actual color value for the text
     fontFamily: 'Poppins-Regular', // Replace with the actual font family
-    marginRight: 10,
+    marginRight: 5,
   },
   signupLink: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#69C3FF', // New color for the 'Signup' link
+    color: '#007EFF', // New color for the 'Signup' link
     fontFamily: 'Poppins-SemiBold', // Replace with the actual font family
   },
 });

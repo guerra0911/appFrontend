@@ -14,7 +14,7 @@ import {
   ScrollView,
 } from "react-native-gesture-handler";
 import { FontAwesome } from "@expo/vector-icons";
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useRoute, useNavigation } from "@react-navigation/native";
 import { useEffect, useCallback, useState } from "react";
 import { icons } from "../constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -23,6 +23,7 @@ import { ProfileCard, PostList, Loader, CustomButton } from "../components";
 import EditProfileForm from "../components/EditProfileForm";
 import api from "../api";
 import RenderModal from "./(tabs)/renderModal";
+import PrivateProfileIndicator from "../components/PrivateProfileIndicator";
 
 const OtherProfile = () => {
   const router = useRouter();
@@ -53,8 +54,7 @@ const OtherProfile = () => {
     } finally {
       setLoading(false);
     }
-  };  
-  
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -63,11 +63,11 @@ const OtherProfile = () => {
         await fetchUserProfile(id);
       }
     };
-  
+
     if (user) {
       fetchProfile();
     }
-  }, [userId, user]);  
+  }, [userId, user]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -143,16 +143,18 @@ const OtherProfile = () => {
                   }
                 />
               </View>
-              <View style={styles.postsContainer}>
-                <PostList userId={userData.id} />
-              </View>
+              {!userProfile.privacy_flag || user?.id === userData.id ? (
+                <View style={styles.postsContainer}>
+                  <PostList userId={userData.id} />
+                </View>
+              ) : (
+                <PrivateProfileIndicator />
+              )}
             </View>
           )}
           {!loading && !userProfile && !userData && (
             <View style={styles.noDataContainer}>
-              <Text style={styles.noDataText}>
-                No user data available
-              </Text>
+              <Text style={styles.noDataText}>No user data available</Text>
             </View>
           )}
         </ScrollView>
@@ -171,9 +173,9 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 16,
     marginTop: 20,
   },
@@ -200,21 +202,21 @@ const styles = StyleSheet.create({
   },
   editButtonContainer: {
     marginTop: 16,
-    width: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
   },
   postsContainer: {
     marginTop: 10,
   },
   noDataContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   noDataText: {
-    color: 'black',
-    fontWeight: 'bold',
+    color: "black",
+    fontWeight: "bold",
     fontSize: 16,
   },
   flexGrow1: {

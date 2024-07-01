@@ -24,6 +24,7 @@ import api from "../../api";
 import CustomButton from "../../components/CustomButton";
 import RenderModal from "./renderModal";
 import EditProfileForm from "../../components/EditProfileForm";
+import PrivateProfileIndicator from "../../components/PrivateProfileIndicator";
 
 const Profile = () => {
   const router = useRouter();
@@ -145,9 +146,14 @@ const Profile = () => {
                   }
                 />
               </View>
-              <View style={styles.postsContainer}>
-                <PostList userId={userData.id} />
-              </View>
+              {!userProfile.privacy_flag || user?.id === userData.id ? (
+                <View style={styles.postsContainer}>
+                  <PostList userId={userData.id} />
+                </View>
+              ) : (
+                <PrivateProfileIndicator />
+              )}
+              
             </View>
           )}
           {!loading && !userProfile && !userData && (

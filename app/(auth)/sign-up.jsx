@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Link, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Text, Alert, Image, Dimensions } from "react-native";
-import { KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, Alert, Image, Dimensions, StyleSheet } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 import { images } from "../../constants";
@@ -80,24 +79,21 @@ const SignUp = () => {
   };
 
   return (
-    <SafeAreaView className="bg-primary h-full">
+    <SafeAreaView style={styles.safeArea}>
       <KeyboardAwareScrollView
         extraScrollHeight={100} // Adjust this value as needed
-        contentContainerStyle={{ flexGrow: 1 }}
+        contentContainerStyle={styles.scrollViewContent}
       >
         <View
-          className="w-full flex justify-center h-full px-4 my-0"
-          style={{
-            minHeight: Dimensions.get("window").height - 100,
-          }}
+          style={styles.container}
         >
           <Image
             source={images.logo}
             resizeMode="contain"
-            className="w-[115px] h-[34px]"
+            style={styles.logo}
           />
 
-          <Text className="text-2xl font-semibold text-white mt-10 font-psemibold">
+          <Text style={styles.title}>
             Sign Up to Stinky
           </Text>
 
@@ -105,7 +101,7 @@ const SignUp = () => {
             title="Username"
             value={username}
             handleChangeText={(e) => setUsername(e)}
-            otherStyles="mt-7"
+            otherStyles={styles.formField}
             multiline={false}
           />
 
@@ -113,7 +109,7 @@ const SignUp = () => {
             title="Email"
             value={email}
             handleChangeText={(e) => setEmail(e)}
-            otherStyles="mt-7"
+            otherStyles={styles.formField}
             multiline={false}
           />
 
@@ -121,7 +117,7 @@ const SignUp = () => {
             title="Password"
             value={password}
             handleChangeText={(e) => setPassword(e)}
-            otherStyles="mt-7"
+            otherStyles={styles.formField}
             multiline={false}
           />
 
@@ -129,24 +125,24 @@ const SignUp = () => {
             title="Confirm Password"
             value={confirmPassword}
             handleChangeText={(e) => setConfirmPassword(e)}
-            otherStyles="mt-7"
+            otherStyles={styles.formField}
             multiline={false}
           />
 
           <CustomButton
             title="Sign Up"
             handlePress={handleSubmit}
-            containerStyles="mt-7"
+            containerStyles={styles.button}
             isLoading={isLoading}
           />
 
-          <View className="flex justify-center pt-5 flex-row gap-2">
-            <Text className="text-lg text-gray-100 font-pregular">
+          <View style={styles.loginContainer}>
+            <Text style={styles.loginText}>
               Have an account already?
             </Text>
             <Link
               href="/sign-in"
-              className="text-lg font-psemibold text-secondary"
+              style={styles.loginLink}
             >
               Login
             </Link>
@@ -156,5 +152,56 @@ const SignUp = () => {
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  safeArea: {
+    backgroundColor: '#F5F5F5',
+    height: '100%',
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+  },
+  container: {
+    width: '100%',
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    minHeight: Dimensions.get("window").height - 100,
+  },
+  logo: {
+    width: 115,
+    height: 34,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: '#000',
+    textAlign: 'left',
+    marginTop: 40,
+  },
+  formField: {
+    marginTop: 16,
+  },
+  button: {
+    marginTop: 16,
+  },
+  loginContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingTop: 5,
+  },
+  loginText: {
+    fontSize: 18,
+    color: '#888',
+    fontFamily: 'Poppins-Regular',
+  },
+  loginLink: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#007EFF',
+    marginLeft: 4,
+    fontFamily: 'Poppins-SemiBold',
+  },
+});
 
 export default SignUp;
