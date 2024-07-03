@@ -1,3 +1,5 @@
+// CreateNoteForm.jsx
+
 import { useState } from "react";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -6,10 +8,12 @@ import {
   Alert,
   ScrollView,
   StyleSheet,
+  View,
+  TouchableOpacity,
+  Image
 } from "react-native";
-
+import * as ImagePicker from 'expo-image-picker';
 import api from "../api";
-
 import CustomButton from "./CustomButton";
 import FormField from "./FormField";
 import { useGlobalContext } from "../context/GlobalProvider";
@@ -20,6 +24,22 @@ const CreateNoteForm = ({ setModalVisible }) => {
   const [form, setForm] = useState({
     content: "",
   });
+  const [images, setImages] = useState([null, null, null]);
+
+  const pickImage = async (index) => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const updatedImages = [...images];
+      updatedImages[index] = result.assets[0].uri;
+      setImages(updatedImages);
+    }
+  };
 
   const handleSubmit = async () => {
     if (form.content === "") {
@@ -28,15 +48,28 @@ const CreateNoteForm = ({ setModalVisible }) => {
 
     setUploading(true);
     try {
-      const res = await api.post("/api/notes/", {
-        content: form.content,
+      const formData = new FormData();
+      formData.append("content", form.content);
+      images.forEach((imageUri, index) => {
+        if (imageUri) {
+          formData.append(`images`, {
+            uri: imageUri,
+            name: `image${index + 1}.jpg`,
+            type: "image/jpeg",
+          });
+        }
       });
-      // Ensure the response is successful before navigating
+
+      const res = await api.post("/api/notes/", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
       if (res.status === 200 || res.status === 201) {
-        setModalVisible(false);  // Close the modal
+        setModalVisible(false);
         router.replace("/home");
       } else {
-        // Handle unsuccessful registration
         Alert.alert("Upload Failed", res.message);
       }
     } catch (error) {
@@ -72,6 +105,18 @@ const CreateNoteForm = ({ setModalVisible }) => {
           multiline={true}
         />
 
+        <View style={styles.imagePickerContainer}>
+          {images.map((image, index) => (
+            <TouchableOpacity key={index} onPress={() => pickImage(index)} style={styles.imagePicker}>
+              {image ? (
+                <Image source={{ uri: image }} style={styles.image} />
+              ) : (
+                <Text style={styles.placeholderText}>+</Text>
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
+
         <CustomButton
           title="Post"
           handlePress={handleSubmit}
@@ -104,6 +149,26 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginTop: 28,
+  },
+  imagePickerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 16,
+  },
+  imagePicker: {
+    width: 100,
+    height: 100,
+    backgroundColor: '#DCDCDC',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+  placeholderText: {
+    fontSize: 32,
+    color: '#888',
   },
 });
 

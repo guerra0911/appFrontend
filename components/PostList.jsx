@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import { ScrollView, View, Text, RefreshControl, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { useFocusEffect } from '@react-navigation/native';
 import PostCard from "./PostCard";
@@ -9,12 +9,12 @@ const PostList = ({ userId }) => {
   const { posts, fetchPosts } = useGlobalContext();
   const [refreshing, setRefreshing] = useState(false);
   const [sortBy, setSortBy] = useState('created_at');
-  const [loading, setLoading] = useState(true);  // New loading state
+  const [loading, setLoading] = useState(true);
 
   const fetchData = async (sortOption) => {
-    setLoading(true);  // Set loading to true
+    setLoading(true);
     await fetchPosts(userId, sortOption);
-    setLoading(false);  // Set loading to false after fetching
+    setLoading(false);
     setRefreshing(false);
   };
 
@@ -74,13 +74,12 @@ const PostList = ({ userId }) => {
               dislikes={post.dislikes}
               comments={post.comments}
               post={post}
+              images={[post.image1, post.image2, post.image3]} // Pass images here
               onLikeDislikeUpdate={onLikeDislikeUpdate}
             />
           ))
         ) : (
-          <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-          >
+          <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
             <Text style={{ color: "white", fontWeight: "600", fontSize: 18 }}>
               No posts available
             </Text>

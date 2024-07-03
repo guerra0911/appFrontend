@@ -15,6 +15,7 @@ const PostCard = ({
   dislikes,
   comments,
   post,
+  images, // Receive images here
   onLikeDislikeUpdate,
 }) => {
   const navigation = useNavigation();
@@ -117,6 +118,25 @@ const PostCard = ({
 
       <Text style={styles.content}>{content}</Text>
 
+      {images.filter(Boolean).length > 0 && (
+        <ScrollView
+          horizontal
+          pagingEnabled
+          style={styles.imageContainer}
+        >
+          {images.map((image, index) => (
+            image && (
+              <Image
+                key={index}
+                source={{ uri: image }}
+                style={styles.image}
+                resizeMode="cover"
+              />
+            )
+          ))}
+        </ScrollView>
+      )}
+
       <View style={styles.actions}>
         <TouchableOpacity style={styles.actionButton} onPress={handleLike}>
           <FontAwesome name="thumbs-up" size={18} color="#69C3FF" />
@@ -194,6 +214,16 @@ const styles = StyleSheet.create({
     color: 'black',
     fontSize: 16,
     marginBottom: 16,
+  },
+  imageContainer: {
+    marginBottom: 16,
+    height: 200,  // Adjust height as needed
+  },
+  image: {
+    width: 300,  // Adjust width as needed
+    height: '100%',
+    marginRight: 10,
+    borderRadius: 10,
   },
   actions: {
     flexDirection: 'row',
