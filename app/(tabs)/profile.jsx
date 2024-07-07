@@ -127,7 +127,7 @@ const Profile = () => {
                   image={profilePic}
                   username={userData.username}
                   posts={posts.length}
-                  followers={userProfile.following.length}
+                  followers={userProfile.followers.length}
                   following={userProfile.following.length}
                   rating={userProfile.rating}
                   spotifyLink={userProfile.spotify_url}

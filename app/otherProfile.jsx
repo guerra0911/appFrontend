@@ -1,3 +1,4 @@
+// otherProfile.jsx
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -38,6 +39,7 @@ const OtherProfile = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [profilePic, setProfilePic] = useState(null);
+  const [followStatus, setFollowStatus] = useState(null);
 
   const fetchUserProfile = async (id) => {
     setLoading(true);
@@ -48,6 +50,8 @@ const OtherProfile = () => {
       setPosts(response.data.posts);
       const timestamp = new Date().getTime();
       setProfilePic(`${response.data.profile.image}?timestamp=${timestamp}`);
+      updateFollowStatus(response.data.profile);
+      // console.log(userProfile.id);
     } catch (error) {
       console.error("Error fetching user profile:", error);
       Alert.alert("Error", "Failed to fetch user profile.");
@@ -56,14 +60,57 @@ const OtherProfile = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const id = userId || user?.id;
-      if (id) {
-        await fetchUserProfile(id);
-      }
-    };
+  const updateFollowStatus = (profile) => {
+    const followers = profile.followers || [];
+    const followRequests = profile.follow_requests || [];
+  
+    if (followers.includes(user.username)) {
+      setFollowStatus("Following");
+    } else if (followRequests.includes(user.username)) {
+      setFollowStatus("Requested");
+    } else {
+      setFollowStatus("Follow");
+    }
+  };
+  
 
+  const handleFollow = async () => {
+    console.log("User : ", user.id);
+    console.log("Is trying to Follow: ", userId);
+
+    try {
+      const response = await api.post(`/api/user/follow/${userId}/`);
+      if (response.data.status === "request_sent") {
+        setFollowStatus("Requested");
+      } else if (response.data.status === "following") {
+        setFollowStatus("Following");
+      }
+    } catch (error) {
+      console.error("Error following user:", error);
+      Alert.alert("Error", "Failed to follow user.");
+    }
+  };
+
+  const handleUnfollow = async () => {
+    try {
+      const response = await api.post(
+        `/api/user/unfollow/${userId}/`
+      );
+      setFollowStatus("Follow");
+    } catch (error) {
+      console.error("Error unfollowing user:", error);
+      Alert.alert("Error", "Failed to unfollow user.");
+    }
+  };
+
+  const fetchProfile = async () => {
+    const id = userId || user?.id;
+    if (id) {
+      await fetchUserProfile(id);
+    }
+  };
+
+  useEffect(() => {
     if (user) {
       fetchProfile();
     }
@@ -78,17 +125,6 @@ const OtherProfile = () => {
     }
     setRefreshing(false);
   }, [userId, user]);
-
-  const logout = async () => {
-    try {
-      await AsyncStorage.removeItem("authToken");
-      setUser(null);
-      setIsLogged(false);
-      router.replace("/sign-in");
-    } catch (error) {
-      Alert.alert("Logout Error", "An error occurred while trying to log out.");
-    }
-  };
 
   return (
     <GestureHandlerRootView style={styles.flex1}>
@@ -124,7 +160,7 @@ const OtherProfile = () => {
                   image={profilePic}
                   username={userData.username}
                   posts={posts.length}
-                  followers={userProfile.following.length}
+                  followers={userProfile.followers.length}
                   following={userProfile.following.length}
                   rating={userProfile.rating}
                   spotifyLink={userProfile.spotify_url}
@@ -132,10 +168,21 @@ const OtherProfile = () => {
                   websiteLink={userProfile.website_url}
                   bio={userProfile.bio}
                   button={
-                    user?.id === userData.id && (
+                    user?.id === userData.id ? (
                       <CustomButton
                         title="Edit Profile"
                         handlePress={() => setModalVisible(true)}
+                        containerStyles={styles.editButtonContainer}
+                        isLoading={loading}
+                      />
+                    ) : (
+                      <CustomButton
+                        title={followStatus}
+                        handlePress={
+                          followStatus === "Follow"
+                            ? handleFollow
+                            : handleUnfollow
+                        }
                         containerStyles={styles.editButtonContainer}
                         isLoading={loading}
                       />
