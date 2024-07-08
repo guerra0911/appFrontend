@@ -2,7 +2,8 @@ import React, { useState, useCallback } from 'react';
 import { ScrollView, View, Text, RefreshControl, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import TournamentCard from './TournamentCard';
-import api from '../api'; // Ensure this is the correct path to your api.js
+import api from '../api';
+import Loader from './Loader';
 
 const TournamentList = () => {
   const [tournaments, setTournaments] = useState([]);
@@ -39,7 +40,7 @@ const TournamentList = () => {
         ))
       ) : (
         <View style={styles.noTournaments}>
-          <Text style={styles.noTournamentsText}>No tournaments available</Text>
+          <Loader isLoader={refreshing} />
         </View>
       )}
     </ScrollView>

@@ -1,4 +1,4 @@
-// otherProfile.jsx
+import React, { useEffect, useCallback, useState } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -16,7 +16,6 @@ import {
 } from "react-native-gesture-handler";
 import { FontAwesome } from "@expo/vector-icons";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import { useEffect, useCallback, useState } from "react";
 import { icons } from "../constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useGlobalContext } from "../context/GlobalProvider";
@@ -51,7 +50,6 @@ const OtherProfile = () => {
       const timestamp = new Date().getTime();
       setProfilePic(`${response.data.profile.image}?timestamp=${timestamp}`);
       updateFollowStatus(response.data.profile);
-      // console.log(userProfile.id);
     } catch (error) {
       console.error("Error fetching user profile:", error);
       Alert.alert("Error", "Failed to fetch user profile.");
@@ -62,8 +60,8 @@ const OtherProfile = () => {
 
   const updateFollowStatus = (profile) => {
     const followers = profile.followers || [];
-    const followRequests = profile.follow_requests || [];
-  
+    const followRequests = profile.requests || [];
+
     if (followers.includes(user.username)) {
       setFollowStatus("Following");
     } else if (followRequests.includes(user.username)) {
@@ -72,12 +70,8 @@ const OtherProfile = () => {
       setFollowStatus("Follow");
     }
   };
-  
 
   const handleFollow = async () => {
-    console.log("User : ", user.id);
-    console.log("Is trying to Follow: ", userId);
-
     try {
       const response = await api.post(`/api/user/follow/${userId}/`);
       if (response.data.status === "request_sent") {
@@ -93,13 +87,21 @@ const OtherProfile = () => {
 
   const handleUnfollow = async () => {
     try {
-      const response = await api.post(
-        `/api/user/unfollow/${userId}/`
-      );
+      const response = await api.post(`/api/user/unfollow/${userId}/`);
       setFollowStatus("Follow");
     } catch (error) {
       console.error("Error unfollowing user:", error);
       Alert.alert("Error", "Failed to unfollow user.");
+    }
+  };
+
+  const handleUnrequest = async () => {
+    try {
+      const response = await api.post(`/api/user/unrequest/${userId}/`);
+      setFollowStatus("Follow");
+    } catch (error) {
+      console.error("Error unrequesting user:", error);
+      Alert.alert("Error", "Failed to unrequest user.");
     }
   };
 
@@ -157,6 +159,7 @@ const OtherProfile = () => {
             <View style={styles.contentContainer}>
               <View style={styles.profileContainer}>
                 <ProfileCard
+                  userProfile={userProfile}
                   image={profilePic}
                   username={userData.username}
                   posts={posts.length}
@@ -178,16 +181,23 @@ const OtherProfile = () => {
                     ) : (
                       <CustomButton
                         title={followStatus}
-                        handlePress={
-                          followStatus === "Follow"
-                            ? handleFollow
-                            : handleUnfollow
-                        }
+                        handlePress={() => {
+                          if (followStatus === "Follow") {
+                            handleFollow();
+                          } else if (followStatus === "Requested") {
+                            handleUnrequest();
+                          } else if (followStatus === "Following") {
+                            handleUnfollow();
+                          }
+                        }}
                         containerStyles={styles.editButtonContainer}
                         isLoading={loading}
                       />
                     )
                   }
+                  isPrivate={userProfile.privacy_flag}
+                  isFollowing={followStatus === "Following"}
+                  isOwnProfile={user?.id === userData.id}
                 />
               </View>
               {!userProfile.privacy_flag || user?.id === userData.id ? (

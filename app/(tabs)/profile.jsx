@@ -1,3 +1,4 @@
+import React from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -17,14 +18,15 @@ import { useEffect, useCallback, useState } from "react";
 import { icons } from "../../constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useGlobalContext } from "../../context/GlobalProvider";
-import ProfileCard from "../../components/ProfileCard"; // Ensure this is the correct path
+import ProfileCard from "../../components/ProfileCard";
 import { PostList } from "../../components";
-import Loader from "../../components/Loader"; // Ensure this is the correct path
+import Loader from "../../components/Loader";
 import api from "../../api";
 import CustomButton from "../../components/CustomButton";
 import RenderModal from "./renderModal";
 import EditProfileForm from "../../components/EditProfileForm";
 import PrivateProfileIndicator from "../../components/PrivateProfileIndicator";
+import { useNavigation } from "@react-navigation/native";
 
 const Profile = () => {
   const router = useRouter();
@@ -37,6 +39,17 @@ const Profile = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [profilePic, setProfilePic] = useState(null);
+  const [requests, setRequests] = useState([]);
+  const [requesting, setRequesting] = useState([]);
+  const navigation = useNavigation();
+  const [requestModalVisible, setRequestModalVisible] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+
+  const navigateToProfile = (userId) => {
+    setModalVisible(false);
+    setRequestModalVisible(false);
+    navigation.navigate("otherProfile", { userId });
+  };
 
   const fetchUserProfile = async (id) => {
     setLoading(true);
@@ -47,14 +60,65 @@ const Profile = () => {
       setPosts(response.data.posts);
       const timestamp = new Date().getTime();
       setProfilePic(`${response.data.profile.image}?timestamp=${timestamp}`);
+      fetchRequests();
+      fetchRequesting();
     } catch (error) {
       console.error("Error fetching user profile:", error);
       Alert.alert("Error", "Failed to fetch user profile.");
     } finally {
       setLoading(false);
     }
-  };  
-  
+  };
+
+  const fetchRequests = async () => {
+    try {
+      const response = await api.get(`/api/user/me/requests/`);
+      setRequests(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchRequesting = async () => {
+    try {
+      const response = await api.get(`/api/user/me/requesting/`);
+      setRequesting(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const openRequestsModal = () => {
+    setModalTitle("Requests");
+    fetchRequests();
+    setRequestModalVisible(true);
+  };
+
+  const openRequestingModal = () => {
+    setModalTitle("Requesting");
+    fetchRequesting();
+    setRequestModalVisible(true);
+  };
+
+  const acceptFollowRequest = async (userId) => {
+    try {
+      await api.post(`/api/user/accept_follow/${userId}/`);
+      fetchRequests(); // Refresh the requests list
+    } catch (error) {
+      console.error("Error accepting follow request:", error);
+      Alert.alert("Error", "Failed to accept follow request.");
+    }
+  };
+
+  const declineFollowRequest = async (userId) => {
+    try {
+      await api.post(`/api/user/decline_follow/${userId}/`);
+      fetchRequests(); // Refresh the requests list
+    } catch (error) {
+      console.error("Error declining follow request:", error);
+      Alert.alert("Error", "Failed to decline follow request.");
+    }
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -63,11 +127,11 @@ const Profile = () => {
         await fetchUserProfile(id);
       }
     };
-  
+
     if (user) {
       fetchProfile();
     }
-  }, [userId, user]);  
+  }, [userId, user]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -102,9 +166,15 @@ const Profile = () => {
           <Loader isLoading={loading} />
           <View style={styles.headerRow}>
             <TouchableOpacity
-              style={styles.logoutButton}
-              onPress={logout}
+              style={styles.button}
+              onPress={openRequestingModal}
             >
+              <Text style={styles.buttonText}>Requesting</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={openRequestsModal}>
+              <Text style={styles.buttonText}>Requests</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.logoutButton} onPress={logout}>
               <Image
                 source={icons.logout}
                 resizeMode="contain"
@@ -120,10 +190,56 @@ const Profile = () => {
             <EditProfileForm setModalVisible={setModalVisible} />
           </RenderModal>
 
+          <RenderModal
+            modalVisible={requestModalVisible}
+            setModalVisible={setRequestModalVisible}
+          >
+            <Text style={styles.modalTitle}>{modalTitle}</Text>
+            <ScrollView>
+              {(modalTitle === "Requests" ? requests : requesting).map(
+                (user, index, array) => (
+                  <View key={user.id}>
+                    <TouchableOpacity
+                      onPress={() => navigateToProfile(user.id)}
+                    >
+                      <View style={styles.userContainer}>
+                        <Image
+                          source={{ uri: user.profile.image }}
+                          style={styles.userImage}
+                        />
+                        <Text style={styles.userName}>@{user.username}</Text>
+                        {modalTitle === "Requests" && (
+                          <View style={styles.actionButtons}>
+                            <TouchableOpacity
+                              style={styles.checkButton}
+                              onPress={() => acceptFollowRequest(user.id)}
+                            >
+                              <Text style={styles.buttonText}>✓</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={styles.crossButton}
+                              onPress={() => declineFollowRequest(user.id)}
+                            >
+                              <Text style={styles.buttonText}>✗</Text>
+                            </TouchableOpacity>
+                          </View>
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                    {index < array.length - 1 && (
+                      <View style={styles.separator} />
+                    )}
+                  </View>
+                )
+              )}
+            </ScrollView>
+          </RenderModal>
+
           {!loading && userProfile && userData && (
             <View style={styles.contentContainer}>
               <View style={styles.profileContainer}>
                 <ProfileCard
+                  userProfile={userProfile}
                   image={profilePic}
                   username={userData.username}
                   posts={posts.length}
@@ -153,14 +269,11 @@ const Profile = () => {
               ) : (
                 <PrivateProfileIndicator />
               )}
-              
             </View>
           )}
           {!loading && !userProfile && !userData && (
             <View style={styles.noDataContainer}>
-              <Text style={styles.noDataText}>
-                No user data available
-              </Text>
+              <Text style={styles.noDataText}>No user data available</Text>
             </View>
           )}
         </ScrollView>
@@ -179,14 +292,22 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
     paddingHorizontal: 16,
     marginTop: 20,
   },
-  backButton: {
+  button: {
+    marginRight: 10,
     padding: 10,
+    backgroundColor: "#007AFF",
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: "#FFF",
+    fontSize: 14,
+    fontWeight: "bold",
   },
   logoutButton: {
     padding: 10,
@@ -208,25 +329,76 @@ const styles = StyleSheet.create({
   },
   editButtonContainer: {
     marginTop: 16,
-    width: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
   },
   postsContainer: {
     marginTop: 10,
   },
   noDataContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   noDataText: {
-    color: 'black',
-    fontWeight: 'bold',
+    color: "black",
+    fontWeight: "bold",
     fontSize: 16,
   },
   flexGrow1: {
     flexGrow: 1,
+  },
+  modalTitle: {
+    fontSize: 24,
+    color: "black",
+    fontWeight: "bold",
+    marginBottom: 20,
+    marginLeft: 13,
+  },
+  userContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    borderRadius: 5,
+    borderColor: "#DCDCDC",
+    backgroundColor: "#F5F5F5",
+    borderRadius: 10,
+    marginVertical: 5,
+  },
+  userImage: {
+    borderWidth: 2,
+    borderColor: "#69C3FF",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  userName: {
+    color: "black",
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  separator: {
+    height: 1,
+    backgroundColor: "#DCDCDC",
+    marginVertical: 1,
+    marginHorizontal: 13,
+  },
+  actionButtons: {
+    flexDirection: "row",
+    marginLeft: "auto",
+  },
+  checkButton: {
+    marginRight: 5,
+    padding: 5,
+    backgroundColor: "#4CAF50",
+    borderRadius: 5,
+  },
+  crossButton: {
+    padding: 5,
+    backgroundColor: "#F44336",
+    borderRadius: 5,
   },
 });
 

@@ -107,7 +107,7 @@ const PostCard = ({
         </TouchableOpacity>
         <View>
           <Text
-            style={styles.username}
+            style={styles.userName}
             onPress={() => navigateToProfile(post.author.id)}
           >
             @{username}
@@ -159,13 +159,16 @@ const PostCard = ({
       <RenderModal modalVisible={modalVisible} setModalVisible={setModalVisible}>
         <Text style={styles.modalTitle}>{modalTitle}</Text>
         <ScrollView>
-          {(modalTitle === 'Liked By' ? likedBy : dislikedBy).map(user => (
+          {(modalTitle === 'Liked By' ? likedBy : dislikedBy).map((user, index, array) => (
+            <View key={user.id}>
             <TouchableOpacity key={user.id} onPress={() => navigateToProfile(user.id)}>
               <View style={styles.userContainer}>
                 <Image source={{ uri: user.profile.image }} style={styles.userImage} />
-                <Text style={styles.userName}>{user.username}</Text>
+                <Text style={styles.userName}>@{user.username}</Text>
               </View>
             </TouchableOpacity>
+            {index < array.length - 1 && <View style={styles.separator} />}
+            </View>
           ))}
         </ScrollView>
       </RenderModal>
@@ -200,11 +203,6 @@ const styles = StyleSheet.create({
   profilePicture: {
     width: '100%',
     height: '100%',
-  },
-  username: {
-    color: 'black',
-    fontWeight: 'bold',
-    fontSize: 18,
   },
   date: {
     color: '#aaa',
@@ -241,19 +239,22 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 24,
-    color: "#fff",
+    color: "black",
     fontWeight: "bold",
     marginBottom: 20,
+    marginLeft: 13,
   },
   userContainer: {
     flexDirection: "row",
     alignItems: "center",
     padding: 10,
-    backgroundColor: "#444",
+    backgroundColor: "#F5F5F5",
     borderRadius: 10,
     marginVertical: 5,
   },
   userImage: {
+    borderWidth: 2,
+    borderColor: "#69C3FF",
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -262,6 +263,13 @@ const styles = StyleSheet.create({
   userName: {
     color: "black",
     fontSize: 18,
+    fontWeight: 'bold',
+  },
+  separator: {
+    height: 1,
+    backgroundColor: "#DCDCDC",
+    marginVertical: 1,
+    marginHorizontal: 13,
   },
 });
 
