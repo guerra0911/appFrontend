@@ -41,13 +41,17 @@ const Profile = () => {
   const [profilePic, setProfilePic] = useState(null);
   const [requests, setRequests] = useState([]);
   const [requesting, setRequesting] = useState([]);
+  const [blockedBy, setBlockedBy] = useState([]);
+  const [blocking, setBlocking] = useState([]);
   const navigation = useNavigation();
   const [requestModalVisible, setRequestModalVisible] = useState(false);
+  const [blockModalVisible, setBlockModalVisible] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
 
   const navigateToProfile = (userId) => {
     setModalVisible(false);
     setRequestModalVisible(false);
+    setBlockModalVisible(false);
     navigation.navigate("otherProfile", { userId });
   };
 
@@ -62,6 +66,8 @@ const Profile = () => {
       setProfilePic(`${response.data.profile.image}?timestamp=${timestamp}`);
       fetchRequests();
       fetchRequesting();
+      fetchBlockedBy();
+      fetchBlocking();
     } catch (error) {
       console.error("Error fetching user profile:", error);
       Alert.alert("Error", "Failed to fetch user profile.");
@@ -98,6 +104,36 @@ const Profile = () => {
     setModalTitle("Requesting");
     fetchRequesting();
     setRequestModalVisible(true);
+  };
+
+  const fetchBlockedBy = async () => {
+    try {
+      const response = await api.get(`/api/user/me/blocked_by/`);
+      setBlockedBy(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchBlocking = async () => {
+    try {
+      const response = await api.get(`/api/user/me/blocking/`);
+      setBlocking(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const openBlockedByModal = () => {
+    setModalTitle("Blocked By");
+    fetchBlockedBy();
+    setBlockModalVisible(true);
+  };
+
+  const openBlockingModal = () => {
+    setModalTitle("Blocking");
+    fetchBlocking();
+    setBlockModalVisible(true);
   };
 
   const acceptFollowRequest = async (userId) => {
@@ -165,6 +201,16 @@ const Profile = () => {
         >
           <Loader isLoading={loading} />
           <View style={styles.headerRow}>
+          <TouchableOpacity
+              style={styles.button}
+              onPress={openBlockingModal}
+            >
+              <Text style={styles.buttonText}>Blocking</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={openBlockedByModal}>
+              <Text style={styles.buttonText}>Blocked By</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity
               style={styles.button}
               onPress={openRequestingModal}
@@ -174,6 +220,7 @@ const Profile = () => {
             <TouchableOpacity style={styles.button} onPress={openRequestsModal}>
               <Text style={styles.buttonText}>Requests</Text>
             </TouchableOpacity>
+
             <TouchableOpacity style={styles.logoutButton} onPress={logout}>
               <Image
                 source={icons.logout}
@@ -224,6 +271,35 @@ const Profile = () => {
                             </TouchableOpacity>
                           </View>
                         )}
+                      </View>
+                    </TouchableOpacity>
+                    {index < array.length - 1 && (
+                      <View style={styles.separator} />
+                    )}
+                  </View>
+                )
+              )}
+            </ScrollView>
+          </RenderModal>
+
+          <RenderModal
+            modalVisible={blockModalVisible}
+            setModalVisible={setBlockModalVisible}
+          >
+            <Text style={styles.modalTitle}>{modalTitle}</Text>
+            <ScrollView>
+              {(modalTitle === "Blocked By" ? blockedBy : blocking).map(
+                (user, index, array) => (
+                  <View key={user.id}>
+                    <TouchableOpacity
+                      onPress={() => navigateToProfile(user.id)}
+                    >
+                      <View style={styles.userContainer}>
+                        <Image
+                          source={{ uri: user.profile.image }}
+                          style={styles.userImage}
+                        />
+                        <Text style={styles.userName}>@{user.username}</Text>
                       </View>
                     </TouchableOpacity>
                     {index < array.length - 1 && (

@@ -9,6 +9,7 @@ import {
   Text,
   RefreshControl,
   StyleSheet,
+  Modal,
 } from "react-native";
 import {
   GestureHandlerRootView,
@@ -23,6 +24,7 @@ import { ProfileCard, PostList, Loader, CustomButton } from "../components";
 import EditProfileForm from "../components/EditProfileForm";
 import api from "../api";
 import RenderModal from "./(tabs)/renderModal";
+import { Ionicons } from "@expo/vector-icons";
 import PrivateProfileIndicator from "../components/PrivateProfileIndicator";
 
 const OtherProfile = () => {
@@ -39,6 +41,8 @@ const OtherProfile = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [profilePic, setProfilePic] = useState(null);
   const [followStatus, setFollowStatus] = useState(null);
+  const [blockStatus, setBlockStatus] = useState(null);
+  const [dropdownVisible, setDropdownVisible] = useState(false); // New state for dropdown visibility
 
   const fetchUserProfile = async (id) => {
     setLoading(true);
@@ -49,6 +53,7 @@ const OtherProfile = () => {
       setPosts(response.data.posts);
       const timestamp = new Date().getTime();
       setProfilePic(`${response.data.profile.image}?timestamp=${timestamp}`);
+      updateBlockStatus(response.data.profile);
       updateFollowStatus(response.data.profile);
     } catch (error) {
       console.error("Error fetching user profile:", error);
@@ -68,6 +73,19 @@ const OtherProfile = () => {
       setFollowStatus("Requested");
     } else {
       setFollowStatus("Follow");
+    }
+  };
+
+  const updateBlockStatus = (profile) => {
+    const blocking = profile.blocking || [];
+    const blocked_by = profile.blocked_by || [];
+
+    if (blocking.includes(user.username)) {
+      setBlockStatus("This User Has Blocked You");
+    } else if (blocked_by.includes(user.username)) {
+      setBlockStatus("You are Blocking this User");
+    } else {
+      setBlockStatus("No Block");
     }
   };
 
@@ -105,6 +123,28 @@ const OtherProfile = () => {
     }
   };
 
+  const handleBlock = async () => {
+    try {
+      const response = await api.post(`/api/user/block/${userId}/`);
+      setBlockStatus("You are Blocking this User");
+      fetchUserProfile(userId); // Refresh the profile
+    } catch (error) {
+      console.error("Error blocking user:", error);
+      Alert.alert("Error", "Failed to block user.");
+    }
+  };
+
+  const handleUnblock = async () => {
+    try {
+      const response = await api.post(`/api/user/unblock/${userId}/`);
+      setBlockStatus("No Block");
+      fetchUserProfile(userId); // Refresh the profile
+    } catch (error) {
+      console.error("Error unblocking user:", error);
+      Alert.alert("Error", "Failed to unblock user.");
+    }
+  };
+
   const fetchProfile = async () => {
     const id = userId || user?.id;
     if (id) {
@@ -137,6 +177,13 @@ const OtherProfile = () => {
             onPress={() => navigation.goBack()}
           >
             <FontAwesome name="arrow-left" size={24} color="#69C3FF" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuButton}
+            onPress={() => setDropdownVisible(true)}
+          >
+            <Ionicons name="ellipsis-vertical" size={24} color="#69C3FF" />
           </TouchableOpacity>
         </View>
 
@@ -178,31 +225,56 @@ const OtherProfile = () => {
                         containerStyles={styles.editButtonContainer}
                         isLoading={loading}
                       />
+                    ) : blockStatus === "This User Has Blocked You" ? (
+                      <View style={styles.blockMessageContainer}>
+                        <Text style={styles.blockMessageText}>
+                          This User has Blocked You
+                        </Text>
+                      </View>
+                    ) : blockStatus === "You are Blocking this User" ? (
+                      <View style={styles.blockMessageContainer}>
+                        <Text style={styles.blockMessageText}>
+                          You are Blocking this User
+                        </Text>
+                      </View>
                     ) : (
-                      <CustomButton
-                        title={followStatus}
-                        handlePress={() => {
-                          if (followStatus === "Follow") {
-                            handleFollow();
-                          } else if (followStatus === "Requested") {
-                            handleUnrequest();
-                          } else if (followStatus === "Following") {
-                            handleUnfollow();
-                          }
-                        }}
-                        containerStyles={styles.editButtonContainer}
-                        isLoading={loading}
-                      />
+                      <View>
+                        <CustomButton
+                          title={followStatus}
+                          handlePress={() => {
+                            if (followStatus === "Follow") {
+                              handleFollow();
+                            } else if (followStatus === "Requested") {
+                              handleUnrequest();
+                            } else if (followStatus === "Following") {
+                              handleUnfollow();
+                            }
+                          }}
+                          containerStyles={styles.editButtonContainer}
+                          isLoading={loading}
+                        />
+                      </View>
                     )
                   }
                   isPrivate={userProfile.privacy_flag}
                   isFollowing={followStatus === "Following"}
                   isOwnProfile={user?.id === userData.id}
+                  blockStatus={blockStatus}
                 />
               </View>
-              {!userProfile.privacy_flag || user?.id === userData.id ? (
+              {blockStatus === "No Block" &&
+                (!userProfile.privacy_flag || user?.id === userData.id) ? (
                 <View style={styles.postsContainer}>
                   <PostList userId={userData.id} />
+                </View>
+              ) : blockStatus === "This User Has Blocked You" ||
+                blockStatus === "You are Blocking this User" ? (
+                <View style={styles.blockMessageContainer}>
+                  <Text style={styles.blockMessageText}>
+                    {blockStatus === "This User Has Blocked You"
+                      ? "This User has Blocked You"
+                      : "You are Blocking this User"}
+                  </Text>
                 </View>
               ) : (
                 <PrivateProfileIndicator />
@@ -215,6 +287,43 @@ const OtherProfile = () => {
             </View>
           )}
         </ScrollView>
+
+        {/* Dropdown Menu */}
+        <Modal
+          transparent={true}
+          visible={dropdownVisible}
+          onRequestClose={() => setDropdownVisible(false)}
+        >
+          <TouchableOpacity
+            style={styles.modalOverlay}
+            activeOpacity={1}
+            onPressOut={() => setDropdownVisible(false)}
+          >
+            <View style={styles.modalContent}>
+              <TouchableOpacity
+                style={styles.dropdownItem}
+                onPress={() => {
+                  if (blockStatus === "No Block") {
+                    handleBlock();
+                  } else if (blockStatus === "You are Blocking this User") {
+                    handleUnblock();
+                  } else if (blockStatus === "This User Has Blocked You") {
+                    // Do Nothing
+                  }
+                  setDropdownVisible(false);
+                }}
+              >
+                <Text style={styles.dropdownItemText}>
+                  {blockStatus === "No Block"
+                    ? "Block User"
+                    : blockStatus === "You are Blocking this User"
+                      ? "Unblock User"
+                      : "Blocked"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </Modal>
       </View>
     </GestureHandlerRootView>
   );
@@ -237,6 +346,9 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   backButton: {
+    padding: 10,
+  },
+  menuButton: {
     padding: 10,
   },
   logoutButton: {
@@ -278,6 +390,36 @@ const styles = StyleSheet.create({
   },
   flexGrow1: {
     flexGrow: 1,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 20,
+    width: "80%",
+    alignItems: "center",
+  },
+  dropdownItem: {
+    paddingVertical: 10,
+  },
+  dropdownItemText: {
+    fontSize: 18,
+    color: "#69C3FF",
+  },
+  blockMessageContainer: {
+    marginTop: 16,
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  blockMessageText: {
+    fontSize: 16,
+    color: "red",
   },
 });
 

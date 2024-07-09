@@ -25,6 +25,7 @@ const ProfileCard = ({
   isPrivate,
   isFollowing,
   isOwnProfile,
+  blockStatus,
 }) => {
   const hasLinks = spotifyLink || imdbLink || websiteLink;
   const [modalVisible, setModalVisible] = useState(false);
@@ -116,7 +117,7 @@ const ProfileCard = ({
           <Text style={styles.statValue}>{posts}</Text>
           <Text style={styles.statLabel}>Posts</Text>
         </View>
-        {(isOwnProfile || isFollowing || !isPrivate) ? (
+        {(isOwnProfile || isFollowing || !isPrivate) && blockStatus === "No Block" ? (
           <TouchableOpacity onPress={openFollowedByModal}>
             <View style={styles.stat}>
               <Text style={styles.statValue}>{followers}</Text>
@@ -129,7 +130,7 @@ const ProfileCard = ({
             <Text style={styles.statLabel}>Followers</Text>
           </View>
         )}
-        {(isOwnProfile || isFollowing || !isPrivate) ? (
+        {(isOwnProfile || isFollowing || !isPrivate) && blockStatus === "No Block" ? (
           <TouchableOpacity onPress={openIsFollowingModal}>
             <View style={styles.stat}>
               <Text style={styles.statValue}>{following}</Text>
