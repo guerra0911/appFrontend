@@ -336,6 +336,8 @@ const Profile = () => {
                       />
                     )
                   }
+                  blockStatus={"No Block"}
+                  isOwnProfile={true}
                 />
               </View>
               {!userProfile.privacy_flag || user?.id === userData.id ? (

@@ -1,19 +1,48 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { ScrollView, View, Text, RefreshControl, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import PostCard from "./PostCard";
 import { useGlobalContext } from '../context/GlobalProvider';
 import { formatDistanceToNow } from 'date-fns';
 
-const PostList = ({ userId }) => {
-  const { posts, fetchPosts } = useGlobalContext();
+const PostList = ({ userId = null }) => {
+  const { posts, fetchPosts, fetchFollowingPosts } = useGlobalContext();
   const [refreshing, setRefreshing] = useState(false);
   const [sortBy, setSortBy] = useState('created_at');
   const [loading, setLoading] = useState(true);
+  const [view, setView] = useState('all'); // Add view state
+
+  useEffect(() => {
+    const loadPreferences = async () => {
+      try {
+        const storedView = await AsyncStorage.getItem('view');
+        const storedSortBy = await AsyncStorage.getItem('sortBy');
+        if (storedView) setView(storedView);
+        if (storedSortBy) setSortBy(storedSortBy);
+      } catch (error) {
+        console.error('Error loading preferences:', error);
+      }
+    };
+    loadPreferences();
+  }, []);
+
+  const savePreferences = async (view, sortBy) => {
+    try {
+      await AsyncStorage.setItem('view', view);
+      await AsyncStorage.setItem('sortBy', sortBy);
+    } catch (error) {
+      console.error('Error saving preferences:', error);
+    }
+  };
 
   const fetchData = async (sortOption) => {
     setLoading(true);
-    await fetchPosts(userId, sortOption);
+    if (view === 'all') {
+      await fetchPosts(userId, sortOption);
+    } else {
+      await fetchFollowingPosts(sortOption);
+    }
     setLoading(false);
     setRefreshing(false);
   };
@@ -21,19 +50,39 @@ const PostList = ({ userId }) => {
   useFocusEffect(
     useCallback(() => {
       fetchData(sortBy);
-    }, [sortBy, userId])
+    }, [sortBy, userId, view]) // Add view as a dependency
   );
 
   const handleSortChange = (newSortBy) => {
     setSortBy(newSortBy);
+    savePreferences(view, newSortBy);
   };
 
   const onLikeDislikeUpdate = () => {
     fetchData(sortBy);
   };
 
+  const handleViewChange = (newView) => {
+    setView(newView);
+    savePreferences(newView, sortBy);
+  };
+
   return (
     <>
+      <View style={styles.viewButtonsContainer}>
+        <TouchableOpacity
+          style={[styles.viewButton, view === 'all' && styles.activeViewButton]}
+          onPress={() => handleViewChange('all')}
+        >
+          <Text style={styles.viewButtonText}>All Posts</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.viewButton, view === 'following' && styles.activeViewButton]}
+          onPress={() => handleViewChange('following')}
+        >
+          <Text style={styles.viewButtonText}>Following</Text>
+        </TouchableOpacity>
+      </View>
       <View style={styles.sortButtonsContainer}>
         <TouchableOpacity
           style={[styles.sortButton, sortBy === 'created_at' && styles.activeSortButton]}
@@ -91,6 +140,25 @@ const PostList = ({ userId }) => {
 };
 
 const styles = StyleSheet.create({
+  viewButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginVertical: 10,
+    marginHorizontal: 16,
+  },
+  viewButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    backgroundColor: '#69C3FF',
+  },
+  activeViewButton: {
+    backgroundColor: '#007EFF',
+  },
+  viewButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
   sortButtonsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',

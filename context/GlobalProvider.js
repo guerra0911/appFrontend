@@ -49,6 +49,16 @@ const GlobalProvider = ({ children }) => {
     }
   };
 
+  const fetchFollowingPosts = async (sortBy = 'created_at') => {
+    try {
+      const response = await api.get(`/api/notes/following/?sort_by=${sortBy}`);
+      setPosts(response.data);
+    } catch (error) {
+      console.error('Error fetching following posts:', error);
+    }
+  };
+  
+
   useEffect(() => {
     checkCurrentUser();
   }, []);
@@ -66,6 +76,7 @@ const GlobalProvider = ({ children }) => {
         posts,
         setPosts,
         fetchPosts,
+        fetchFollowingPosts,
       }}
     >
       {children}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Image, Alert, Button, Switch, Text, ScrollView, Modal, TouchableOpacity } from "react-native";
+import { View, Image, Alert, Button, Switch, Text, ScrollView } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import api from "../api";
@@ -19,20 +19,34 @@ const isValidURL = (url) => {
 };
 
 const EditProfileForm = ({ setModalVisible }) => {
-  const [username, setUsername] = useState("");
-  const [bio, setBio] = useState("");
-  const [birthday, setBirthday] = useState(new Date());
-  const [formattedBirthday, setFormattedBirthday] = useState(birthday.toDateString());
-  const [spotifyUrl, setSpotifyUrl] = useState("");
-  const [imdbUrl, setImdbUrl] = useState("");
-  const [websiteUrl, setWebsiteUrl] = useState("");
-  const [email, setEmail] = useState("");
-  const [privacyFlag, setPrivacyFlag] = useState(false);
-  const [notificationFlag, setNotificationFlag] = useState(true);
-  const [uploading, setUploading] = useState(false);
-  const [image, setImage] = useState(null);
   const { user, setUser } = useGlobalContext();
+  const [username, setUsername] = useState(user.username || "");
+  const [bio, setBio] = useState(user.profile.bio || "");
+  const [birthday, setBirthday] = useState(new Date(user.profile.birthday) || new Date());
+  const [formattedBirthday, setFormattedBirthday] = useState(birthday.toDateString());
+  const [spotifyUrl, setSpotifyUrl] = useState(user.profile.spotify_url || "");
+  const [imdbUrl, setImdbUrl] = useState(user.profile.imdb_url || "");
+  const [websiteUrl, setWebsiteUrl] = useState(user.profile.website_url || "");
+  const [email, setEmail] = useState(user.profile.email || "");
+  const [privacyFlag, setPrivacyFlag] = useState(user.profile.privacy_flag);
+  const [notificationFlag, setNotificationFlag] = useState(user.profile.notification_flag);
+  const [image, setImage] = useState(user.profile.image || null);
+  const [uploading, setUploading] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+
+  // Initial state to compare later
+  const initialState = {
+    username: user.username,
+    bio: user.profile.bio,
+    birthday: user.profile.birthday,
+    spotify_url: user.profile.spotify_url,
+    imdb_url: user.profile.imdb_url,
+    website_url: user.profile.website_url,
+    email: user.profile.email,
+    privacy_flag: user.profile.privacy_flag,
+    notification_flag: user.profile.notification_flag,
+    image: user.profile.image,
+  };
 
   useEffect(() => {
     (async () => {
@@ -53,73 +67,71 @@ const EditProfileForm = ({ setModalVisible }) => {
       quality: 1,
     });
 
-    console.log("Image Picker Result: ", result);
-
     if (!result.canceled && result.assets && result.assets.length > 0) {
       const selectedImageUri = result.assets[0].uri;
       setImage(selectedImageUri);
-      console.log("Selected image URI: ", selectedImageUri);
     }
   };
 
   const handleSubmit = async () => {
     setUploading(true);
+    const formData = new FormData();
 
-    if (spotifyUrl && !isValidURL(spotifyUrl)) {
-      Alert.alert("Invalid Spotify URL.");
-      setUploading(false);
-      return;
+    // Check for changes and add only changed fields to formData
+    if (username.trim() && username !== initialState.username) {
+      formData.append("username", username);
     }
-
-    if (imdbUrl && !isValidURL(imdbUrl)) {
-      Alert.alert("Invalid IMDb URL.");
-      setUploading(false);
-      return;
+    if (bio.trim() && bio !== initialState.bio) {
+      formData.append("profile.bio", bio);
     }
-
-    if (websiteUrl && !isValidURL(websiteUrl)) {
-      Alert.alert("Invalid Website URL.");
-      setUploading(false);
-      return;
+    if (birthday && birthday.toISOString().split('T')[0] !== initialState.birthday) {
+      formData.append("profile.birthday", birthday.toISOString().split('T')[0]);
+    }
+    if (spotifyUrl.trim() && spotifyUrl !== initialState.spotify_url) {
+      if (!isValidURL(spotifyUrl)) {
+        Alert.alert("Invalid Spotify URL.");
+        setUploading(false);
+        return;
+      }
+      formData.append("profile.spotify_url", spotifyUrl);
+    }
+    if (imdbUrl.trim() && imdbUrl !== initialState.imdb_url) {
+      if (!isValidURL(imdbUrl)) {
+        Alert.alert("Invalid IMDb URL.");
+        setUploading(false);
+        return;
+      }
+      formData.append("profile.imdb_url", imdbUrl);
+    }
+    if (websiteUrl.trim() && websiteUrl !== initialState.website_url) {
+      if (!isValidURL(websiteUrl)) {
+        Alert.alert("Invalid Website URL.");
+        setUploading(false);
+        return;
+      }
+      formData.append("profile.website_url", websiteUrl);
+    }
+    if (email.trim() && email !== initialState.email) {
+      formData.append("profile.email", email);
+    }
+    if (privacyFlag !== initialState.privacy_flag) {
+      formData.append("profile.privacy_flag", privacyFlag);
+    }
+    if (notificationFlag !== initialState.notification_flag) {
+      formData.append("profile.notification_flag", notificationFlag);
+    }
+    if (image && image !== initialState.image) {
+      const userId = user.id;
+      const timestamp = new Date().getTime();
+      const uniqueImageName = `profile_${userId}.jpg`;
+      formData.append("profile.image", {
+        uri: image,
+        name: uniqueImageName,
+        type: "image/jpeg",
+      });
     }
 
     try {
-      const formData = new FormData();
-      if (username.trim()) {
-        formData.append("username", username);
-      }
-      if (bio.trim()) {
-        formData.append("profile.bio", bio);
-      }
-      if (birthday) {
-        formData.append("profile.birthday", birthday.toISOString().split('T')[0]);
-      }
-      if (spotifyUrl.trim()) {
-        formData.append("profile.spotify_url", spotifyUrl);
-      }
-      if (imdbUrl.trim()) {
-        formData.append("profile.imdb_url", imdbUrl);
-      }
-      if (websiteUrl.trim()) {
-        formData.append("profile.website_url", websiteUrl);
-      }
-      if (email.trim()) {
-        formData.append("profile.email", email);
-      }
-      formData.append("profile.privacy_flag", privacyFlag);
-      formData.append("profile.notification_flag", notificationFlag);
-      if (image) {
-        const userId = user.id;
-        const timestamp = new Date().getTime();
-        const uniqueImageName = `profile_${userId}.jpg`;
-        formData.append("profile.image", {
-          uri: image,
-          name: uniqueImageName,
-          type: "image/jpeg",
-        });
-        console.log("FormData: ", formData);
-      }
-
       const response = await api.put("/api/user/me/update/", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
