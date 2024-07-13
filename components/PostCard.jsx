@@ -37,6 +37,8 @@ const PostCard = ({ post, onLikeDislikeUpdate }) => {
     navigation.navigate("otherProfile", { userId });
   };
 
+  const images = [post.image1, post.image2, post.image3].filter(Boolean);
+
   return (
     <View style={styles.postCard}>
       <View style={styles.header}>
@@ -63,21 +65,19 @@ const PostCard = ({ post, onLikeDislikeUpdate }) => {
 
       <Text style={styles.content}>{post.content}</Text>
 
-      {post.images?.filter(Boolean).length > 0 && (
+      {images.length > 0 && (
         <ScrollView
           horizontal
           pagingEnabled
           style={styles.imageContainer}
         >
-          {post.images.filter(Boolean).map((image, index) => (
-            image && (
-              <Image
-                key={index}
-                source={{ uri: image }}
-                style={styles.image}
-                resizeMode="cover"
-              />
-            )
+          {images.map((image, index) => (
+            <Image
+              key={index}
+              source={{ uri: image }}
+              style={styles.image}
+              resizeMode="cover"
+            />
           ))}
         </ScrollView>
       )}

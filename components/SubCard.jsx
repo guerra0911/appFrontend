@@ -12,6 +12,9 @@ const SubCard = ({ sub, onLikeDislikeUpdate }) => {
   const originalPost = sub.original_note;
   const subPost = sub.sub_note;
 
+  const imagesOriginal = [originalPost.image1, originalPost.image2, originalPost.image3].filter(Boolean);
+  const imagesSub = [subPost.image1, subPost.image2, subPost.image3].filter(Boolean);
+
   const navigation = useNavigation();
   const originalPostActions = usePostActions(originalPost, onLikeDislikeUpdate);
   const subPostActions = usePostActions(subPost, onLikeDislikeUpdate);
@@ -54,21 +57,20 @@ const SubCard = ({ sub, onLikeDislikeUpdate }) => {
 
       <Text style={styles.content}>{subPost.content}</Text>
 
-      {subPost.images?.filter(Boolean).length > 0 && (
-        <ScrollView horizontal pagingEnabled style={styles.imageContainer}>
-          {subPost.images
-            .filter(Boolean)
-            .map(
-              (image, index) =>
-                image && (
-                  <Image
-                    key={index}
-                    source={{ uri: image }}
-                    style={styles.image}
-                    resizeMode="cover"
-                  />
-                )
-            )}
+      {imagesSub.length > 0 && (
+        <ScrollView
+          horizontal
+          pagingEnabled
+          style={styles.imageContainer}
+        >
+          {imagesSub.map((image, index) => (
+            <Image
+              key={index}
+              source={{ uri: image }}
+              style={styles.image}
+              resizeMode="cover"
+            />
+          ))}
         </ScrollView>
       )}
 
@@ -101,23 +103,22 @@ const SubCard = ({ sub, onLikeDislikeUpdate }) => {
 
         <Text style={styles.content}>{originalPost.content}</Text>
 
-        {originalPost.images?.filter(Boolean).length > 0 && (
-          <ScrollView horizontal pagingEnabled style={styles.imageContainer}>
-            {originalPost.images
-              .filter(Boolean)
-              .map(
-                (image, index) =>
-                  image && (
-                    <Image
-                      key={index}
-                      source={{ uri: image }}
-                      style={styles.image}
-                      resizeMode="cover"
-                    />
-                  )
-              )}
-          </ScrollView>
-        )}
+        {imagesOriginal.length > 0 && (
+        <ScrollView
+          horizontal
+          pagingEnabled
+          style={styles.imageContainer}
+        >
+          {imagesOriginal.map((image, index) => (
+            <Image
+              key={index}
+              source={{ uri: image }}
+              style={styles.image}
+              resizeMode="cover"
+            />
+          ))}
+        </ScrollView>
+      )}
       </View>
 
       <View style={styles.actions}>
