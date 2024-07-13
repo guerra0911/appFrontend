@@ -1,100 +1,40 @@
-import React, { useState } from "react";
+import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import api from '../api';
-import { useGlobalContext } from '../context/GlobalProvider';
 import RenderModal from "../app/(tabs)/renderModal";
 import CreateChallengeForm from "./CreateChallengeForm";
 import CreateSubForm from "./CreateSubForm"; 
 import { formatDistanceToNow } from "date-fns";
+import usePostActions from '../hooks/usePostActions';
 
 const PostCard = ({ post, onLikeDislikeUpdate }) => {
   const navigation = useNavigation();
-  const { user, posts, setPosts } = useGlobalContext(); // Accessing the current user and posts
-  const [likeCount, setLikeCount] = useState(post.likes.length);
-  const [dislikeCount, setDislikeCount] = useState(post.dislikes.length);
-  const [likedBy, setLikedBy] = useState([]);
-  const [dislikedBy, setDislikedBy] = useState([]);
-  const [likeDislikeModalVisible, setLikeDislikeModalVisible] = useState(false);
-  const [formModalVisible, setFormModalVisible] = useState(false);
-  const [likeDislikeModalTitle, setLikeDislikeModalTitle] = useState('');
-  const [formType, setFormType] = useState(null); // New state to handle form type (challenge or sub)
+  const {
+    user,
+    likeCount,
+    dislikeCount,
+    likedBy,
+    dislikedBy,
+    likeDislikeModalVisible,
+    setLikeDislikeModalVisible,
+    formModalVisible,
+    setFormModalVisible,
+    likeDislikeModalTitle,
+    formType,
+    setFormType,
+    handleLike,
+    handleDislike,
+    openLikedByModal,
+    openDislikedByModal,
+    openChallengeForm,
+    openSubForm,
+  } = usePostActions(post, onLikeDislikeUpdate);
 
   const navigateToProfile = (userId) => {
     setLikeDislikeModalVisible(false);
     setFormModalVisible(false);
     navigation.navigate("otherProfile", { userId });
-  };
-
-  const updatePostLikesDislikes = (updatedPost) => {
-    setPosts((prevPosts) => 
-      prevPosts.map((p) => (p.id === updatedPost.id ? updatedPost : p))
-    );
-  };
-
-  const handleLike = async () => {
-    try {
-      const response = await api.post(`/api/notes/${post.id}/like/`);
-      setLikeCount(response.data.likes);
-      setDislikeCount(response.data.dislikes);
-      updatePostLikesDislikes(response.data); // Update global state
-      onLikeDislikeUpdate(); // Trigger a refresh of the posts
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleDislike = async () => {
-    try {
-      const response = await api.post(`/api/notes/${post.id}/dislike/`);
-      setLikeCount(response.data.likes);
-      setDislikeCount(response.data.dislikes);
-      updatePostLikesDislikes(response.data); // Update global state
-      onLikeDislikeUpdate(); // Trigger a refresh of the posts
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const fetchLikedBy = async () => {
-    try {
-      const response = await api.get(`/api/notes/${post.id}/liked_by/`);
-      setLikedBy(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const fetchDislikedBy = async () => {
-    try {
-      const response = await api.get(`/api/notes/${post.id}/disliked_by/`);
-      setDislikedBy(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const openLikedByModal = () => {
-    setLikeDislikeModalTitle('Liked By');
-    fetchLikedBy();
-    setLikeDislikeModalVisible(true);
-  };
-
-  const openDislikedByModal = () => {
-    setLikeDislikeModalTitle('Disliked By');
-    fetchDislikedBy();
-    setLikeDislikeModalVisible(true);
-  };
-
-  const openChallengeForm = () => {
-    setFormType('challenge');
-    setFormModalVisible(true);
-  };
-
-  const openSubForm = () => {
-    setFormType('sub');
-    setFormModalVisible(true);
   };
 
   return (

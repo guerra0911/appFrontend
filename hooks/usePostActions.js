@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from 'react';
 import api from '../api';
-import { useGlobalContext } from '../context/GlobalProvider'; 
+import { useGlobalContext } from '../context/GlobalProvider';
 
-export const usePostActions = (post, onLikeDislikeUpdate) => {
+const usePostActions = (post, onLikeDislikeUpdate) => {
   const { user, posts, setPosts } = useGlobalContext();
   const [likeCount, setLikeCount] = useState(post.likes.length);
   const [dislikeCount, setDislikeCount] = useState(post.dislikes.length);
@@ -24,8 +24,8 @@ export const usePostActions = (post, onLikeDislikeUpdate) => {
       const response = await api.post(`/api/notes/${post.id}/like/`);
       setLikeCount(response.data.likes);
       setDislikeCount(response.data.dislikes);
-      updatePostLikesDislikes(response.data); // Update global state
-      onLikeDislikeUpdate(); // Trigger a refresh of the posts
+      updatePostLikesDislikes(response.data);
+      onLikeDislikeUpdate();
     } catch (error) {
       console.error(error);
     }
@@ -36,8 +36,8 @@ export const usePostActions = (post, onLikeDislikeUpdate) => {
       const response = await api.post(`/api/notes/${post.id}/dislike/`);
       setLikeCount(response.data.likes);
       setDislikeCount(response.data.dislikes);
-      updatePostLikesDislikes(response.data); // Update global state
-      onLikeDislikeUpdate(); // Trigger a refresh of the posts
+      updatePostLikesDislikes(response.data);
+      onLikeDislikeUpdate();
     } catch (error) {
       console.error(error);
     }
@@ -84,21 +84,25 @@ export const usePostActions = (post, onLikeDislikeUpdate) => {
   };
 
   return {
+    user,
     likeCount,
     dislikeCount,
     likedBy,
     dislikedBy,
     likeDislikeModalVisible,
+    setLikeDislikeModalVisible,
     formModalVisible,
+    setFormModalVisible,
     likeDislikeModalTitle,
     formType,
+    setFormType,
     handleLike,
     handleDislike,
     openLikedByModal,
     openDislikedByModal,
     openChallengeForm,
     openSubForm,
-    setLikeDislikeModalVisible,
-    setFormModalVisible,
   };
 };
+
+export default usePostActions;
