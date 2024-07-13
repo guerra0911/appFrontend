@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import PostCard from "./PostCard";
 
-const ChallengeCard = ({ challenge }) => {
+const ChallengeCard = ({ challenge, onLikeDislikeUpdate }) => {
   const originalNote = challenge.original_note;
   const challengerNote = challenge.challenger_note;
 
@@ -20,6 +20,7 @@ const ChallengeCard = ({ challenge }) => {
             comments={originalNote.comments}
             post={originalNote}
             images={[originalNote.image1, originalNote.image2, originalNote.image3]}
+            onLikeDislikeUpdate={onLikeDislikeUpdate}
           />
         )}
       </View>
@@ -36,6 +37,7 @@ const ChallengeCard = ({ challenge }) => {
             comments={challengerNote.comments}
             post={challengerNote}
             images={[challengerNote.image1, challengerNote.image2, challengerNote.image3]}
+            onLikeDislikeUpdate={onLikeDislikeUpdate}
           />
         )}
       </View>

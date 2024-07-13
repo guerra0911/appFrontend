@@ -1,5 +1,3 @@
-// PostCard.jsx
-
 import React, { useState } from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
@@ -19,22 +17,23 @@ const PostCard = ({
   dislikes = [],
   comments = [],
   post,
-  images = [], // Receive images here 
+  images = [],
   onLikeDislikeUpdate,
 }) => {
-  console.log('PostCard props:', { profilePicture, username, date, content, likes, dislikes, comments, post, images });
   const navigation = useNavigation();
   const { user, posts, setPosts } = useGlobalContext(); // Accessing the current user and posts
   const [likeCount, setLikeCount] = useState(likes.length);
   const [dislikeCount, setDislikeCount] = useState(dislikes.length);
   const [likedBy, setLikedBy] = useState([]);
   const [dislikedBy, setDislikedBy] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalTitle, setModalTitle] = useState('');
+  const [likeDislikeModalVisible, setLikeDislikeModalVisible] = useState(false);
+  const [formModalVisible, setFormModalVisible] = useState(false);
+  const [likeDislikeModalTitle, setLikeDislikeModalTitle] = useState('');
   const [formType, setFormType] = useState(null); // New state to handle form type (challenge or sub)
 
   const navigateToProfile = (userId) => {
-    setModalVisible(false);
+    setLikeDislikeModalVisible(false);
+    setFormModalVisible(false);
     navigation.navigate("otherProfile", { userId });
   };
 
@@ -87,25 +86,25 @@ const PostCard = ({
   };
 
   const openLikedByModal = () => {
-    setModalTitle('Liked By');
+    setLikeDislikeModalTitle('Liked By');
     fetchLikedBy();
-    setModalVisible(true);
+    setLikeDislikeModalVisible(true);
   };
 
   const openDislikedByModal = () => {
-    setModalTitle('Disliked By');
+    setLikeDislikeModalTitle('Disliked By');
     fetchDislikedBy();
-    setModalVisible(true);
+    setLikeDislikeModalVisible(true);
   };
 
   const openChallengeForm = () => {
     setFormType('challenge');
-    setModalVisible(true);
+    setFormModalVisible(true);
   };
 
   const openSubForm = () => {
     setFormType('sub');
-    setModalVisible(true);
+    setFormModalVisible(true);
   };
 
   return (
@@ -184,11 +183,28 @@ const PostCard = ({
         )}
       </View>
 
-      <RenderModal modalVisible={modalVisible} setModalVisible={setModalVisible}>
+      <RenderModal modalVisible={likeDislikeModalVisible} setModalVisible={setLikeDislikeModalVisible}>
+        <Text style={styles.modalTitle}>{likeDislikeModalTitle}</Text>
+        <ScrollView>
+          {(likeDislikeModalTitle === 'Liked By' ? likedBy : dislikedBy).map((user, index, array) => (
+            <View key={user.id}>
+            <TouchableOpacity key={user.id} onPress={() => navigateToProfile(user.id)}>
+              <View style={styles.userContainer}>
+                <Image source={{ uri: user.profile.image }} style={styles.userImage} />
+                <Text style={styles.userName}>@{user.username}</Text>
+              </View>
+            </TouchableOpacity>
+            {index < array.length - 1 && <View style={styles.separator} />}
+            </View>
+          ))}
+        </ScrollView>
+      </RenderModal>
+
+      <RenderModal modalVisible={formModalVisible} setModalVisible={setFormModalVisible}>
         {formType === 'challenge' ? (
-          <CreateChallengeForm setModalVisible={setModalVisible} originalNoteId={post.id} />
+          <CreateChallengeForm setModalVisible={formModalVisible} originalNoteId={post.id} />
         ) : (
-          <CreateSubForm setModalVisible={setModalVisible} originalNoteId={post.id} />
+          <CreateSubForm setModalVisible={formModalVisible} originalNoteId={post.id} />
         )}
       </RenderModal>
     </View>

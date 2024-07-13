@@ -2,7 +2,7 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import PostCard from "./PostCard";
 
-const SubCard = ({ sub }) => {
+const SubCard = ({ sub, onLikeDislikeUpdate }) => {
   return (
     <View style={styles.subCard}>
       <PostCard
@@ -15,6 +15,7 @@ const SubCard = ({ sub }) => {
         comments={sub.sub_note.comments}
         post={sub.sub_note}
         images={[sub.sub_note.image1, sub.sub_note.image2, sub.sub_note.image3]}
+        onLikeDislikeUpdate={onLikeDislikeUpdate}
       />
       <View style={styles.originalPostContainer}>
         <PostCard
@@ -27,6 +28,7 @@ const SubCard = ({ sub }) => {
           comments={sub.original_note.comments}
           post={sub.original_note}
           images={[sub.original_note.image1, sub.original_note.image2, sub.original_note.image3]}
+          onLikeDislikeUpdate={onLikeDislikeUpdate}
         />
       </View>
     </View>

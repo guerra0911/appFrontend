@@ -88,16 +88,16 @@ const PostList = ({ userId = null }) => {
     
   
     if (post.challenger_note) {
-      // console.log('Rendering ChallengeCard for post:', post.id);
-      // console.log('Rendering post:', post);
-      return <ChallengeCard key={`challenge-${post.id}`} challenge={post} />;
+      console.log('Rendering ChallengeCard for post:', post.id);
+      console.log('Rendering post:', post);
+      return <ChallengeCard key={`challenge-${post.id}`} challenge={post} onLikeDislikeUpdate={onLikeDislikeUpdate}/>;
     } else if (post.sub_note) {
-      // console.log('Rendering SubCard for post:', post.id);
-      // console.log('Rendering post:', post);
-      return <SubCard key={`sub-${post.id}`} sub={post} />;
+      console.log('Rendering SubCard for post:', post.id);
+      console.log('Rendering post:', post);
+      return <SubCard key={`sub-${post.id}`} sub={post} onLikeDislikeUpdate={onLikeDislikeUpdate}/>;
     } else {
-      // console.log('Rendering PostCard for post:', post.id);
-      // console.log('Rendering post:', post); 
+      console.log('Rendering PostCard for post:', post.id);
+      console.log('Rendering post:', post); 
       return (
         <PostCard
           key={`post-${post.id}`}
