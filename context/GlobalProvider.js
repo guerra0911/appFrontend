@@ -57,6 +57,33 @@ const GlobalProvider = ({ children }) => {
       console.error('Error fetching following posts:', error);
     }
   };
+
+  const fetchAllCombinedPosts = async (sortBy = 'created_at') => {
+    try {
+      const response = await api.get(`/api/notes/all/combined/?sort_by=${sortBy}`);
+      setPosts(response.data);
+    } catch (error) {
+      console.error('Error fetching all combined posts:', error);
+    }
+  };
+
+  const fetchUserCombinedPosts = async (userId, sortBy = 'created_at') => {
+    try {
+      const response = await api.get(`/api/notes/user/${userId}/combined/?sort_by=${sortBy}`);
+      setPosts(response.data);
+    } catch (error) {
+      console.error('Error fetching user combined posts:', error);
+    }
+  };
+
+  const fetchFollowingCombinedPosts = async (sortBy = 'created_at') => {
+    try {
+      const response = await api.get(`/api/notes/following/combined/?sort_by=${sortBy}`);
+      setPosts(response.data);
+    } catch (error) {
+      console.error('Error fetching following combined posts:', error);
+    }
+  };
   
 
   useEffect(() => {
@@ -77,6 +104,9 @@ const GlobalProvider = ({ children }) => {
         setPosts,
         fetchPosts,
         fetchFollowingPosts,
+        fetchAllCombinedPosts,
+        fetchUserCombinedPosts,
+        fetchFollowingCombinedPosts,
       }}
     >
       {children}

@@ -263,7 +263,9 @@ const OtherProfile = () => {
                 />
               </View>
               {blockStatus === "No Block" &&
-                (!userProfile.privacy_flag || user?.id === userData.id) ? (
+                (!userProfile.privacy_flag ||
+                  followStatus === "Following" ||
+                  user?.id === userData.id) ? (
                 <View style={styles.postsContainer}>
                   <PostList userId={userData.id} />
                 </View>

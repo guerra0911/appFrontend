@@ -89,7 +89,8 @@ const Home = () => {
                             </View>
                             <ScrollView contentContainerStyle={styles.scrollViewContent}>
                                 <View>
-                                    <PostList userId={null} />
+                                    {/* Pass in Null to Fetch ALL posts in GlobalProvider */}
+                                    <PostList userId={null} />      
                                 </View>
                             </ScrollView>
                         </>

@@ -1,3 +1,5 @@
+// PostCard.jsx
+
 import React, { useState } from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
@@ -5,19 +7,22 @@ import { useNavigation } from "@react-navigation/native";
 import api from '../api'; // Ensure the correct path to your api.js
 import { useGlobalContext } from '../context/GlobalProvider'; // Ensure the correct path to your GlobalProvider.js
 import RenderModal from "../app/(tabs)/renderModal";
+import CreateChallengeForm from "./CreateChallengeForm"; // Ensure the correct path to your CreateChallengeForm.jsx
+import CreateSubForm from "./CreateSubForm"; // Ensure the correct path to your CreateSubForm.jsx
 
 const PostCard = ({
   profilePicture,
   username,
   date,
   content,
-  likes,
-  dislikes,
-  comments,
+  likes = [],
+  dislikes = [],
+  comments = [],
   post,
-  images, // Receive images here
+  images = [], // Receive images here 
   onLikeDislikeUpdate,
 }) => {
+  console.log('PostCard props:', { profilePicture, username, date, content, likes, dislikes, comments, post, images });
   const navigation = useNavigation();
   const { user, posts, setPosts } = useGlobalContext(); // Accessing the current user and posts
   const [likeCount, setLikeCount] = useState(likes.length);
@@ -26,6 +31,7 @@ const PostCard = ({
   const [dislikedBy, setDislikedBy] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalTitle, setModalTitle] = useState('');
+  const [formType, setFormType] = useState(null); // New state to handle form type (challenge or sub)
 
   const navigateToProfile = (userId) => {
     setModalVisible(false);
@@ -92,11 +98,21 @@ const PostCard = ({
     setModalVisible(true);
   };
 
+  const openChallengeForm = () => {
+    setFormType('challenge');
+    setModalVisible(true);
+  };
+
+  const openSubForm = () => {
+    setFormType('sub');
+    setModalVisible(true);
+  };
+
   return (
     <View style={styles.postCard}>
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => navigateToProfile(post.author.id)}
+          onPress={() => navigateToProfile(post?.author?.id)}
           style={styles.profilePictureContainer}
         >
           <Image
@@ -108,7 +124,7 @@ const PostCard = ({
         <View>
           <Text
             style={styles.userName}
-            onPress={() => navigateToProfile(post.author.id)}
+            onPress={() => navigateToProfile(post?.author?.id)}
           >
             @{username}
           </Text>
@@ -154,23 +170,26 @@ const PostCard = ({
           <FontAwesome name="comment" size={18} color="black" />
           <Text style={styles.actionText}>{comments.length}</Text>
         </TouchableOpacity>
+        {post.author.id !== user.id && (
+          <>
+            <TouchableOpacity style={styles.actionButton} onPress={openChallengeForm}>
+              <FontAwesome name="exchange" size={18} color="black" />
+              <Text style={styles.actionText}>Challenge</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionButton} onPress={openSubForm}>
+              <FontAwesome name="subscript" size={18} color="black" />
+              <Text style={styles.actionText}>Sub</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
 
       <RenderModal modalVisible={modalVisible} setModalVisible={setModalVisible}>
-        <Text style={styles.modalTitle}>{modalTitle}</Text>
-        <ScrollView>
-          {(modalTitle === 'Liked By' ? likedBy : dislikedBy).map((user, index, array) => (
-            <View key={user.id}>
-            <TouchableOpacity key={user.id} onPress={() => navigateToProfile(user.id)}>
-              <View style={styles.userContainer}>
-                <Image source={{ uri: user.profile.image }} style={styles.userImage} />
-                <Text style={styles.userName}>@{user.username}</Text>
-              </View>
-            </TouchableOpacity>
-            {index < array.length - 1 && <View style={styles.separator} />}
-            </View>
-          ))}
-        </ScrollView>
+        {formType === 'challenge' ? (
+          <CreateChallengeForm setModalVisible={setModalVisible} originalNoteId={post.id} />
+        ) : (
+          <CreateSubForm setModalVisible={setModalVisible} originalNoteId={post.id} />
+        )}
       </RenderModal>
     </View>
   );
