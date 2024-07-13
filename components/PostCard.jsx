@@ -2,28 +2,18 @@ import React, { useState } from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import api from '../api'; // Ensure the correct path to your api.js
-import { useGlobalContext } from '../context/GlobalProvider'; // Ensure the correct path to your GlobalProvider.js
+import api from '../api';
+import { useGlobalContext } from '../context/GlobalProvider';
 import RenderModal from "../app/(tabs)/renderModal";
-import CreateChallengeForm from "./CreateChallengeForm"; // Ensure the correct path to your CreateChallengeForm.jsx
-import CreateSubForm from "./CreateSubForm"; // Ensure the correct path to your CreateSubForm.jsx
+import CreateChallengeForm from "./CreateChallengeForm";
+import CreateSubForm from "./CreateSubForm"; 
+import { formatDistanceToNow } from "date-fns";
 
-const PostCard = ({
-  profilePicture,
-  username,
-  date,
-  content,
-  likes = [],
-  dislikes = [],
-  comments = [],
-  post,
-  images = [],
-  onLikeDislikeUpdate,
-}) => {
+const PostCard = ({ post, onLikeDislikeUpdate }) => {
   const navigation = useNavigation();
   const { user, posts, setPosts } = useGlobalContext(); // Accessing the current user and posts
-  const [likeCount, setLikeCount] = useState(likes.length);
-  const [dislikeCount, setDislikeCount] = useState(dislikes.length);
+  const [likeCount, setLikeCount] = useState(post.likes.length);
+  const [dislikeCount, setDislikeCount] = useState(post.dislikes.length);
   const [likedBy, setLikedBy] = useState([]);
   const [dislikedBy, setDislikedBy] = useState([]);
   const [likeDislikeModalVisible, setLikeDislikeModalVisible] = useState(false);
@@ -115,7 +105,7 @@ const PostCard = ({
           style={styles.profilePictureContainer}
         >
           <Image
-            source={{ uri: profilePicture }}
+            source={{ uri: post.author?.profile?.image }}
             style={styles.profilePicture}
             resizeMode="cover"
           />
@@ -125,21 +115,21 @@ const PostCard = ({
             style={styles.userName}
             onPress={() => navigateToProfile(post?.author?.id)}
           >
-            @{username}
+            @{post.author?.username}
           </Text>
-          <Text style={styles.date}>{date}</Text>
+          <Text style={styles.date}>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</Text>
         </View>
       </View>
 
-      <Text style={styles.content}>{content}</Text>
+      <Text style={styles.content}>{post.content}</Text>
 
-      {images.filter(Boolean).length > 0 && (
+      {post.images?.filter(Boolean).length > 0 && (
         <ScrollView
           horizontal
           pagingEnabled
           style={styles.imageContainer}
         >
-          {images.map((image, index) => (
+          {post.images.filter(Boolean).map((image, index) => (
             image && (
               <Image
                 key={index}
@@ -167,7 +157,7 @@ const PostCard = ({
         </TouchableOpacity>
         <TouchableOpacity style={styles.actionButton}>
           <FontAwesome name="comment" size={18} color="black" />
-          <Text style={styles.actionText}>{comments.length}</Text>
+          <Text style={styles.actionText}>{post.comments.length}</Text>
         </TouchableOpacity>
         {post.author.id !== user.id && (
           <>

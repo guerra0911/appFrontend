@@ -14,7 +14,6 @@ import PostCard from "./PostCard";
 import ChallengeCard from "./ChallengeCard";
 import SubCard from "./SubCard";
 import { useGlobalContext } from "../context/GlobalProvider";
-import { formatDistanceToNow } from "date-fns";
 
 const PostList = ({ userId = null }) => {
   const {
@@ -85,37 +84,26 @@ const PostList = ({ userId = null }) => {
   };
 
   const renderPost = (post) => {
-    
-  
     if (post.challenger_note) {
       console.log('Rendering ChallengeCard for post:', post.id);
       console.log('Rendering post:', post);
-      return <ChallengeCard key={`challenge-${post.id}`} challenge={post} onLikeDislikeUpdate={onLikeDislikeUpdate}/>;
+      return <ChallengeCard key={`challenge-${post.id}`} challenge={post} onLikeDislikeUpdate={onLikeDislikeUpdate} />;
     } else if (post.sub_note) {
       console.log('Rendering SubCard for post:', post.id);
       console.log('Rendering post:', post);
-      return <SubCard key={`sub-${post.id}`} sub={post} onLikeDislikeUpdate={onLikeDislikeUpdate}/>;
+      return <SubCard key={`sub-${post.id}`} sub={post} onLikeDislikeUpdate={onLikeDislikeUpdate} />;
     } else {
       console.log('Rendering PostCard for post:', post.id);
-      console.log('Rendering post:', post); 
+      console.log('Rendering post:', post);
       return (
         <PostCard
           key={`post-${post.id}`}
-          profilePicture={post.author?.profile?.image}
-          username={post.author?.username}
-          date={formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
-          content={post.content}
-          likes={post.likes}
-          dislikes={post.dislikes}
-          comments={post.comments}
           post={post}
-          images={[post.image1, post.image2, post.image3]}
           onLikeDislikeUpdate={onLikeDislikeUpdate}
         />
       );
     }
   };
-  
 
   return (
     <>
