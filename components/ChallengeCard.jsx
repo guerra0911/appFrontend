@@ -299,7 +299,7 @@ const ChallengeCard = ({ challenge, onLikeDislikeUpdate }) => {
 const styles = StyleSheet.create({
   challengeCard: {
     width: '100%',
-    padding: 16,
+    padding: 0,  // Remove padding
     marginBottom: 16,
     flexDirection: 'row',
     alignItems: 'center',
@@ -311,22 +311,21 @@ const styles = StyleSheet.create({
     borderColor: "#DCDCDC",
     borderRadius: 10,
     borderWidth: 1,
-    padding: 16,
+    padding: 16,  // Add padding here
     marginBottom: 16,
   },
   header: {
-    flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
   },
   profilePictureContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 64,  // Increased size
+    height: 64,  // Increased size
+    borderRadius: 32,  // Updated to maintain circular shape
     overflow: 'hidden',
     borderWidth: 2,
     borderColor: '#69C3FF',
-    marginRight: 16,
+    marginBottom: 8,
   },
   profilePicture: {
     width: '100%',
@@ -339,10 +338,12 @@ const styles = StyleSheet.create({
     color: "black",
     fontSize: 18,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   date: {
     color: '#aaa',
     fontSize: 14,
+    textAlign: 'center',
   },
   content: {
     color: 'black',

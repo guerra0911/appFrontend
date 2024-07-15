@@ -1,12 +1,19 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import React from "react";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import RenderModal from "../app/(tabs)/renderModal";
 import CreateChallengeForm from "./CreateChallengeForm";
-import CreateSubForm from "./CreateSubForm"; 
+import CreateSubForm from "./CreateSubForm";
 import { formatDistanceToNow } from "date-fns";
-import usePostActions from '../hooks/usePostActions';
+import usePostActions from "../hooks/usePostActions";
 
 const PostCard = ({ post, onLikeDislikeUpdate }) => {
   const navigation = useNavigation();
@@ -59,18 +66,18 @@ const PostCard = ({ post, onLikeDislikeUpdate }) => {
           >
             @{post.author?.username}
           </Text>
-          <Text style={styles.date}>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</Text>
+          <Text style={styles.date}>
+            {formatDistanceToNow(new Date(post.created_at), {
+              addSuffix: true,
+            })}
+          </Text>
         </View>
       </View>
 
       <Text style={styles.content}>{post.content}</Text>
 
       {images.length > 0 && (
-        <ScrollView
-          horizontal
-          pagingEnabled
-          style={styles.imageContainer}
-        >
+        <ScrollView horizontal pagingEnabled style={styles.imageContainer}>
           {images.map((image, index) => (
             <Image
               key={index}
@@ -101,7 +108,10 @@ const PostCard = ({ post, onLikeDislikeUpdate }) => {
         </TouchableOpacity>
         {post.author.id !== user.id && (
           <>
-            <TouchableOpacity style={styles.actionButton} onPress={openChallengeForm}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={openChallengeForm}
+            >
               <FontAwesome name="exchange" size={18} color="black" />
               <Text style={styles.actionText}>Challenge</Text>
             </TouchableOpacity>
@@ -113,28 +123,48 @@ const PostCard = ({ post, onLikeDislikeUpdate }) => {
         )}
       </View>
 
-      <RenderModal modalVisible={likeDislikeModalVisible} setModalVisible={setLikeDislikeModalVisible}>
+      <RenderModal
+        modalVisible={likeDislikeModalVisible}
+        setModalVisible={setLikeDislikeModalVisible}
+      >
         <Text style={styles.modalTitle}>{likeDislikeModalTitle}</Text>
         <ScrollView>
-          {(likeDislikeModalTitle === 'Liked By' ? likedBy : dislikedBy).map((user, index, array) => (
-            <View key={user.id}>
-            <TouchableOpacity key={user.id} onPress={() => navigateToProfile(user.id)}>
-              <View style={styles.userContainer}>
-                <Image source={{ uri: user.profile.image }} style={styles.userImage} />
-                <Text style={styles.userName}>@{user.username}</Text>
+          {(likeDislikeModalTitle === "Liked By" ? likedBy : dislikedBy).map(
+            (user, index, array) => (
+              <View key={user.id}>
+                <TouchableOpacity
+                  key={user.id}
+                  onPress={() => navigateToProfile(user.id)}
+                >
+                  <View style={styles.userContainer}>
+                    <Image
+                      source={{ uri: user.profile.image }}
+                      style={styles.userImage}
+                    />
+                    <Text style={styles.userName}>@{user.username}</Text>
+                  </View>
+                </TouchableOpacity>
+                {index < array.length - 1 && <View style={styles.separator} />}
               </View>
-            </TouchableOpacity>
-            {index < array.length - 1 && <View style={styles.separator} />}
-            </View>
-          ))}
+            )
+          )}
         </ScrollView>
       </RenderModal>
 
-      <RenderModal modalVisible={formModalVisible} setModalVisible={setFormModalVisible}>
-        {formType === 'challenge' ? (
-          <CreateChallengeForm setModalVisible={formModalVisible} originalNoteId={post.id} />
+      <RenderModal
+        modalVisible={formModalVisible}
+        setModalVisible={setFormModalVisible}
+      >
+        {formType === "challenge" ? (
+          <CreateChallengeForm
+            setModalVisible={setFormModalVisible}
+            originalNoteId={post.id}
+          />
         ) : (
-          <CreateSubForm setModalVisible={formModalVisible} originalNoteId={post.id} />
+          <CreateSubForm
+            setModalVisible={setFormModalVisible}
+            originalNoteId={post.id}
+          />
         )}
       </RenderModal>
     </View>
@@ -143,8 +173,8 @@ const PostCard = ({ post, onLikeDislikeUpdate }) => {
 
 const styles = StyleSheet.create({
   postCard: {
-    width: '100%',
-    backgroundColor: '#F5F5F5',
+    width: "100%",
+    backgroundColor: "#F5F5F5",
     borderColor: "#DCDCDC",
     borderRadius: 10,
     borderWidth: 1,
@@ -152,53 +182,53 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 16,
   },
   profilePictureContainer: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    overflow: 'hidden',
+    overflow: "hidden",
     borderWidth: 2,
-    borderColor: '#69C3FF',
+    borderColor: "#69C3FF",
     marginRight: 16,
   },
   profilePicture: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   date: {
-    color: '#aaa',
+    color: "#aaa",
     fontSize: 14,
   },
   content: {
-    color: 'black',
+    color: "black",
     fontSize: 16,
     marginBottom: 16,
   },
   imageContainer: {
     marginBottom: 16,
-    height: 200,  // Adjust height as needed
+    height: 200, // Adjust height as needed
   },
   image: {
-    width: 300,  // Adjust width as needed
-    height: '100%',
+    width: 300, // Adjust width as needed
+    height: "100%",
     marginRight: 10,
     borderRadius: 10,
   },
   actions: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     marginTop: 16,
   },
   actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   actionText: {
-    color: 'black',
+    color: "black",
     fontSize: 16,
     marginLeft: 8,
   },
@@ -228,7 +258,7 @@ const styles = StyleSheet.create({
   userName: {
     color: "black",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   separator: {
     height: 1,
