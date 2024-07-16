@@ -15,6 +15,11 @@ import CreateSubForm from "./CreateSubForm";
 import { formatDistanceToNow } from "date-fns";
 import usePostActions from "../hooks/usePostActions";
 
+const sword =
+  "https://nickguerrabucket.s3.us-east-2.amazonaws.com/admin/sword.png";
+const quote =
+  "https://nickguerrabucket.s3.us-east-2.amazonaws.com/admin/quote.png";
+
 const PostCard = ({ post, onLikeDislikeUpdate }) => {
   const navigation = useNavigation();
   const {
@@ -112,12 +117,10 @@ const PostCard = ({ post, onLikeDislikeUpdate }) => {
               style={styles.actionButton}
               onPress={openChallengeForm}
             >
-              <FontAwesome name="exchange" size={18} color="black" />
-              <Text style={styles.actionText}>Challenge</Text>
+              <Image source={{ uri: sword }} style={styles.iconButton} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.actionButton} onPress={openSubForm}>
-              <FontAwesome name="subscript" size={18} color="black" />
-              <Text style={styles.actionText}>Sub</Text>
+              <Image source={{ uri: quote }} style={styles.iconButton} />
             </TouchableOpacity>
           </>
         )}
@@ -265,6 +268,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#DCDCDC",
     marginVertical: 1,
     marginHorizontal: 13,
+  },
+  iconButton: {
+    width: 24,
+    height: 24,
+    marginRight: 8,
   },
 });
 

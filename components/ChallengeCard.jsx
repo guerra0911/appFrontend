@@ -8,6 +8,11 @@ import CreateSubForm from "./CreateSubForm";
 import { formatDistanceToNow } from "date-fns";
 import usePostActions from "../hooks/usePostActions";
 
+const sword =
+  "https://nickguerrabucket.s3.us-east-2.amazonaws.com/admin/sword.png";
+const quote =
+  "https://nickguerrabucket.s3.us-east-2.amazonaws.com/admin/quote.png";
+
 const ChallengeCard = ({ challenge, onLikeDislikeUpdate }) => {
   const originalPost = challenge.original_note;
   const challengerPost = challenge.challenger_note;
@@ -98,15 +103,13 @@ const ChallengeCard = ({ challenge, onLikeDislikeUpdate }) => {
                 style={styles.actionButton}
                 onPress={challengerPostActions.openChallengeForm}
               >
-                <FontAwesome name="exchange" size={18} color="black" />
-                <Text style={styles.actionText}>Challenge</Text>
+                <Image source={{ uri: sword }} style={styles.iconButton} />
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.actionButton}
                 onPress={challengerPostActions.openSubForm}
               >
-                <FontAwesome name="subscript" size={18} color="black" />
-                <Text style={styles.actionText}>Sub</Text>
+                <Image source={{ uri: quote }} style={styles.iconButton} />
               </TouchableOpacity>
             </>
           )}
@@ -231,15 +234,13 @@ const ChallengeCard = ({ challenge, onLikeDislikeUpdate }) => {
                 style={styles.actionButton}
                 onPress={originalPostActions.openChallengeForm}
               >
-                <FontAwesome name="exchange" size={18} color="black" />
-                <Text style={styles.actionText}>Challenge</Text>
+                <Image source={{ uri: sword }} style={styles.iconButton} />
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.actionButton}
                 onPress={originalPostActions.openSubForm}
               >
-                <FontAwesome name="subscript" size={18} color="black" />
-                <Text style={styles.actionText}>Sub</Text>
+                <Image source={{ uri: quote }} style={styles.iconButton} />
               </TouchableOpacity>
             </>
           )}
@@ -407,6 +408,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginHorizontal: 8,
+  },
+  iconButton: {
+    width: 24,
+    height: 24,
+    marginRight: 8,
   },
 });
 
