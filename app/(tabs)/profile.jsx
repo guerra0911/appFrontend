@@ -27,6 +27,7 @@ import RenderModal from "./renderModal";
 import EditProfileForm from "../../components/EditProfileForm";
 import PrivateProfileIndicator from "../../components/PrivateProfileIndicator";
 import { useNavigation } from "@react-navigation/native";
+import ChallengeCard from "../../components/ChallengeCard";
 
 const Profile = () => {
   const router = useRouter();
@@ -389,7 +390,73 @@ const Profile = () => {
           >
             <Text style={styles.modalTitle}>{modalTitle}</Text>
             <ScrollView>
-              {/* WRITE CODE HERE */}
+              {modalTitle === "Challenge Requests" && challengeRequests.map((challenge) => (
+                <View key={`challenge-${challenge.id}`}>
+                  <View style={styles.actionButtons}>
+                    <TouchableOpacity
+                      style={styles.checkButton}
+                      onPress={() => acceptChallengeRequest(challenge.id)}
+                    >
+                      <Text style={styles.buttonText}>Accept</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.crossButton}
+                      onPress={() => declineChallengeRequest(challenge.id)}
+                    >
+                      <Text style={styles.buttonText}>Decline</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <ChallengeCard
+                    key={`challenge-${challenge.id}`}
+                    challenge={challenge}
+                    onLikeDislikeUpdate={fetchChallengeRequests}
+                  />
+                </View>
+              ))}
+
+              {modalTitle === "Requesting to Challenge" && (
+                <>
+                  {requestingChallenges.map((challenge) => (
+                    <View key={`challenge-${challenge.id}`}>
+                      <TouchableOpacity
+                        style={styles.crossButton}
+                        onPress={() => deleteChallenge(challenge.id)}
+                      >
+                        <Text style={styles.buttonText}>Delete</Text>
+                      </TouchableOpacity>
+                      <ChallengeCard
+                        key={`challenge-${challenge.id}`}
+                        challenge={challenge}
+                        onLikeDislikeUpdate={fetchRequestingChallenges}
+                      />
+                    </View>
+                  ))}
+                  <Text style={styles.sectionTitle}>Declined Challenges</Text>
+                  {challengesDeclined.map((challenge) => (
+                    <View key={`challenge-${challenge.id}`}>
+                      <View style={styles.actionButtons}>
+                        <TouchableOpacity
+                          style={styles.checkButton}
+                          onPress={() => resubmitChallengeRequest(challenge.id)}
+                        >
+                          <Text style={styles.buttonText}>Resubmit</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.crossButton}
+                          onPress={() => deleteChallenge(challenge.id)}
+                        >
+                          <Text style={styles.buttonText}>Delete</Text>
+                        </TouchableOpacity>
+                      </View>
+                      <ChallengeCard
+                        key={`challenge-${challenge.id}`}
+                        challenge={challenge}
+                        onLikeDislikeUpdate={fetchChallengesDeclined}
+                      />
+                    </View>
+                  ))}
+                </>
+              )}
             </ScrollView>
           </RenderModal>
 
@@ -589,6 +656,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#F44336",
     borderRadius: 5,
   },
+  buttonText: {
+    color: "#FFF",
+    fontWeight: "bold",
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginVertical: 10,
+    marginLeft: 13,
+  }
 });
 
 export default Profile;
