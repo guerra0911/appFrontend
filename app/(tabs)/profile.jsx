@@ -43,15 +43,20 @@ const Profile = () => {
   const [requesting, setRequesting] = useState([]);
   const [blockedBy, setBlockedBy] = useState([]);
   const [blocking, setBlocking] = useState([]);
+  const [challengeRequests, setChallengeRequests] = useState([]);
+  const [challengesDeclined, setChallengesDeclined] = useState([]);
+  const [requestingChallenges, setRequestingChallenges] = useState([]);
   const navigation = useNavigation();
   const [requestModalVisible, setRequestModalVisible] = useState(false);
   const [blockModalVisible, setBlockModalVisible] = useState(false);
+  const [challengeModalVisible, setChallengeModalVisible] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
 
   const navigateToProfile = (userId) => {
     setModalVisible(false);
     setRequestModalVisible(false);
     setBlockModalVisible(false);
+    setChallengeModalVisible(false);
     navigation.navigate("otherProfile", { userId });
   };
 
@@ -68,6 +73,10 @@ const Profile = () => {
       fetchRequesting();
       fetchBlockedBy();
       fetchBlocking();
+      fetchChallengeRequests();
+      fetchRequestingChallenges();
+      fetchChallengesDeclined();
+
     } catch (error) {
       console.error("Error fetching user profile:", error);
       Alert.alert("Error", "Failed to fetch user profile.");
@@ -136,6 +145,46 @@ const Profile = () => {
     setBlockModalVisible(true);
   };
 
+  const fetchChallengeRequests = async () => {
+    try {
+      const response = await api.get(`/api/challenges/requests/`);
+      setChallengeRequests(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchRequestingChallenges = async () => {
+    try {
+      const response = await api.get(`/api/challenges/requesting/`);
+      setRequestingChallenges(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchChallengesDeclined = async () => {
+    try {
+      const response = await api.get(`/api/challenges/declined/`);
+      setChallengesDeclined(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const openChallengeRequestsModal = () => {
+    setModalTitle("Challenge Requests");
+    fetchChallengeRequests();
+    setChallengeModalVisible(true);
+  };
+
+  const openRequestingChallengesModal = () => {
+    setModalTitle("Requesting to Challenge");
+    fetchRequestingChallenges();
+    fetchChallengesDeclined();
+    setChallengeModalVisible(true);
+  };
+
   const acceptFollowRequest = async (userId) => {
     try {
       await api.post(`/api/user/accept_follow/${userId}/`);
@@ -153,6 +202,48 @@ const Profile = () => {
     } catch (error) {
       console.error("Error declining follow request:", error);
       Alert.alert("Error", "Failed to decline follow request.");
+    }
+  };
+
+  const acceptChallengeRequest = async (challengeId) => {
+    try {
+      await api.post(`/api/challenges/accept/${challengeId}/`);
+      fetchChallengeRequests(); // Refresh the requests list
+    } catch (error) {
+      console.error("Error accepting challenge request:", error);
+      Alert.alert("Error", "Failed to accept challenge request.");
+    }
+  };
+
+  const declineChallengeRequest = async (challengeId) => {
+    try {
+      await api.post(`/api/challenges/decline/${challengeId}/`);
+      fetchChallengeRequests(); // Refresh the requests list
+    } catch (error) {
+      console.error("Error declining challenge request:", error);
+      Alert.alert("Error", "Failed to decline challenge request.");
+    }
+  };
+
+  const resubmitChallengeRequest = async (challengeId) => {
+    try {
+      await api.post(`/api/challenges/resubmit/${challengeId}/`);
+      fetchChallengesDeclined();  // Refresh the declined list
+      fetchRequestingChallenges(); // Refresh the requesting list
+    } catch (error) {
+      console.error("Error resubmitting challenge request:", error);
+      Alert.alert("Error", "Failed to resubmit challenge request.");
+    }
+  };
+
+  const deleteChallenge = async (challengeId) => {
+    try {
+      await api.post(`/api/challenges/delete/${challengeId}/`);
+      fetchChallengesDeclined();  // Refresh the declined list
+      fetchRequestingChallenges(); // Refresh the requesting list
+    } catch (error) {
+      console.error("Error deleting challenge:", error);
+      Alert.alert("Error", "Failed to delete challenge.");
     }
   };
 
@@ -221,6 +312,16 @@ const Profile = () => {
               <Text style={styles.buttonText}>Requests</Text>
             </TouchableOpacity>
 
+            <TouchableOpacity
+              style={styles.button}
+              onPress={openRequestingChallengesModal}
+            >
+              <Text style={styles.buttonText}>Sent Challenges</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={openChallengeRequestsModal}>
+              <Text style={styles.buttonText}>Challenge Requests</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity style={styles.logoutButton} onPress={logout}>
               <Image
                 source={icons.logout}
@@ -279,6 +380,16 @@ const Profile = () => {
                   </View>
                 )
               )}
+            </ScrollView>
+          </RenderModal>
+
+          <RenderModal
+            modalVisible={challengeModalVisible}
+            setModalVisible={setChallengeModalVisible}
+          >
+            <Text style={styles.modalTitle}>{modalTitle}</Text>
+            <ScrollView>
+              {/* WRITE CODE HERE */}
             </ScrollView>
           </RenderModal>
 
