@@ -50,7 +50,7 @@ const PostCard = ({ post, onLikeDislikeUpdate }) => {
   };
 
   const images = [post.image1, post.image2, post.image3].filter(Boolean);
-
+  
   return (
     <View style={styles.postCard}>
       <View style={styles.header}>

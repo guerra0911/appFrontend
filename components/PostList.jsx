@@ -12,6 +12,9 @@ import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import PostCard from "./PostCard";
 import ChallengeCard from "./ChallengeCard";
+import ChallengeCardAnimated from "./ChallengeCardAnimated";
+import ChallengeCardFlip from "./ChallengeCardFlip";
+import ChallengeCardStacked from "./ChallengeCardStacked";
 import SubCard from "./SubCard";
 import { useGlobalContext } from "../context/GlobalProvider";
 
@@ -87,7 +90,20 @@ const PostList = ({ userId = null }) => {
     if (post.challenger_note) {
       // console.log('Rendering ChallengeCard for post:', post.id);
       // console.log('Rendering post:', post);
-      return <ChallengeCard key={`challenge-${post.id}`} challenge={post} onLikeDislikeUpdate={onLikeDislikeUpdate} />;
+      // return <ChallengeCard key={`challenge-${post.id}`} challenge={post} onLikeDislikeUpdate={onLikeDislikeUpdate} />;
+      // return <ChallengeCardAnimated key={`challenge-${post.id}`} challenge={post} onLikeDislikeUpdate={onLikeDislikeUpdate} />;
+      // return <ChallengeCardCarousel key={`challenge-${post.id}`} challenge={post} onLikeDislikeUpdate={onLikeDislikeUpdate} />;
+      // return <ChallengeCardFold key={`challenge-${post.id}`} challenge={post} onLikeDislikeUpdate={onLikeDislikeUpdate} />;
+      // return <ChallengeCardFlip key={`challenge-${post.id}`} challenge={post} onLikeDislikeUpdate={onLikeDislikeUpdate} />;
+      // return <ChallengeCardStacked key={`challenge-${post.id}`} challenge={post} onLikeDislikeUpdate={onLikeDislikeUpdate} />;
+      return (
+        <View key={`challenge-${post.id}`}>
+          <ChallengeCardFlip challenge={post} onLikeDislikeUpdate={onLikeDislikeUpdate} />
+          <ChallengeCardStacked challenge={post} onLikeDislikeUpdate={onLikeDislikeUpdate} />
+          {/* <ChallengeCardSwipe challenge={post} onLikeDislikeUpdate={onLikeDislikeUpdate} /> */}
+          {/* <ChallengeCardCarousel challenge={post} onLikeDislikeUpdate={onLikeDislikeUpdate} /> */}
+        </View>
+      );
     } else if (post.sub_note) {
       // console.log('Rendering SubCard for post:', post.id);
       // console.log('Rendering post:', post);
