@@ -20,6 +20,12 @@ const screenWidth = Dimensions.get("window").width;
 
 const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
   const [flipped, setFlipped] = useState(false);
+  const [originalHeight, setOriginalHeight] = useState(0);
+  const [challengerHeight, setChallengerHeight] = useState(0);
+  const [minHeight, setMinHeight] = useState(0);
+  const [measured, setMeasured] = useState(false);
+  
+  // Keep these states as requested
   const [frontCardHeight, setFrontCardHeight] = useState(0);
   const [showEntryCard, setShowEntryCard] = useState(false);
   const [showBackgroundCard, setShowBackgroundCard] = useState(true);
@@ -55,17 +61,17 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
           Animated.parallel([
             Animated.timing(translateX, {
               toValue: dx > 0 ? screenWidth : -screenWidth,
-              duration: 300,
+              duration: 1000,
               useNativeDriver: false,
             }),
             Animated.timing(translateYBack, {
               toValue: 0,
-              duration: 300,
+              duration: 1000,
               useNativeDriver: false,
             }),
             Animated.timing(translateXBack, {
               toValue: 0,
-              duration: 300,
+              duration: 1000,
               useNativeDriver: false,
             }),
           ]).start(() => {
@@ -80,7 +86,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
             translateXEntry.setValue(-screenWidth);
             Animated.timing(translateXEntry, {
               toValue: -30,
-              duration: 300,
+              duration: 1000,
               useNativeDriver: false,
             }).start(() => {
               setShowEntryCard(false);
@@ -97,12 +103,38 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
     })
   ).current;
 
-  const measureCardHeight = (event, postType) => {
+  useEffect(() => {
+    if (originalHeight > 0 && challengerHeight > 0) {
+      const minHeight = Math.min(originalHeight, challengerHeight);
+      setMinHeight(minHeight);
+      setMeasured(true);
+      console.log("Original Post Height:", originalHeight);
+      console.log("Challenger Post Height:", challengerHeight);
+      console.log("Minimum Height:", minHeight);
+    }
+  }, [originalHeight, challengerHeight]);
+  
+  const measureCardHeight = (event, type) => {
     const { height } = event.nativeEvent.layout;
-    if (postType === "Front") {
-      setFrontCardHeight(height);
+    if (type === "original") {
+      setOriginalHeight(height);
+    } else {
+      setChallengerHeight(height);
     }
   };
+
+  if (!measured) {
+    return (
+      <View style={{ position: 'absolute', top: -9999 }}>
+        <View onLayout={(event) => measureCardHeight(event, "original")}>
+          <ChallengeCard post={originalPost} onLikeDislikeUpdate={onLikeDislikeUpdate} />
+        </View>
+        <View onLayout={(event) => measureCardHeight(event, "challenger")}>
+          <ChallengeCard post={challengerPost} onLikeDislikeUpdate={onLikeDislikeUpdate} />
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.challengeCard, { height: frontCardHeight }]}>
@@ -117,7 +149,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
               },
             ]}
           >
-            <ChallengeCard post={flipped ? challengerPost : originalPost}/>
+            <ChallengeCard post={flipped ? challengerPost : originalPost} height={minHeight}  defaultHeight={flipped ? challengerHeight : originalHeight}/>
           </Animated.View>
         )}
         {showBackgroundCard && (
@@ -130,7 +162,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
               },
             ]}
           >
-            <ChallengeCard post={flipped ? challengerPost : originalPost}/>
+            <ChallengeCard post={flipped ? challengerPost : originalPost} height={minHeight} defaultHeight={flipped ? challengerHeight : originalHeight}/>
           </Animated.View>
         )}
         <Animated.View
@@ -142,9 +174,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
               zIndex: 2,
             },
           ]}
-          onLayout={(event) =>
-            measureCardHeight(event, "Front")
-          }
+          onLayout={(event) => setFrontCardHeight(event.nativeEvent.layout.height)}
           {...panResponder.panHandlers}
         >
           {flipped ? (
