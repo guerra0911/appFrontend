@@ -27,7 +27,7 @@ import RenderModal from "./renderModal";
 import EditProfileForm from "../../components/EditProfileForm";
 import PrivateProfileIndicator from "../../components/PrivateProfileIndicator";
 import { useNavigation } from "@react-navigation/native";
-import ChallengeCard from "../../components/ChallengeCard";
+import ChallengeCardStacked from "../../components/ChallengeCardStacked";
 
 const Profile = () => {
   const router = useRouter();
@@ -406,7 +406,7 @@ const Profile = () => {
                       <Text style={styles.buttonText}>Decline</Text>
                     </TouchableOpacity>
                   </View>
-                  <ChallengeCard
+                  <ChallengeCardStacked
                     key={`challenge-${challenge.id}`}
                     challenge={challenge}
                     onLikeDislikeUpdate={fetchChallengeRequests}
@@ -424,7 +424,7 @@ const Profile = () => {
                       >
                         <Text style={styles.buttonText}>Delete</Text>
                       </TouchableOpacity>
-                      <ChallengeCard
+                      <ChallengeCardStacked
                         key={`challenge-${challenge.id}`}
                         challenge={challenge}
                         onLikeDislikeUpdate={fetchRequestingChallenges}
@@ -448,7 +448,7 @@ const Profile = () => {
                           <Text style={styles.buttonText}>Delete</Text>
                         </TouchableOpacity>
                       </View>
-                      <ChallengeCard
+                      <ChallengeCardStacked
                         key={`challenge-${challenge.id}`}
                         challenge={challenge}
                         onLikeDislikeUpdate={fetchChallengesDeclined}

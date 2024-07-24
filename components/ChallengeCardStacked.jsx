@@ -9,7 +9,7 @@ import {
   LayoutAnimation,
   Platform,
 } from "react-native";
-import PostCard from "./PostCard";
+import ChallengeCard from "./ChallengeCard";
 
 if (Platform.OS === "android") {
   UIManager.setLayoutAnimationEnabledExperimental &&
@@ -117,7 +117,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
               },
             ]}
           >
-            <PostCard post={flipped ? challengerPost : originalPost} />
+            <ChallengeCard post={flipped ? challengerPost : originalPost}/>
           </Animated.View>
         )}
         {showBackgroundCard && (
@@ -130,7 +130,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
               },
             ]}
           >
-            <PostCard post={flipped ? challengerPost : originalPost} />
+            <ChallengeCard post={flipped ? challengerPost : originalPost}/>
           </Animated.View>
         )}
         <Animated.View
@@ -148,12 +148,12 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
           {...panResponder.panHandlers}
         >
           {flipped ? (
-            <PostCard
+            <ChallengeCard
               post={originalPost}
               onLikeDislikeUpdate={onLikeDislikeUpdate}
             />
           ) : (
-            <PostCard
+            <ChallengeCard
               post={challengerPost}
               onLikeDislikeUpdate={onLikeDislikeUpdate}
             />
@@ -177,6 +177,7 @@ const styles = StyleSheet.create({
   },
   postContainer: {
     position: "absolute",
+    borderRadius: 10,
     top: 0,
     left: 0,
     right: 0,
