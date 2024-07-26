@@ -18,6 +18,7 @@ import CreateChallengeForm from "./CreateChallengeForm";
 import CreateSubForm from "./CreateSubForm";
 import { formatDistanceToNow } from "date-fns";
 import usePostActions from "../hooks/usePostActions";
+import GradientBar from "./GradientBar";
 
 const sword =
   "https://nickguerrabucket.s3.us-east-2.amazonaws.com/admin/sword.png";
@@ -74,9 +75,13 @@ const ChallengeCard = ({ post, onLikeDislikeUpdate, height, defaultHeight }) => 
 
   useEffect(() => {
     if (height) {
-      console.log(height);
+      if(post.is_challenger) {
+        // console.log("Challenge Card Height:", height);
+      } else {
+        // console.log("Original Card Height:", height);
+      }    
       const customAnimationConfig = {
-        duration: 2000, // duration in milliseconds
+        duration: 300, // How long for Card to Increase/Decrease in Height
         update: {
           type: LayoutAnimation.Types.easeInEaseOut,
           property: LayoutAnimation.Properties.opacity,
@@ -132,7 +137,7 @@ const ChallengeCard = ({ post, onLikeDislikeUpdate, height, defaultHeight }) => 
           </ScrollView>
         )}
 
-        <View style={styles.actions}>
+        {/* <View style={styles.actions}>
           <TouchableOpacity style={styles.actionButton} onPress={handleLike}>
             <FontAwesome name="thumbs-up" size={18} color="#69C3FF" />
             <TouchableOpacity onPress={openLikedByModal}>
@@ -165,16 +170,18 @@ const ChallengeCard = ({ post, onLikeDislikeUpdate, height, defaultHeight }) => 
               </TouchableOpacity>
             </>
           )}
-        </View>
+        </View> */}
       </View>
 
-      {height && height < (defaultHeight + 100) && (
+      {/* {height && height < (defaultHeight + 100) && (
         <LinearGradient
           colors={['rgba(245, 245, 245, 0)', 'rgba(245, 245, 245, 1)']}
           style={styles.footer}
         >
         </LinearGradient>
-      )}
+      )} */}
+
+      <GradientBar height={height} defaultHeight={defaultHeight} /> 
     </View>
 
     <RenderModal
@@ -267,7 +274,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentWrapper: {
-    
   },
   content: {
     color: "black",

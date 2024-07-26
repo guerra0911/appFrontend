@@ -24,14 +24,35 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
   const [challengerHeight, setChallengerHeight] = useState(0);
   const [minHeight, setMinHeight] = useState(0);
   const [measured, setMeasured] = useState(false);
-  
-  // Keep these states as requested
   const [frontCardHeight, setFrontCardHeight] = useState(0);
   const [showEntryCard, setShowEntryCard] = useState(false);
   const [showBackgroundCard, setShowBackgroundCard] = useState(true);
+  const [dxValue, setDxValue] = useState(0);
+  const [swipingHeight, setSwipingHeight] = useState(0);
+  const [backCardHeight, setBackCardHeight] = useState(0);
 
   const originalPost = challenge.original_note;
   const challengerPost = challenge.challenger_note;
+  const originalHeightRef = useRef(0);
+  const challengerHeightRef = useRef(0);
+  const flippedRef = useRef(flipped);
+  const minHeightRef = useRef(minHeight);
+
+  useEffect(() => {
+    originalHeightRef.current = originalHeight;
+  }, [originalHeight]);
+
+  useEffect(() => {
+    challengerHeightRef.current = challengerHeight;
+  }, [challengerHeight]);
+
+  useEffect(() => {
+    flippedRef.current = flipped;
+  }, [flipped]);
+
+  useEffect(() => {
+    minHeight.current = minHeight;
+  }, [minHeight]);
 
   const translateX = useRef(new Animated.Value(0)).current;
   const translateXEntry = useRef(new Animated.Value(-screenWidth)).current;
@@ -53,51 +74,102 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
-      onPanResponderMove: Animated.event([null, { dx: translateX }], {
-        useNativeDriver: false,
-      }),
+      onPanResponderMove: (e, gestureState) => {
+        // console.log("Current dx:", gestureState.dx);
+        setDxValue(gestureState.dx);
+        Animated.event([null, { dx: translateX }], {
+          useNativeDriver: false,
+        })(e, gestureState);
+      },
       onPanResponderRelease: (e, { dx }) => {
+        // console.log("PanResponder released with dx:", dx);
         if (Math.abs(dx) > screenWidth / 4) {
+          // console.log("Swiping card off the screen");
+          // console.log("Original Ref = ", originalHeightRef.current);
+          // console.log("Challenger Ref = ",challengerHeightRef.current);
+          // console.log("Flipped = ", flippedRef.current);
+          //Start Back card to Grow as it moves into front card position
+          if (flippedRef.current) {
+            setBackCardHeight(challengerHeightRef.current);
+          } else {
+            setBackCardHeight(originalHeightRef.current);
+          }
+
+          if (flippedRef.current) {
+            // console.log(
+            //   "Setting Swipe Height to Challenger: ",
+            //   challengerHeightRef.current
+            // );
+            setSwipingHeight(challengerHeightRef.current);
+          } else {
+            setSwipingHeight(originalHeightRef.current);
+            // console.log(
+            //   "Setting Swipe Height to Original: ",
+            //   originalHeightRef.current
+            // );
+          }
           Animated.parallel([
+            //Front Card Swiping off of Screen After Complete Swipe
             Animated.timing(translateX, {
-              toValue: dx > 0 ? screenWidth : -screenWidth,
-              duration: 1000,
+              toValue: dx > 0 ? screenWidth + 175 : -screenWidth - 250,
+              duration: 300,
               useNativeDriver: false,
             }),
+            //Background Card Moving Up
             Animated.timing(translateYBack, {
               toValue: 0,
-              duration: 1000,
+              duration: 300,
               useNativeDriver: false,
             }),
+            //Background Card Moving Right
             Animated.timing(translateXBack, {
               toValue: 0,
-              duration: 1000,
+              duration: 300,
               useNativeDriver: false,
             }),
           ]).start(() => {
-            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-            setFlipped((prevFlipped) => !prevFlipped);
+            // console.log("Front card swipe animation completed");
+            LayoutAnimation.configureNext(
+              LayoutAnimation.Presets.easeInEaseOut
+            );
+            setFlipped((prevFlipped) => {
+              // console.log("Flipping card:", !prevFlipped);
+              return !prevFlipped;
+            });
+
             translateX.setValue(0);
             translateYBack.setValue(10);
             translateXBack.setValue(-30);
 
             setShowEntryCard(true);
             setShowBackgroundCard(false);
+            setBackCardHeight(minHeightRef.current);
+
             translateXEntry.setValue(-screenWidth);
+            //Entry Card Swiping in
             Animated.timing(translateXEntry, {
               toValue: -30,
-              duration: 1000,
+              duration: 300,
               useNativeDriver: false,
             }).start(() => {
+              // console.log("Entry card animation completed");
               setShowEntryCard(false);
               setShowBackgroundCard(true);
             });
           });
         } else {
+          if (flippedRef.current) {
+            setSwipingHeight(originalHeightRef.current);
+          } else {
+            setSwipingHeight(challengerHeightRef.current);
+          }
+          // console.log("Swipe not significant, resetting front card position");
           Animated.spring(translateX, {
             toValue: 0,
             useNativeDriver: false,
-          }).start();
+          }).start(() => {
+            // console.log("Front card reset animation completed");
+          });
         }
       },
     })
@@ -108,36 +180,89 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
       const minHeight = Math.min(originalHeight, challengerHeight);
       setMinHeight(minHeight);
       setMeasured(true);
-      console.log("Original Post Height:", originalHeight);
-      console.log("Challenger Post Height:", challengerHeight);
-      console.log("Minimum Height:", minHeight);
+      // console.log(
+      //   "Heights measured. Original:",
+      //   originalHeight,
+      //   "Challenger:",
+      //   challengerHeight,
+      //   "Minimum:",
+      //   minHeight
+      // );
     }
   }, [originalHeight, challengerHeight]);
-  
-  const measureCardHeight = (event, type) => {
-    const { height } = event.nativeEvent.layout;
-    if (type === "original") {
-      setOriginalHeight(height);
+
+  useEffect(() => {
+    const calculateSwipingHeight = () => {
+      // Your custom calculation using dxValue, originalHeight, challengerHeight, minHeight, frontCardHeight, and flipped
+      const clampedDxValue = Math.max(
+        Math.min(Math.abs(dxValue) / (screenWidth / 4), 1),
+        -1
+      );
+      if (flipped) {
+        const swipeHeight =
+          originalHeight - (originalHeight - minHeight) * clampedDxValue;
+        setSwipingHeight(swipeHeight);
+      } else {
+        const swipeHeight =
+          challengerHeight - (challengerHeight - minHeight) * clampedDxValue;
+        setSwipingHeight(swipeHeight);
+      }
+    };
+
+    calculateSwipingHeight();
+  }, [dxValue]);
+
+  const startBackCardGrowth = () => {
+    if (flippedRef.current) {
+      setBackCardHeight(originalHeightRef.current);
     } else {
-      setChallengerHeight(height);
+      setBackCardHeight(challengerHeightRef.current);
     }
   };
 
+  const measureCardHeight = (event, type) => {
+    const { height } = event.nativeEvent.layout;
+    // console.log(`${type} card height measured:`, height);
+
+    if (type === "original") {
+      setOriginalHeight(height);
+      // console.log("Content: ", originalPost.content);
+    } else {
+      setChallengerHeight(height);
+      // console.log("Content: ", challengerPost.content);
+    }
+  };
+
+  useEffect(() => {
+    // console.log("swipingHeight changed:", swipingHeight);
+  }, [swipingHeight]);
+
   if (!measured) {
     return (
-      <View style={{ position: 'absolute', top: -9999 }}>
+      <View style={{ position: "absolute", top: -9999 }}>
         <View onLayout={(event) => measureCardHeight(event, "original")}>
-          <ChallengeCard post={originalPost} onLikeDislikeUpdate={onLikeDislikeUpdate} />
+          <ChallengeCard
+            post={originalPost}
+            onLikeDislikeUpdate={onLikeDislikeUpdate}
+          />
         </View>
         <View onLayout={(event) => measureCardHeight(event, "challenger")}>
-          <ChallengeCard post={challengerPost} onLikeDislikeUpdate={onLikeDislikeUpdate} />
+          <ChallengeCard
+            post={challengerPost}
+            onLikeDislikeUpdate={onLikeDislikeUpdate}
+          />
         </View>
       </View>
     );
   }
 
   return (
-    <View style={[styles.challengeCard, { height: frontCardHeight }]}>
+    <View
+      style={[
+        styles.challengeCard,
+        { height: swipingHeight !== 0 ? swipingHeight : frontCardHeight },
+      ]}
+    >
       <View style={styles.cardsContainer}>
         {showEntryCard && (
           <Animated.View
@@ -149,7 +274,11 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
               },
             ]}
           >
-            <ChallengeCard post={flipped ? challengerPost : originalPost} height={minHeight}  defaultHeight={flipped ? challengerHeight : originalHeight}/>
+            <ChallengeCard
+              post={flipped ? challengerPost : originalPost}
+              height={minHeight}
+              defaultHeight={flipped ? challengerHeight : originalHeight}
+            />
           </Animated.View>
         )}
         {showBackgroundCard && (
@@ -157,15 +286,70 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
             style={[
               styles.backgroundCard,
               {
-                transform: [{ translateY: translateYBack }, { translateX: translateXBack }],
+                transform: [
+                  { translateY: translateYBack },
+                  { translateX: translateXBack },
+                ],
                 zIndex: 0,
               },
             ]}
           >
-            <ChallengeCard post={flipped ? challengerPost : originalPost} height={minHeight} defaultHeight={flipped ? challengerHeight : originalHeight}/>
+            <ChallengeCard
+              post={flipped ? challengerPost : originalPost}
+              height={backCardHeight !== 0 ? backCardHeight : minHeight}
+              defaultHeight={flipped ? challengerHeight : originalHeight}
+            />
           </Animated.View>
         )}
-        <Animated.View
+        {flipped && (
+          <Animated.View
+            style={[
+              styles.postContainer,
+              {
+                transform: [{ translateX }, { rotate: frontRotate }],
+                opacity: frontOpacity,
+                zIndex: 2,
+              },
+            ]}
+            onLayout={(event) => {
+              const height = event.nativeEvent.layout.height;
+              setFrontCardHeight(height);
+              // console.log("Front card height set:", height);
+            }}
+            {...panResponder.panHandlers}
+          >
+            <ChallengeCard
+              post={originalPost}
+              onLikeDislikeUpdate={onLikeDislikeUpdate}
+              {...(swipingHeight !== 0 && { height: swipingHeight })}
+            />
+          </Animated.View>
+        )}
+        {!flipped && (
+          <Animated.View
+            style={[
+              styles.postContainer,
+              {
+                transform: [{ translateX }, { rotate: frontRotate }],
+                opacity: frontOpacity,
+                zIndex: 2,
+              },
+            ]}
+            onLayout={(event) => {
+              const height = event.nativeEvent.layout.height;
+              setFrontCardHeight(height);
+              // console.log("Front card height set:", height);
+            }}
+            {...panResponder.panHandlers}
+          >
+            <ChallengeCard
+              post={challengerPost}
+              onLikeDislikeUpdate={onLikeDislikeUpdate}
+              {...(swipingHeight !== 0 && { height: swipingHeight })}
+            />
+          </Animated.View>
+        )}
+        {/* <Animated.View
           style={[
             styles.postContainer,
             {
@@ -174,21 +358,27 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
               zIndex: 2,
             },
           ]}
-          onLayout={(event) => setFrontCardHeight(event.nativeEvent.layout.height)}
+          onLayout={(event) => {
+            const height = event.nativeEvent.layout.height;
+            setFrontCardHeight(height);
+            // console.log("Front card height set:", height);
+          }}
           {...panResponder.panHandlers}
         >
           {flipped ? (
             <ChallengeCard
               post={originalPost}
               onLikeDislikeUpdate={onLikeDislikeUpdate}
+              // {...(swipingHeight !== 0 && { height: swipingHeight })}
             />
           ) : (
             <ChallengeCard
               post={challengerPost}
               onLikeDislikeUpdate={onLikeDislikeUpdate}
+              // {...(swipingHeight !== 0 && { height: swipingHeight })}
             />
           )}
-        </Animated.View>
+        </Animated.View> */}
       </View>
     </View>
   );
@@ -197,7 +387,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
 const styles = StyleSheet.create({
   challengeCard: {
     width: "100%",
-    marginBottom: 16,
+    marginBottom: 24,
     paddingLeft: 32,
   },
   cardsContainer: {
