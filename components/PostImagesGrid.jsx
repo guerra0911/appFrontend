@@ -122,16 +122,16 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: 'absolute',
-    top: 110,
-    right: 0,
+    top: 40,
+    right: 20,
     zIndex: 1,
     backgroundColor: 'rgba(0,0,0,0.6)',
-    borderRadius: 10,
+    borderRadius: 20,
     padding: 10,
   },
   closeButtonText: {
     color: 'white',
-    fontSize: 12,
+    fontSize: 18,
     fontWeight: 'bold',
   },
   fullImage: {
