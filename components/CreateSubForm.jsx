@@ -13,7 +13,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import api from "../api";
 import CustomButton from "./CustomButton";
-import FormField from "./FormField";
+import NoteFormField from "./NoteFormField";
 import { useGlobalContext } from "../context/GlobalProvider";
 
 const CreateSubForm = ({ setModalVisible, originalNoteId }) => {
@@ -108,11 +108,11 @@ const CreateSubForm = ({ setModalVisible, originalNoteId }) => {
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <Text style={styles.title}>New Sub-Note</Text>
 
-        <FormField
+        <NoteFormField
           value={form.content}
           placeholder="Add a sub-note to the original note..."
           handleChangeText={(e) => setForm({ ...form, content: e })}
-          otherStyles={styles.formField}
+          otherStyles={styles.NoteformField}
           height={200}
           multiline={true}
         />
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     marginBottom: 0,
     marginLeft: 2,
   },
-  formField: {
+  NoteformField: {
     marginTop: 0,
   },
   buttonContainer: {

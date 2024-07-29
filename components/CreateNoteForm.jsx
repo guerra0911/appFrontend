@@ -15,7 +15,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import api from "../api";
 import CustomButton from "./CustomButton";
-import FormField from "./FormField";
+import NoteFormField from "./NoteFormField";
 import { useGlobalContext } from "../context/GlobalProvider";
 
 const CreateNoteForm = ({ setModalVisible }) => {
@@ -96,12 +96,12 @@ const CreateNoteForm = ({ setModalVisible }) => {
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <Text style={styles.title}>New Post</Text>
 
-        <FormField
+        <NoteFormField
           value={form.content}
           placeholder="Tell the world your hottest take ..."
           handleChangeText={(e) => setForm({ ...form, content: e })}
-          otherStyles={styles.formField}
-          height={200}
+          otherStyles={styles.NoteformField}
+          height={215}
           multiline={true}
         />
 
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     marginBottom: 0,
     marginLeft: 2,
   },
-  formField: {
+  NoteformField: {
     marginTop: 0,
   },
   buttonContainer: {

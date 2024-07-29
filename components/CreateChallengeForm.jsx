@@ -13,7 +13,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import api from "../api";
 import CustomButton from "./CustomButton";
-import FormField from "./FormField";
+import NoteFormField from "./NoteFormField";
 import { useGlobalContext } from "../context/GlobalProvider";
 
 const CreateChallengeForm = ({ setModalVisible, originalNoteId }) => {
@@ -51,7 +51,7 @@ const CreateChallengeForm = ({ setModalVisible, originalNoteId }) => {
       formData.append("is_challenger", true);
       images.forEach((imageUri, index) => {
         if (imageUri) {
-          formData.append(`image${index + 1}`, {
+          formData.append(`images`, {
             uri: imageUri,
             name: `image${index + 1}.jpg`,
             type: "image/jpeg",
@@ -108,11 +108,11 @@ const CreateChallengeForm = ({ setModalVisible, originalNoteId }) => {
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <Text style={styles.title}>New Challenge</Text>
 
-        <FormField
+        <NoteFormField
           value={form.content}
           placeholder="Counter the original note..."
           handleChangeText={(e) => setForm({ ...form, content: e })}
-          otherStyles={styles.formField}
+          otherStyles={styles.NoteformField}
           height={200}
           multiline={true}
         />
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     marginBottom: 0,
     marginLeft: 2,
   },
-  formField: {
+  NoteformField: {
     marginTop: 0,
   },
   buttonContainer: {

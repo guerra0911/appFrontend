@@ -25,7 +25,7 @@ const sword =
 const quote =
   "https://nickguerrabucket.s3.us-east-2.amazonaws.com/admin/quote.png";
 
-const ChallengeCard = ({ post, onLikeDislikeUpdate, height, defaultHeight }) => {
+const ChallengeCard = ({ post, onLikeDislikeUpdate, height, defaultHeight, toggleCompression, isCompressible }) => {
   const navigation = useNavigation();
   const {
     user,
@@ -75,11 +75,6 @@ const ChallengeCard = ({ post, onLikeDislikeUpdate, height, defaultHeight }) => 
 
   useEffect(() => {
     if (height) {
-      if(post.is_challenger) {
-        // console.log("Challenge Card Height:", height);
-      } else {
-        // console.log("Original Card Height:", height);
-      }    
       const customAnimationConfig = {
         duration: 300, // How long for Card to Increase/Decrease in Height
         update: {
@@ -136,100 +131,11 @@ const ChallengeCard = ({ post, onLikeDislikeUpdate, height, defaultHeight }) => 
             ))}
           </ScrollView>
         )}
-
-        {/* <View style={styles.actions}>
-          <TouchableOpacity style={styles.actionButton} onPress={handleLike}>
-            <FontAwesome name="thumbs-up" size={18} color="#69C3FF" />
-            <TouchableOpacity onPress={openLikedByModal}>
-              <Text style={styles.actionText}>{likeCount}</Text>
-            </TouchableOpacity>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton} onPress={handleDislike}>
-            <FontAwesome name="thumbs-down" size={18} color="#FF0000" />
-            <TouchableOpacity onPress={openDislikedByModal}>
-              <Text style={styles.actionText}>{dislikeCount}</Text>
-            </TouchableOpacity>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}>
-            <FontAwesome name="comment" size={18} color="black" />
-            <Text style={styles.actionText}>{post.comments.length}</Text>
-          </TouchableOpacity>
-          {post.author.id !== user.id && (
-            <>
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={openChallengeForm}
-              >
-                <Image source={{ uri: sword }} style={styles.iconButton} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={openSubForm}
-              >
-                <Image source={{ uri: quote }} style={styles.iconButton} />
-              </TouchableOpacity>
-            </>
-          )}
-        </View> */}
       </View>
-
-      {/* {height && height < (defaultHeight + 100) && (
-        <LinearGradient
-          colors={['rgba(245, 245, 245, 0)', 'rgba(245, 245, 245, 1)']}
-          style={styles.footer}
-        >
-        </LinearGradient>
-      )} */}
 
       <GradientBar height={height} defaultHeight={defaultHeight} /> 
     </View>
 
-    <RenderModal
-      modalVisible={likeDislikeModalVisible}
-      setModalVisible={setLikeDislikeModalVisible}
-    >
-      <Text style={styles.modalTitle}>{likeDislikeModalTitle}</Text>
-      <ScrollView>
-        {(likeDislikeModalTitle === "Liked By" ? likedBy : dislikedBy).map(
-          (user, index, array) => (
-            <View key={user.id}>
-              <TouchableOpacity
-                key={user.id}
-                onPress={() => navigateToProfile(user.id)}
-              >
-                <View style={styles.userContainer}>
-                  <Image
-                    source={{ uri: user.profile.image }}
-                    style={styles.userImage}
-                  />
-                  <Text style={styles.userName}>@{user.username}</Text>
-                </View>
-              </TouchableOpacity>
-              {index < array.length - 1 && (
-                <View style={styles.separator} />
-              )}
-            </View>
-          )
-        )}
-      </ScrollView>
-    </RenderModal>
-
-    <RenderModal
-      modalVisible={formModalVisible}
-      setModalVisible={setFormModalVisible}
-    >
-      {formType === "challenge" ? (
-        <CreateChallengeForm
-          setModalVisible={setFormModalVisible}
-          originalNoteId={post.id}
-        />
-      ) : (
-        <CreateSubForm
-          setModalVisible={setFormModalVisible}
-          originalNoteId={post.id}
-        />
-      )}
-    </RenderModal>
   </View>
 );
 

@@ -30,6 +30,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
   const [dxValue, setDxValue] = useState(0);
   const [swipingHeight, setSwipingHeight] = useState(0);
   const [backCardHeight, setBackCardHeight] = useState(0);
+  
 
   const originalPost = challenge.original_note;
   const challengerPost = challenge.challenger_note;
@@ -75,38 +76,25 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
     PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
       onPanResponderMove: (e, gestureState) => {
-        // console.log("Current dx:", gestureState.dx);
         setDxValue(gestureState.dx);
         Animated.event([null, { dx: translateX }], {
           useNativeDriver: false,
         })(e, gestureState);
       },
       onPanResponderRelease: (e, { dx }) => {
-        // console.log("PanResponder released with dx:", dx);
         if (Math.abs(dx) > screenWidth / 4) {
-          // console.log("Swiping card off the screen");
-          // console.log("Original Ref = ", originalHeightRef.current);
-          // console.log("Challenger Ref = ",challengerHeightRef.current);
-          // console.log("Flipped = ", flippedRef.current);
-          //Start Back card to Grow as it moves into front card position
+          // If successful swipe, start growing Background card into size of the New Front Card
           if (flippedRef.current) {
             setBackCardHeight(challengerHeightRef.current);
           } else {
             setBackCardHeight(originalHeightRef.current);
           }
-
+          
+          //If Successful Swipe, Set Card to height of Next Card to Show up
           if (flippedRef.current) {
-            // console.log(
-            //   "Setting Swipe Height to Challenger: ",
-            //   challengerHeightRef.current
-            // );
             setSwipingHeight(challengerHeightRef.current);
           } else {
             setSwipingHeight(originalHeightRef.current);
-            // console.log(
-            //   "Setting Swipe Height to Original: ",
-            //   originalHeightRef.current
-            // );
           }
           Animated.parallel([
             //Front Card Swiping off of Screen After Complete Swipe
@@ -128,12 +116,10 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
               useNativeDriver: false,
             }),
           ]).start(() => {
-            // console.log("Front card swipe animation completed");
             LayoutAnimation.configureNext(
               LayoutAnimation.Presets.easeInEaseOut
             );
             setFlipped((prevFlipped) => {
-              // console.log("Flipping card:", !prevFlipped);
               return !prevFlipped;
             });
 
@@ -146,29 +132,26 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
             setBackCardHeight(minHeightRef.current);
 
             translateXEntry.setValue(-screenWidth);
-            //Entry Card Swiping in
             Animated.timing(translateXEntry, {
               toValue: -30,
               duration: 300,
               useNativeDriver: false,
             }).start(() => {
-              // console.log("Entry card animation completed");
               setShowEntryCard(false);
               setShowBackgroundCard(true);
             });
           });
         } else {
+          //If Unsuccessful Swipe, just revert back to original size
           if (flippedRef.current) {
             setSwipingHeight(originalHeightRef.current);
           } else {
             setSwipingHeight(challengerHeightRef.current);
           }
-          // console.log("Swipe not significant, resetting front card position");
           Animated.spring(translateX, {
             toValue: 0,
             useNativeDriver: false,
           }).start(() => {
-            // console.log("Front card reset animation completed");
           });
         }
       },
@@ -180,20 +163,11 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
       const minHeight = Math.min(originalHeight, challengerHeight);
       setMinHeight(minHeight);
       setMeasured(true);
-      // console.log(
-      //   "Heights measured. Original:",
-      //   originalHeight,
-      //   "Challenger:",
-      //   challengerHeight,
-      //   "Minimum:",
-      //   minHeight
-      // );
     }
   }, [originalHeight, challengerHeight]);
 
   useEffect(() => {
     const calculateSwipingHeight = () => {
-      // Your custom calculation using dxValue, originalHeight, challengerHeight, minHeight, frontCardHeight, and flipped
       const clampedDxValue = Math.max(
         Math.min(Math.abs(dxValue) / (screenWidth / 4), 1),
         -1
@@ -212,30 +186,14 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
     calculateSwipingHeight();
   }, [dxValue]);
 
-  const startBackCardGrowth = () => {
-    if (flippedRef.current) {
-      setBackCardHeight(originalHeightRef.current);
-    } else {
-      setBackCardHeight(challengerHeightRef.current);
-    }
-  };
-
   const measureCardHeight = (event, type) => {
     const { height } = event.nativeEvent.layout;
-    // console.log(`${type} card height measured:`, height);
-
     if (type === "original") {
       setOriginalHeight(height);
-      // console.log("Content: ", originalPost.content);
     } else {
       setChallengerHeight(height);
-      // console.log("Content: ", challengerPost.content);
     }
   };
-
-  useEffect(() => {
-    // console.log("swipingHeight changed:", swipingHeight);
-  }, [swipingHeight]);
 
   if (!measured) {
     return (
