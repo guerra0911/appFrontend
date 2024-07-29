@@ -14,6 +14,7 @@ import CreateChallengeForm from "./CreateChallengeForm";
 import CreateSubForm from "./CreateSubForm";
 import { formatDistanceToNow } from "date-fns";
 import usePostActions from "../hooks/usePostActions";
+import PostImagesGrid from "./PostImagesGrid";
 
 const sword =
   "https://nickguerrabucket.s3.us-east-2.amazonaws.com/admin/sword.png";
@@ -82,16 +83,7 @@ const PostCard = ({ post, onLikeDislikeUpdate }) => {
       <Text style={styles.content}>{post.content}</Text>
 
       {images.length > 0 && (
-        <ScrollView horizontal pagingEnabled style={styles.imageContainer}>
-          {images.map((image, index) => (
-            <Image
-              key={index}
-              source={{ uri: image }}
-              style={styles.image}
-              resizeMode="cover"
-            />
-          ))}
-        </ScrollView>
+        <PostImagesGrid images={images} />
       )}
 
       <View style={styles.actions}>

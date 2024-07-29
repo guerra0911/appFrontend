@@ -90,9 +90,7 @@ const PostList = ({ userId = null }) => {
     if (post.challenger_note) {
       return (
         <View key={`challenge-${post.id}`}>
-          {/* <ChallengeCardFlip challenge={post} onLikeDislikeUpdate={onLikeDislikeUpdate} /> */}
           <ChallengeCardStacked challenge={post} onLikeDislikeUpdate={onLikeDislikeUpdate} />
-          {/* <ChallengeCardSwipe challenge={post} onLikeDislikeUpdate={onLikeDislikeUpdate} /> */}
         </View>
       );
     } else if (post.sub_note) {

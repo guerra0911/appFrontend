@@ -8,6 +8,7 @@ import {
   UIManager,
   LayoutAnimation,
   Platform,
+  Text,
 } from "react-native";
 import ChallengeCard from "./ChallengeCard";
 
@@ -307,36 +308,9 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
             />
           </Animated.View>
         )}
-        {/* <Animated.View
-          style={[
-            styles.postContainer,
-            {
-              transform: [{ translateX }, { rotate: frontRotate }],
-              opacity: frontOpacity,
-              zIndex: 2,
-            },
-          ]}
-          onLayout={(event) => {
-            const height = event.nativeEvent.layout.height;
-            setFrontCardHeight(height);
-            // console.log("Front card height set:", height);
-          }}
-          {...panResponder.panHandlers}
-        >
-          {flipped ? (
-            <ChallengeCard
-              post={originalPost}
-              onLikeDislikeUpdate={onLikeDislikeUpdate}
-              // {...(swipingHeight !== 0 && { height: swipingHeight })}
-            />
-          ) : (
-            <ChallengeCard
-              post={challengerPost}
-              onLikeDislikeUpdate={onLikeDislikeUpdate}
-              // {...(swipingHeight !== 0 && { height: swipingHeight })}
-            />
-          )}
-        </Animated.View> */}
+      </View>
+      <View style={styles.vsCircle}>
+        <Text style={styles.vsText}>VS</Text>
       </View>
     </View>
   );
@@ -377,6 +351,23 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: "#F5F5F5",
     overflow: "hidden",
+  },
+  vsCircle: {
+    position: "absolute",
+    bottom: -20,
+    left: 10,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: "#F5F5F5",
+    borderColor: "#DCDCDC",
+    borderWidth: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  vsText: {
+    fontSize: 10,
+    color: "#000",
   },
 });
 

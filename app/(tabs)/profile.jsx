@@ -77,7 +77,6 @@ const Profile = () => {
       fetchChallengeRequests();
       fetchRequestingChallenges();
       fetchChallengesDeclined();
-
     } catch (error) {
       console.error("Error fetching user profile:", error);
       Alert.alert("Error", "Failed to fetch user profile.");
@@ -229,7 +228,7 @@ const Profile = () => {
   const resubmitChallengeRequest = async (challengeId) => {
     try {
       await api.post(`/api/challenges/resubmit/${challengeId}/`);
-      fetchChallengesDeclined();  // Refresh the declined list
+      fetchChallengesDeclined(); // Refresh the declined list
       fetchRequestingChallenges(); // Refresh the requesting list
     } catch (error) {
       console.error("Error resubmitting challenge request:", error);
@@ -240,7 +239,7 @@ const Profile = () => {
   const deleteChallenge = async (challengeId) => {
     try {
       await api.post(`/api/challenges/delete/${challengeId}/`);
-      fetchChallengesDeclined();  // Refresh the declined list
+      fetchChallengesDeclined(); // Refresh the declined list
       fetchRequestingChallenges(); // Refresh the requesting list
     } catch (error) {
       console.error("Error deleting challenge:", error);
@@ -293,13 +292,13 @@ const Profile = () => {
         >
           <Loader isLoading={loading} />
           <View style={styles.headerRow}>
-          <TouchableOpacity
-              style={styles.button}
-              onPress={openBlockingModal}
-            >
+            <TouchableOpacity style={styles.button} onPress={openBlockingModal}>
               <Text style={styles.buttonText}>Blocking</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={openBlockedByModal}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={openBlockedByModal}
+            >
               <Text style={styles.buttonText}>Blocked By</Text>
             </TouchableOpacity>
 
@@ -319,7 +318,10 @@ const Profile = () => {
             >
               <Text style={styles.buttonText}>Sent Challenges</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={openChallengeRequestsModal}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={openChallengeRequestsModal}
+            >
               <Text style={styles.buttonText}>Challenge Requests</Text>
             </TouchableOpacity>
 
@@ -390,29 +392,31 @@ const Profile = () => {
           >
             <Text style={styles.modalTitle}>{modalTitle}</Text>
             <ScrollView>
-              {modalTitle === "Challenge Requests" && challengeRequests.map((challenge) => (
-                <View key={`challenge-${challenge.id}`}>
-                  <View style={styles.actionButtons}>
-                    <TouchableOpacity
-                      style={styles.checkButton}
-                      onPress={() => acceptChallengeRequest(challenge.id)}
-                    >
-                      <Text style={styles.buttonText}>Accept</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.crossButton}
-                      onPress={() => declineChallengeRequest(challenge.id)}
-                    >
-                      <Text style={styles.buttonText}>Decline</Text>
-                    </TouchableOpacity>
+              {modalTitle === "Challenge Requests" &&
+                challengeRequests.map((challenge) => (
+                  <View key={`challenge-${challenge.id}`}>
+                    <View style={styles.actionButtons}>
+                      <TouchableOpacity
+                        style={styles.checkButton}
+                        onPress={() => acceptChallengeRequest(challenge.id)}
+                      >
+                        <Text style={styles.buttonText}>Accept</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.crossButton}
+                        onPress={() => declineChallengeRequest(challenge.id)}
+                      >
+                        <Text style={styles.buttonText}>Decline</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <View key={`challenge-${challenge.id}`}>
+                      <ChallengeCardStacked
+                        challenge={challenge}
+                        onLikeDislikeUpdate={fetchChallengeRequests}
+                      />
+                    </View>
                   </View>
-                  <ChallengeCardStacked
-                    key={`challenge-${challenge.id}`}
-                    challenge={challenge}
-                    onLikeDislikeUpdate={fetchChallengeRequests}
-                  />
-                </View>
-              ))}
+                ))}
 
               {modalTitle === "Requesting to Challenge" && (
                 <>
@@ -633,7 +637,7 @@ const styles = StyleSheet.create({
   userName: {
     color: "black",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   separator: {
     height: 1,
@@ -644,6 +648,7 @@ const styles = StyleSheet.create({
   actionButtons: {
     flexDirection: "row",
     marginLeft: "auto",
+    marginBottom: 10,
   },
   checkButton: {
     marginRight: 5,
@@ -665,7 +670,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginVertical: 10,
     marginLeft: 13,
-  }
+  },
 });
 
 export default Profile;
