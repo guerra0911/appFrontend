@@ -9,8 +9,11 @@ import {
   LayoutAnimation,
   Platform,
   Text,
+  Button,
 } from "react-native";
 import ChallengeCard from "./ChallengeCard";
+import api from "../api";
+import Loader from "./Loader";
 
 if (Platform.OS === "android") {
   UIManager.setLayoutAnimationEnabledExperimental &&
@@ -31,7 +34,9 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
   const [dxValue, setDxValue] = useState(0);
   const [swipingHeight, setSwipingHeight] = useState(0);
   const [backCardHeight, setBackCardHeight] = useState(0);
-  
+
+  const [hasCurrentUserSelectedWinner, setHasCurrentUserSelectedWinner] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const originalPost = challenge.original_note;
   const challengerPost = challenge.challenger_note;
@@ -159,14 +164,17 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
     })
   ).current;
 
+  //Set the Minimum Height for the Entry and Background Card on Loadup
   useEffect(() => {
     if (originalHeight > 0 && challengerHeight > 0) {
       const minHeight = Math.min(originalHeight, challengerHeight);
       setMinHeight(minHeight);
       setMeasured(true);
     }
+    setIsLoading(false);
   }, [originalHeight, challengerHeight]);
 
+  //As the user swipes away, decrease card height to minimum height in real time
   useEffect(() => {
     const calculateSwipingHeight = () => {
       const clampedDxValue = Math.max(
@@ -187,6 +195,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
     calculateSwipingHeight();
   }, [dxValue]);
 
+  //Render and Measure cards off screen on loadup to get Default height values
   const measureCardHeight = (event, type) => {
     const { height } = event.nativeEvent.layout;
     if (type === "original") {
@@ -196,7 +205,44 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
     }
   };
 
+  //Callable function to check and see if a user has made a winner selection for this specific challenger
+  const fetchUserPickStatus = async () => {
+    try {
+      const response = await api.get(`api/challenges/${challenge.id}/has_user_selected_winner/`);
+      setHasCurrentUserSelectedWinner(response.data.has_picked);
+    } catch (error) {
+      console.error("Error fetching user pick status", error);
+    }
+  };
+
+  //onMount function, called when the component is rendered initially
+  useEffect(() => {
+    console.log("Fetching Pick Status");
+    fetchUserPickStatus();
+  }, [challenge.id]);
+
+
+  //Allow users to pick which post is the winner
+  const handlePickUpdate = async (pickType) => {
+    try {
+      const endpoint = pickType === 'original' 
+        ? `api/challenges/${challenge.id}/pick_original/`
+        : `api/challenges/${challenge.id}/pick_challenger/`;
+      await api.post(endpoint);
+      fetchUserPickStatus(); //Refresh the pick status after updating
+    } catch (error) {
+      console.error("Error updating pick", error);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Loader isLoading={isLoading}/>
+    );
+  }
+
   if (!measured) {
+    console.log("Measuring");
     return (
       <View style={{ position: "absolute", top: -9999 }}>
         <View onLayout={(event) => measureCardHeight(event, "original")}>
@@ -312,6 +358,22 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
       <View style={styles.vsCircle}>
         <Text style={styles.vsText}>VS</Text>
       </View>
+
+      {hasCurrentUserSelectedWinner ? (
+        <Text style={styles.winnerText}>You have selected a winner</Text>
+      ) : (
+        <View style={styles.pickButtons}>
+          <Button
+            title="Pick Original"
+            onPress={() => handlePickUpdate('original')}
+          />
+          <Button
+            title="Pick Challenger"
+            onPress={() => handlePickUpdate('challenger')}
+          />
+        </View>
+      )}
+
     </View>
   );
 };
@@ -319,7 +381,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
 const styles = StyleSheet.create({
   challengeCard: {
     width: "100%",
-    marginBottom: 24,
+    marginBottom: 36,
     paddingLeft: 32,
   },
   cardsContainer: {
