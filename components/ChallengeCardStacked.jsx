@@ -12,6 +12,7 @@ import {
   Button,
 } from "react-native";
 import ChallengeCard from "./ChallengeCard";
+import ChallengeFooter from "./ChallengeFooter";
 import api from "../api";
 import Loader from "./Loader";
 
@@ -36,6 +37,8 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
   const [backCardHeight, setBackCardHeight] = useState(0);
 
   const [hasCurrentUserSelectedWinner, setHasCurrentUserSelectedWinner] = useState(false);
+  const [originalPicks, setOriginalPicks] = useState([]);
+  const [challengerPicks, setChallengerPicks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const originalPost = challenge.original_note;
@@ -210,6 +213,12 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
     try {
       const response = await api.get(`api/challenges/${challenge.id}/has_user_selected_winner/`);
       setHasCurrentUserSelectedWinner(response.data.has_picked);
+      
+      const originalResponse = await api.get(`api/challenges/${challenge.id}/get_original_picks/`);
+      setOriginalPicks(originalResponse.data);
+      
+      const challengerResponse = await api.get(`api/challenges/${challenge.id}/get_challenger_picks/`);
+      setChallengerPicks(challengerResponse.data);
     } catch (error) {
       console.error("Error fetching user pick status", error);
     }
@@ -217,10 +226,8 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
 
   //onMount function, called when the component is rendered initially
   useEffect(() => {
-    console.log("Fetching Pick Status");
     fetchUserPickStatus();
   }, [challenge.id]);
-
 
   //Allow users to pick which post is the winner
   const handlePickUpdate = async (pickType) => {
@@ -242,7 +249,6 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
   }
 
   if (!measured) {
-    console.log("Measuring");
     return (
       <View style={{ position: "absolute", top: -9999 }}>
         <View onLayout={(event) => measureCardHeight(event, "original")}>
@@ -283,6 +289,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
               post={flipped ? challengerPost : originalPost}
               height={minHeight}
               defaultHeight={flipped ? challengerHeight : originalHeight}
+              handlePickUpdate={handlePickUpdate}
             />
           </Animated.View>
         )}
@@ -303,6 +310,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
               post={flipped ? challengerPost : originalPost}
               height={backCardHeight !== 0 ? backCardHeight : minHeight}
               defaultHeight={flipped ? challengerHeight : originalHeight}
+              handlePickUpdate={handlePickUpdate}
             />
           </Animated.View>
         )}
@@ -319,7 +327,6 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
             onLayout={(event) => {
               const height = event.nativeEvent.layout.height;
               setFrontCardHeight(height);
-              // console.log("Front card height set:", height);
             }}
             {...panResponder.panHandlers}
           >
@@ -327,6 +334,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
               post={originalPost}
               onLikeDislikeUpdate={onLikeDislikeUpdate}
               {...(swipingHeight !== 0 && { height: swipingHeight })}
+              handlePickUpdate={handlePickUpdate}
             />
           </Animated.View>
         )}
@@ -343,7 +351,6 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
             onLayout={(event) => {
               const height = event.nativeEvent.layout.height;
               setFrontCardHeight(height);
-              // console.log("Front card height set:", height);
             }}
             {...panResponder.panHandlers}
           >
@@ -351,29 +358,19 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
               post={challengerPost}
               onLikeDislikeUpdate={onLikeDislikeUpdate}
               {...(swipingHeight !== 0 && { height: swipingHeight })}
+              handlePickUpdate={handlePickUpdate}
             />
           </Animated.View>
         )}
       </View>
-      <View style={styles.vsCircle}>
-        <Text style={styles.vsText}>VS</Text>
-      </View>
 
-      {hasCurrentUserSelectedWinner ? (
-        <Text style={styles.winnerText}>You have selected a winner</Text>
-      ) : (
-        <View style={styles.pickButtons}>
-          <Button
-            title="Pick Original"
-            onPress={() => handlePickUpdate('original')}
-          />
-          <Button
-            title="Pick Challenger"
-            onPress={() => handlePickUpdate('challenger')}
-          />
-        </View>
-      )}
-
+      <ChallengeFooter
+        hasCurrentUserSelectedWinner={hasCurrentUserSelectedWinner}
+        originalPost={originalPost}
+        challengerPost={challengerPost}
+        originalPicks={originalPicks}
+        challengerPicks={challengerPicks}
+      />
     </View>
   );
 };

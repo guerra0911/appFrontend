@@ -9,10 +9,11 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { LinearGradient } from 'expo-linear-gradient';
+import { LinearGradient } from "expo-linear-gradient";
 import RenderModal from "../app/(tabs)/renderModal";
 import CreateChallengeForm from "./CreateChallengeForm";
 import CreateSubForm from "./CreateSubForm";
@@ -26,7 +27,13 @@ const sword =
 const quote =
   "https://nickguerrabucket.s3.us-east-2.amazonaws.com/admin/quote.png";
 
-const ChallengeCard = ({ post, onLikeDislikeUpdate, height, defaultHeight, toggleCompression, isCompressible }) => {
+const ChallengeCard = ({
+  post,
+  onLikeDislikeUpdate,
+  height,
+  defaultHeight,
+  handlePickUpdate,
+}) => {
   const navigation = useNavigation();
   const {
     user,
@@ -50,10 +57,13 @@ const ChallengeCard = ({ post, onLikeDislikeUpdate, height, defaultHeight, toggl
   } = usePostActions(post, onLikeDislikeUpdate);
 
   useEffect(() => {
-    if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+    if (
+      Platform.OS === "android" &&
+      UIManager.setLayoutAnimationEnabledExperimental
+    ) {
       UIManager.setLayoutAnimationEnabledExperimental(true);
     }
-  }, []);  
+  }, []);
 
   const navigateToProfile = (userId) => {
     setLikeDislikeModalVisible(false);
@@ -86,51 +96,73 @@ const ChallengeCard = ({ post, onLikeDislikeUpdate, height, defaultHeight, toggl
       LayoutAnimation.configureNext(customAnimationConfig);
     }
   }, [height]);
-  
+
+  const [lastTap, setLastTap] = useState(null);
+
+  const handleDoubleTap = () => {
+    const now = Date.now();
+    const DOUBLE_PRESS_DELAY = 300;
+    if (lastTap && now - lastTap < DOUBLE_PRESS_DELAY) {
+      handlePickUpdate(post.is_challenger ? "challenger" : "original");
+    } else {
+      setLastTap(now);
+    }
+  };
 
   return (
-  <View style={[styles.wrapper, { height: height ? height : 'auto' }]}>
-    <View style={styles.header}>
-      <TouchableOpacity
-        onPress={() => navigateToProfile(post?.author?.id)}
-        style={styles.profilePictureContainer}
-      >
-        <Image
-          source={{ uri: post.author?.profile?.image }}
-          style={styles.profilePicture}
-          resizeMode="cover"
-        />
-      </TouchableOpacity>
-      <View>
-        <Text
-          style={styles.userName}
-          onPress={() => navigateToProfile(post?.author?.id)}
-        >
-          @{post.author?.username}
-        </Text>
-        <Text style={styles.date}>
-          {formatDistanceToNow(new Date(post.created_at), {
-            addSuffix: true,
-          })}
-        </Text>
+    // <TouchableOpacity activeOpacity={1} onPress={handleDoubleTap}>
+    <TouchableWithoutFeedback onPress={handleDoubleTap}>
+      <View style={[styles.wrapper, { height: height ? height : "auto" }]}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            onPress={() => navigateToProfile(post?.author?.id)}
+            style={styles.profilePictureContainer}
+            activeOpacity={1} // This prevents double-tap on profile picture from propagating
+          >
+            <Image
+              source={{ uri: post.author?.profile?.image }}
+              style={styles.profilePicture}
+              resizeMode="cover"
+            />
+          </TouchableOpacity>
+          <View>
+            <Text
+              style={styles.userName}
+              onPress={() => navigateToProfile(post?.author?.id)}
+            >
+              @{post.author?.username}
+            </Text>
+            <Text style={styles.date}>
+              {formatDistanceToNow(new Date(post.created_at), {
+                addSuffix: true,
+              })}
+            </Text>
+          </View>
+        </View>
+
+        <TouchableWithoutFeedback onPress={handleDoubleTap}>
+          <View
+            style={[
+              styles.contentContainer,
+              { height: height ? height : "auto" },
+            ]}
+          >
+            <View
+              ref={contentRef}
+              onLayout={() => {}}
+              style={styles.contentWrapper}
+            >
+              <Text style={styles.content}>{post.content}</Text>
+              {images.length > 0 && <PostImagesGrid images={images} />}
+            </View>
+            <GradientBar height={height} defaultHeight={defaultHeight} />
+          </View>
+        </TouchableWithoutFeedback>
       </View>
-    </View>
 
-    <View style={[styles.contentContainer, { height: height ? height : 'auto' }]}>
-      <View ref={contentRef} onLayout={() => {}} style={styles.contentWrapper}>
-        <Text style={styles.content}>{post.content}</Text>
-
-        {images.length > 0 && (
-        <PostImagesGrid images={images} /> 
-      )}
-      </View>
-
-      <GradientBar height={height} defaultHeight={defaultHeight} /> 
-    </View>
-
-  </View>
-);
-
+      {/* </TouchableOpacity> */}
+    </TouchableWithoutFeedback>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -171,8 +203,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     flex: 1,
   },
-  contentWrapper: {
-  },
+  contentWrapper: {},
   content: {
     color: "black",
     fontSize: 16,
