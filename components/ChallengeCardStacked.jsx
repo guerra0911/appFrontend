@@ -8,8 +8,6 @@ import {
   UIManager,
   LayoutAnimation,
   Platform,
-  Text,
-  Button,
 } from "react-native";
 import ChallengeCard from "./ChallengeCard";
 import ChallengeFooter from "./ChallengeFooter";
@@ -61,7 +59,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
   }, [flipped]);
 
   useEffect(() => {
-    minHeight.current = minHeight;
+    minHeightRef.current = minHeight;
   }, [minHeight]);
 
   const translateX = useRef(new Animated.Value(0)).current;
@@ -98,7 +96,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
           } else {
             setBackCardHeight(originalHeightRef.current);
           }
-          
+
           //If Successful Swipe, Set Card to height of Next Card to Show up
           if (flippedRef.current) {
             setSwipingHeight(challengerHeightRef.current);
@@ -250,7 +248,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
 
   if (!measured) {
     return (
-      <View style={{ position: "absolute", top: -9999 }}>
+      <View>
         <View onLayout={(event) => measureCardHeight(event, "original")}>
           <ChallengeCard
             post={originalPost}
