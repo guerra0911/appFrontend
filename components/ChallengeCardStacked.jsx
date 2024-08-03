@@ -21,7 +21,7 @@ if (Platform.OS === "android") {
 
 const screenWidth = Dimensions.get("window").width;
 
-const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
+const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate, isRequestView = false }) => {
   const [flipped, setFlipped] = useState(false);
   const [originalHeight, setOriginalHeight] = useState(0);
   const [challengerHeight, setChallengerHeight] = useState(0);
@@ -229,6 +229,9 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
 
   //Allow users to pick which post is the winner
   const handlePickUpdate = async (pickType) => {
+    if (isRequestView) {
+      return;
+    }
     try {
       const endpoint = pickType === 'original' 
         ? `api/challenges/${challenge.id}/pick_original/`
@@ -253,12 +256,14 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
           <ChallengeCard
             post={originalPost}
             onLikeDislikeUpdate={onLikeDislikeUpdate}
+            isRequestView={isRequestView}
           />
         </View>
         <View onLayout={(event) => measureCardHeight(event, "challenger")}>
           <ChallengeCard
             post={challengerPost}
             onLikeDislikeUpdate={onLikeDislikeUpdate}
+            isRequestView={isRequestView}
           />
         </View>
       </View>
@@ -288,6 +293,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
               height={minHeight}
               defaultHeight={flipped ? challengerHeight : originalHeight}
               handlePickUpdate={handlePickUpdate}
+              isRequestView={isRequestView}
             />
           </Animated.View>
         )}
@@ -309,6 +315,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
               height={backCardHeight !== 0 ? backCardHeight : minHeight}
               defaultHeight={flipped ? challengerHeight : originalHeight}
               handlePickUpdate={handlePickUpdate}
+              isRequestView={isRequestView}
             />
           </Animated.View>
         )}
@@ -333,6 +340,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
               onLikeDislikeUpdate={onLikeDislikeUpdate}
               {...(swipingHeight !== 0 && { height: swipingHeight })}
               handlePickUpdate={handlePickUpdate}
+              isRequestView={isRequestView}
             />
           </Animated.View>
         )}
@@ -357,6 +365,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
               onLikeDislikeUpdate={onLikeDislikeUpdate}
               {...(swipingHeight !== 0 && { height: swipingHeight })}
               handlePickUpdate={handlePickUpdate}
+              isRequestView={isRequestView}
             />
           </Animated.View>
         )}
@@ -368,6 +377,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate }) => {
         challengerPost={challengerPost}
         originalPicks={originalPicks}
         challengerPicks={challengerPicks}
+        isRequestView={isRequestView}
       />
     </View>
   );

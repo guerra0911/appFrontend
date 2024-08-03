@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Animated, Dimensions, Image } from "react-nativ
 
 const screenWidth = Dimensions.get("window").width;
 
-const ChallengeFooter = ({ hasCurrentUserSelectedWinner, originalPost, challengerPost, originalPicks, challengerPicks }) => {
+const ChallengeFooter = ({ hasCurrentUserSelectedWinner, originalPost, challengerPost, originalPicks, challengerPicks, isRequestView }) => {
   const widthAnim = useRef(new Animated.Value(hasCurrentUserSelectedWinner ? screenWidth - 38 : 36)).current;
 
   useEffect(() => {

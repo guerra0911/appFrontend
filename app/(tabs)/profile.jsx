@@ -1,21 +1,7 @@
-import React from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  View,
-  Image,
-  TouchableOpacity,
-  Alert,
-  Text,
-  RefreshControl,
-  StyleSheet,
-} from "react-native";
-import {
-  GestureHandlerRootView,
-  ScrollView,
-} from "react-native-gesture-handler";
-import { useEffect, useCallback, useState } from "react";
-import { icons } from "../../constants";
+import { View, Image, TouchableOpacity, Alert, Text, RefreshControl, StyleSheet, ScrollView } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useGlobalContext } from "../../context/GlobalProvider";
 import ProfileCard from "../../components/ProfileCard";
@@ -27,7 +13,12 @@ import RenderModal from "./renderModal";
 import EditProfileForm from "../../components/EditProfileForm";
 import PrivateProfileIndicator from "../../components/PrivateProfileIndicator";
 import { useNavigation } from "@react-navigation/native";
-import ChallengeCardStacked from "../../components/ChallengeCardStacked";
+import ChallengeStatusButton from "../../components/ChallengeStatusButton";
+import FollowStatusButton from "../../components/FollowStatusButton";
+import BlockingStatusButton from "../../components/BlockingStatusButton";
+import useChallengeActions from "../../hooks/useChallengeActions";
+import useFollowBlockActions from "../../hooks/useFollowBlockActions";
+import { icons } from "../../constants";
 
 const Profile = () => {
   const router = useRouter();
@@ -35,31 +26,24 @@ const Profile = () => {
   const [userProfile, setUserProfile] = useState(null);
   const [userData, setUserData] = useState(null);
   const [posts, setPosts] = useState([]);
-  const { user, setUser, setIsLogged, loading, setLoading } =
-    useGlobalContext();
+  const { user, setUser, setIsLogged, loading, setLoading } = useGlobalContext();
   const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [profilePic, setProfilePic] = useState(null);
-  const [requests, setRequests] = useState([]);
-  const [requesting, setRequesting] = useState([]);
-  const [blockedBy, setBlockedBy] = useState([]);
-  const [blocking, setBlocking] = useState([]);
-  const [challengeRequests, setChallengeRequests] = useState([]);
-  const [challengesDeclined, setChallengesDeclined] = useState([]);
-  const [requestingChallenges, setRequestingChallenges] = useState([]);
   const navigation = useNavigation();
-  const [requestModalVisible, setRequestModalVisible] = useState(false);
-  const [blockModalVisible, setBlockModalVisible] = useState(false);
-  const [challengeModalVisible, setChallengeModalVisible] = useState(false);
-  const [modalTitle, setModalTitle] = useState("");
 
-  const navigateToProfile = (userId) => {
-    setModalVisible(false);
-    setRequestModalVisible(false);
-    setBlockModalVisible(false);
-    setChallengeModalVisible(false);
-    navigation.navigate("otherProfile", { userId });
-  };
+  const {
+    fetchRequests,
+    fetchRequesting,
+    fetchBlockedBy,
+    fetchBlocking,
+  } = useFollowBlockActions();
+
+  const {
+    fetchChallengeRequests,
+    fetchRequestingChallenges,
+    fetchChallengesDeclined,
+  } = useChallengeActions();
 
   const fetchUserProfile = async (id) => {
     setLoading(true);
@@ -82,168 +66,6 @@ const Profile = () => {
       Alert.alert("Error", "Failed to fetch user profile.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchRequests = async () => {
-    try {
-      const response = await api.get(`/api/user/me/requests/`);
-      setRequests(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const fetchRequesting = async () => {
-    try {
-      const response = await api.get(`/api/user/me/requesting/`);
-      setRequesting(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const openRequestsModal = () => {
-    setModalTitle("Requests");
-    fetchRequests();
-    setRequestModalVisible(true);
-  };
-
-  const openRequestingModal = () => {
-    setModalTitle("Requesting");
-    fetchRequesting();
-    setRequestModalVisible(true);
-  };
-
-  const fetchBlockedBy = async () => {
-    try {
-      const response = await api.get(`/api/user/me/blocked_by/`);
-      setBlockedBy(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const fetchBlocking = async () => {
-    try {
-      const response = await api.get(`/api/user/me/blocking/`);
-      setBlocking(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const openBlockedByModal = () => {
-    setModalTitle("Blocked By");
-    fetchBlockedBy();
-    setBlockModalVisible(true);
-  };
-
-  const openBlockingModal = () => {
-    setModalTitle("Blocking");
-    fetchBlocking();
-    setBlockModalVisible(true);
-  };
-
-  const fetchChallengeRequests = async () => {
-    try {
-      const response = await api.get(`/api/challenges/requests/`);
-      setChallengeRequests(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const fetchRequestingChallenges = async () => {
-    try {
-      const response = await api.get(`/api/challenges/requesting/`);
-      setRequestingChallenges(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const fetchChallengesDeclined = async () => {
-    try {
-      const response = await api.get(`/api/challenges/declined/`);
-      setChallengesDeclined(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const openChallengeRequestsModal = () => {
-    setModalTitle("Challenge Requests");
-    fetchChallengeRequests();
-    setChallengeModalVisible(true);
-  };
-
-  const openRequestingChallengesModal = () => {
-    setModalTitle("Requesting to Challenge");
-    fetchRequestingChallenges();
-    fetchChallengesDeclined();
-    setChallengeModalVisible(true);
-  };
-
-  const acceptFollowRequest = async (userId) => {
-    try {
-      await api.post(`/api/user/accept_follow/${userId}/`);
-      fetchRequests(); // Refresh the requests list
-    } catch (error) {
-      console.error("Error accepting follow request:", error);
-      Alert.alert("Error", "Failed to accept follow request.");
-    }
-  };
-
-  const declineFollowRequest = async (userId) => {
-    try {
-      await api.post(`/api/user/decline_follow/${userId}/`);
-      fetchRequests(); // Refresh the requests list
-    } catch (error) {
-      console.error("Error declining follow request:", error);
-      Alert.alert("Error", "Failed to decline follow request.");
-    }
-  };
-
-  const acceptChallengeRequest = async (challengeId) => {
-    try {
-      await api.post(`/api/challenges/accept/${challengeId}/`);
-      fetchChallengeRequests(); // Refresh the requests list
-    } catch (error) {
-      console.error("Error accepting challenge request:", error);
-      Alert.alert("Error", "Failed to accept challenge request.");
-    }
-  };
-
-  const declineChallengeRequest = async (challengeId) => {
-    try {
-      await api.post(`/api/challenges/decline/${challengeId}/`);
-      fetchChallengeRequests(); // Refresh the requests list
-    } catch (error) {
-      console.error("Error declining challenge request:", error);
-      Alert.alert("Error", "Failed to decline challenge request.");
-    }
-  };
-
-  const resubmitChallengeRequest = async (challengeId) => {
-    try {
-      await api.post(`/api/challenges/resubmit/${challengeId}/`);
-      fetchChallengesDeclined(); // Refresh the declined list
-      fetchRequestingChallenges(); // Refresh the requesting list
-    } catch (error) {
-      console.error("Error resubmitting challenge request:", error);
-      Alert.alert("Error", "Failed to resubmit challenge request.");
-    }
-  };
-
-  const deleteChallenge = async (challengeId) => {
-    try {
-      await api.post(`/api/challenges/delete/${challengeId}/`);
-      fetchChallengesDeclined(); // Refresh the declined list
-      fetchRequestingChallenges(); // Refresh the requesting list
-    } catch (error) {
-      console.error("Error deleting challenge:", error);
-      Alert.alert("Error", "Failed to delete challenge.");
     }
   };
 
@@ -286,211 +108,23 @@ const Profile = () => {
       <View style={styles.container}>
         <ScrollView
           contentContainerStyle={styles.scrollViewContent}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
           <Loader isLoading={loading} />
           <View style={styles.headerRow}>
-            <TouchableOpacity style={styles.button} onPress={openBlockingModal}>
-              <Text style={styles.buttonText}>Blocking</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={openBlockedByModal}
-            >
-              <Text style={styles.buttonText}>Blocked By</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.button}
-              onPress={openRequestingModal}
-            >
-              <Text style={styles.buttonText}>Requesting</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={openRequestsModal}>
-              <Text style={styles.buttonText}>Requests</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.button}
-              onPress={openRequestingChallengesModal}
-            >
-              <Text style={styles.buttonText}>Sent Challenges</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={openChallengeRequestsModal}
-            >
-              <Text style={styles.buttonText}>Challenge Requests</Text>
-            </TouchableOpacity>
-
+            <BlockingStatusButton type="Blocking" />
+            <BlockingStatusButton type="Blocked By" />
+            <FollowStatusButton type="Requesting" />
+            <FollowStatusButton type="Requests" />
+            <ChallengeStatusButton type="Sent" />
+            <ChallengeStatusButton type="Requests" />
             <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-              <Image
-                source={icons.logout}
-                resizeMode="contain"
-                style={styles.logoutIcon}
-              />
+              <Image source={icons.logout} resizeMode="contain" style={styles.logoutIcon} />
             </TouchableOpacity>
           </View>
 
-          <RenderModal
-            modalVisible={modalVisible}
-            setModalVisible={setModalVisible}
-          >
+          <RenderModal modalVisible={modalVisible} setModalVisible={setModalVisible}>
             <EditProfileForm setModalVisible={setModalVisible} />
-          </RenderModal>
-
-          <RenderModal
-            modalVisible={requestModalVisible}
-            setModalVisible={setRequestModalVisible}
-          >
-            <Text style={styles.modalTitle}>{modalTitle}</Text>
-            <ScrollView>
-              {(modalTitle === "Requests" ? requests : requesting).map(
-                (user, index, array) => (
-                  <View key={user.id}>
-                    <TouchableOpacity
-                      onPress={() => navigateToProfile(user.id)}
-                    >
-                      <View style={styles.userContainer}>
-                        <Image
-                          source={{ uri: user.profile.image }}
-                          style={styles.userImage}
-                        />
-                        <Text style={styles.userName}>@{user.username}</Text>
-                        {modalTitle === "Requests" && (
-                          <View style={styles.actionButtons}>
-                            <TouchableOpacity
-                              style={styles.checkButton}
-                              onPress={() => acceptFollowRequest(user.id)}
-                            >
-                              <Text style={styles.buttonText}>✓</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                              style={styles.crossButton}
-                              onPress={() => declineFollowRequest(user.id)}
-                            >
-                              <Text style={styles.buttonText}>✗</Text>
-                            </TouchableOpacity>
-                          </View>
-                        )}
-                      </View>
-                    </TouchableOpacity>
-                    {index < array.length - 1 && (
-                      <View style={styles.separator} />
-                    )}
-                  </View>
-                )
-              )}
-            </ScrollView>
-          </RenderModal>
-
-          <RenderModal
-            modalVisible={challengeModalVisible}
-            setModalVisible={setChallengeModalVisible}
-          >
-            <Text style={styles.modalTitle}>{modalTitle}</Text>
-            <ScrollView>
-              {modalTitle === "Challenge Requests" &&
-                challengeRequests.map((challenge) => (
-                  <View key={`challenge-${challenge.id}`}>
-                    <View style={styles.actionButtons}>
-                      <TouchableOpacity
-                        style={styles.checkButton}
-                        onPress={() => acceptChallengeRequest(challenge.id)}
-                      >
-                        <Text style={styles.buttonText}>Accept</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.crossButton}
-                        onPress={() => declineChallengeRequest(challenge.id)}
-                      >
-                        <Text style={styles.buttonText}>Decline</Text>
-                      </TouchableOpacity>
-                    </View>
-                    <View key={`challenge-${challenge.id}`}>
-                      <ChallengeCardStacked
-                        challenge={challenge}
-                        onLikeDislikeUpdate={fetchChallengeRequests}
-                      />
-                    </View>
-                  </View>
-                ))}
-
-              {modalTitle === "Requesting to Challenge" && (
-                <>
-                  {requestingChallenges.map((challenge) => (
-                    <View key={`challenge-${challenge.id}`}>
-                      <TouchableOpacity
-                        style={styles.crossButton}
-                        onPress={() => deleteChallenge(challenge.id)}
-                      >
-                        <Text style={styles.buttonText}>Delete</Text>
-                      </TouchableOpacity>
-                      <ChallengeCardStacked
-                        key={`challenge-${challenge.id}`}
-                        challenge={challenge}
-                        onLikeDislikeUpdate={fetchRequestingChallenges}
-                      />
-                    </View>
-                  ))}
-                  <Text style={styles.sectionTitle}>Declined Challenges</Text>
-                  {challengesDeclined.map((challenge) => (
-                    <View key={`challenge-${challenge.id}`}>
-                      <View style={styles.actionButtons}>
-                        <TouchableOpacity
-                          style={styles.checkButton}
-                          onPress={() => resubmitChallengeRequest(challenge.id)}
-                        >
-                          <Text style={styles.buttonText}>Resubmit</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={styles.crossButton}
-                          onPress={() => deleteChallenge(challenge.id)}
-                        >
-                          <Text style={styles.buttonText}>Delete</Text>
-                        </TouchableOpacity>
-                      </View>
-                      <ChallengeCardStacked
-                        key={`challenge-${challenge.id}`}
-                        challenge={challenge}
-                        onLikeDislikeUpdate={fetchChallengesDeclined}
-                      />
-                    </View>
-                  ))}
-                </>
-              )}
-            </ScrollView>
-          </RenderModal>
-
-          <RenderModal
-            modalVisible={blockModalVisible}
-            setModalVisible={setBlockModalVisible}
-          >
-            <Text style={styles.modalTitle}>{modalTitle}</Text>
-            <ScrollView>
-              {(modalTitle === "Blocked By" ? blockedBy : blocking).map(
-                (user, index, array) => (
-                  <View key={user.id}>
-                    <TouchableOpacity
-                      onPress={() => navigateToProfile(user.id)}
-                    >
-                      <View style={styles.userContainer}>
-                        <Image
-                          source={{ uri: user.profile.image }}
-                          style={styles.userImage}
-                        />
-                        <Text style={styles.userName}>@{user.username}</Text>
-                      </View>
-                    </TouchableOpacity>
-                    {index < array.length - 1 && (
-                      <View style={styles.separator} />
-                    )}
-                  </View>
-                )
-              )}
-            </ScrollView>
           </RenderModal>
 
           {!loading && userProfile && userData && (
@@ -558,24 +192,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginTop: 20,
   },
-  button: {
-    marginRight: 10,
-    padding: 10,
-    backgroundColor: "#007AFF",
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: "#FFF",
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  logoutButton: {
-    padding: 10,
-  },
-  logoutIcon: {
-    width: 24,
-    height: 24,
-  },
   scrollViewContent: {
     flexGrow: 1,
   },
@@ -606,70 +222,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
-  flexGrow1: {
-    flexGrow: 1,
-  },
-  modalTitle: {
-    fontSize: 24,
-    color: "black",
-    fontWeight: "bold",
-    marginBottom: 20,
-    marginLeft: 13,
-  },
-  userContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+  logoutButton: {
     padding: 10,
-    borderRadius: 5,
-    borderColor: "#DCDCDC",
-    backgroundColor: "#F5F5F5",
-    borderRadius: 10,
-    marginVertical: 5,
   },
-  userImage: {
-    borderWidth: 2,
-    borderColor: "#69C3FF",
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 10,
-  },
-  userName: {
-    color: "black",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  separator: {
-    height: 1,
-    backgroundColor: "#DCDCDC",
-    marginVertical: 1,
-    marginHorizontal: 13,
-  },
-  actionButtons: {
-    flexDirection: "row",
-    marginLeft: "auto",
-    marginBottom: 10,
-  },
-  checkButton: {
-    marginRight: 5,
-    padding: 5,
-    backgroundColor: "#4CAF50",
-    borderRadius: 5,
-  },
-  crossButton: {
-    padding: 5,
-    backgroundColor: "#F44336",
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: "#FFF",
-    fontWeight: "bold",
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginVertical: 10,
-    marginLeft: 13,
+  logoutIcon: {
+    width: 24,
+    height: 24,
   },
 });
 

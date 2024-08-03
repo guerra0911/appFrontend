@@ -33,6 +33,7 @@ const ChallengeCard = ({
   height,
   defaultHeight,
   handlePickUpdate,
+  isRequestView = false,
 }) => {
   const navigation = useNavigation();
   const {
@@ -100,6 +101,9 @@ const ChallengeCard = ({
   const [lastTap, setLastTap] = useState(null);
 
   const handleDoubleTap = () => {
+    if (isRequestView) {
+      return;
+    }
     const now = Date.now();
     const DOUBLE_PRESS_DELAY = 300;
     if (lastTap && now - lastTap < DOUBLE_PRESS_DELAY) {
