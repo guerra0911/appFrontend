@@ -61,6 +61,7 @@ const Profile = () => {
       fetchChallengeRequests();
       fetchRequestingChallenges();
       fetchChallengesDeclined();
+      console.log("AAC = ", response.data.profile.auto_accept_challenges);
     } catch (error) {
       console.error("Error fetching user profile:", error);
       Alert.alert("Error", "Failed to fetch user profile.");

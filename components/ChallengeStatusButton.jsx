@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import RenderModal from "../app/(tabs)/renderModal";
 import ChallengeCardStacked from "./ChallengeCardStacked";
 import useChallengeActions from "../hooks/useChallengeActions";
@@ -8,7 +8,7 @@ import StatusActionButton from "./StatusActionButton";
 const ChallengeStatusButton = ({ type }) => {
   const [challengeModalVisible, setChallengeModalVisible] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
-  
+
   const {
     challengeRequests,
     challengesDeclined,
@@ -20,6 +20,8 @@ const ChallengeStatusButton = ({ type }) => {
     declineChallengeRequest,
     resubmitChallengeRequest,
     deleteChallenge,
+    acceptAllChallengeRequests,
+    declineAllChallengeRequests,
   } = useChallengeActions();
 
   const openChallengeRequestsModal = () => {
@@ -33,6 +35,28 @@ const ChallengeStatusButton = ({ type }) => {
     fetchRequestingChallenges();
     fetchChallengesDeclined();
     setChallengeModalVisible(true);
+  };
+
+  const handleAcceptAll = async () => {
+    try {
+      await acceptAllChallengeRequests();
+      Alert.alert("All challenge requests accepted!");
+      fetchChallengeRequests();
+    } catch (error) {
+      console.error("Error accepting all challenges:", error);
+      Alert.alert("Error accepting all challenges. Please try again.");
+    }
+  };
+
+  const handleDeclineAll = async () => {
+    try {
+      await declineAllChallengeRequests();
+      Alert.alert("All challenge requests declined!");
+      fetchChallengeRequests();
+    } catch (error) {
+      console.error("Error declining all challenges:", error);
+      Alert.alert("Error declining all challenges. Please try again.");
+    }
   };
 
   return (
@@ -50,30 +74,45 @@ const ChallengeStatusButton = ({ type }) => {
       <RenderModal modalVisible={challengeModalVisible} setModalVisible={setChallengeModalVisible}>
         <Text style={styles.modalTitle}>{modalTitle}</Text>
         <ScrollView>
-          {modalTitle === "Challenge Requests" &&
-            challengeRequests.map((challenge) => (
-              <View key={`challenge-${challenge.id}`}>
-                <View style={styles.actionButtons}>
-                  <StatusActionButton
-                    text="Accept"
-                    color="#4CAF50"
-                    onPress={() => acceptChallengeRequest(challenge.id)}
-                  />
-                  <StatusActionButton
-                    text="Decline"
-                    color="#F44336"
-                    onPress={() => declineChallengeRequest(challenge.id)}
-                  />
-                </View>
-                <View key={`challenge-${challenge.id}`}>
-                <ChallengeCardStacked
-                  challenge={challenge}
-                  onLikeDislikeUpdate={fetchChallengeRequests}
-                  isRequestView={true}
+          {modalTitle === "Challenge Requests" && (
+            <>
+              <View style={styles.actionButtons}>
+                <StatusActionButton
+                  text="Accept All"
+                  color="#4CAF50"
+                  onPress={handleAcceptAll}
                 />
-                </View>
+                <StatusActionButton
+                  text="Decline All"
+                  color="#F44336"
+                  onPress={handleDeclineAll}
+                />
               </View>
-            ))}
+              {challengeRequests.map((challenge) => (
+                <View key={`challenge-${challenge.id}`}>
+                  <View style={styles.actionButtons}>
+                    <StatusActionButton
+                      text="Accept"
+                      color="#4CAF50"
+                      onPress={() => acceptChallengeRequest(challenge.id)}
+                    />
+                    <StatusActionButton
+                      text="Decline"
+                      color="#F44336"
+                      onPress={() => declineChallengeRequest(challenge.id)}
+                    />
+                  </View>
+                  <View key={`challenge-${challenge.id}`}>
+                    <ChallengeCardStacked
+                      challenge={challenge}
+                      onLikeDislikeUpdate={fetchChallengeRequests}
+                      isRequestView={true}
+                    />
+                  </View>
+                </View>
+              ))}
+            </>
+          )}
 
           {modalTitle === "Sent Challenges" && (
             <>

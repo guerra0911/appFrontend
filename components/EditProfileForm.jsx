@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Image, Alert, Button, Switch, Text, ScrollView } from "react-native";
+import { View, Image, Alert, Button, ScrollView, TextInput, Text, Switch} from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import api from "../api";
@@ -8,45 +8,25 @@ import CustomButton from "./CustomButton";
 import FormField from "./FormField";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 
-const isValidURL = (url) => {
-  const pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
-    '((([a-z\\d]([a-z\\d-]*[a\\d])*)\\.?)+[a-z]{2,}|'+ // domain name
-    '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
-    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
-    '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
-    '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
-  return !!pattern.test(url);
-};
-
 const EditProfileForm = ({ setModalVisible }) => {
   const { user, setUser } = useGlobalContext();
-  const [username, setUsername] = useState(user.username || "");
-  const [bio, setBio] = useState(user.profile.bio || "");
-  const [birthday, setBirthday] = useState(new Date(user.profile.birthday) || new Date());
-  const [formattedBirthday, setFormattedBirthday] = useState(birthday.toDateString());
-  const [spotifyUrl, setSpotifyUrl] = useState(user.profile.spotify_url || "");
-  const [imdbUrl, setImdbUrl] = useState(user.profile.imdb_url || "");
-  const [websiteUrl, setWebsiteUrl] = useState(user.profile.website_url || "");
-  const [email, setEmail] = useState(user.profile.email || "");
-  const [privacyFlag, setPrivacyFlag] = useState(user.profile.privacy_flag);
-  const [notificationFlag, setNotificationFlag] = useState(user.profile.notification_flag);
-  const [image, setImage] = useState(user.profile.image || null);
+  const [image, setImage] = useState(user.profile.image);
   const [uploading, setUploading] = useState(false);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-
-  // Initial state to compare later
-  const initialState = {
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [birthday, setBirthday] = useState(new Date(user.profile.birthday));
+  const [formData, setFormData] = useState({
     username: user.username,
     bio: user.profile.bio,
+    location: user.profile.location,
     birthday: user.profile.birthday,
     spotify_url: user.profile.spotify_url,
     imdb_url: user.profile.imdb_url,
     website_url: user.profile.website_url,
-    email: user.profile.email,
     privacy_flag: user.profile.privacy_flag,
     notification_flag: user.profile.notification_flag,
-    image: user.profile.image,
-  };
+    email: user.profile.email,
+    auto_accept_challenges: user.profile.auto_accept_challenges,
+  });
 
   useEffect(() => {
     (async () => {
@@ -73,75 +53,56 @@ const EditProfileForm = ({ setModalVisible }) => {
     }
   };
 
+  const handleInputChange = (name, value) => {
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirm = (date) => {
+    setBirthday(date);
+    setFormData({ ...formData, birthday: date.toISOString().split('T')[0] });
+    hideDatePicker();
+  };
+
   const handleSubmit = async () => {
     setUploading(true);
-    const formData = new FormData();
+    const changedData = {};
 
-    // Check for changes and add only changed fields to formData
-    if (username.trim() && username !== initialState.username) {
-      formData.append("username", username);
-    }
-    if (bio.trim() && bio !== initialState.bio) {
-      formData.append("profile.bio", bio);
-    }
-    if (birthday && birthday.toISOString().split('T')[0] !== initialState.birthday) {
-      formData.append("profile.birthday", birthday.toISOString().split('T')[0]);
-    }
-    if (spotifyUrl.trim() && spotifyUrl !== initialState.spotify_url) {
-      if (!isValidURL(spotifyUrl)) {
-        Alert.alert("Invalid Spotify URL.");
-        setUploading(false);
-        return;
+    Object.keys(formData).forEach(key => {
+      if (formData[key] !== user[key] && formData[key] !== user.profile[key]) {
+        changedData[key] = formData[key];
       }
-      formData.append("profile.spotify_url", spotifyUrl);
-    }
-    if (imdbUrl.trim() && imdbUrl !== initialState.imdb_url) {
-      if (!isValidURL(imdbUrl)) {
-        Alert.alert("Invalid IMDb URL.");
-        setUploading(false);
-        return;
-      }
-      formData.append("profile.imdb_url", imdbUrl);
-    }
-    if (websiteUrl.trim() && websiteUrl !== initialState.website_url) {
-      if (!isValidURL(websiteUrl)) {
-        Alert.alert("Invalid Website URL.");
-        setUploading(false);
-        return;
-      }
-      formData.append("profile.website_url", websiteUrl);
-    }
-    if (email.trim() && email !== initialState.email) {
-      formData.append("profile.email", email);
-    }
-    if (privacyFlag !== initialState.privacy_flag) {
-      formData.append("profile.privacy_flag", privacyFlag);
-    }
-    if (notificationFlag !== initialState.notification_flag) {
-      formData.append("profile.notification_flag", notificationFlag);
-    }
-    if (image && image !== initialState.image) {
-      const userId = user.id;
-      const timestamp = new Date().getTime();
-      const uniqueImageName = `profile_${userId}.jpg`;
-      formData.append("profile.image", {
+    });
+
+    if (image !== user.profile.image) {
+      changedData.image = {
         uri: image,
-        name: uniqueImageName,
+        name: `profile_${user.id}.jpg`,
         type: "image/jpeg",
-      });
+      };
+    }
+
+    const requestData = new FormData();
+    for (const key in changedData) {
+      requestData.append(key, changedData[key]);
     }
 
     try {
-      const response = await api.put("/api/user/me/update/", formData, {
+      const response = await api.put("/api/user/me/update/", requestData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
 
-      // Update global user state
-      setUser(response.data);
-
       Alert.alert("Profile updated successfully!");
+      setUser(response.data);
       setModalVisible(false);
     } catch (error) {
       console.error(
@@ -155,83 +116,83 @@ const EditProfileForm = ({ setModalVisible }) => {
   };
 
   return (
-    <KeyboardAwareScrollView
-      extraScrollHeight={100} // Adjust this value as needed
-      contentContainerStyle={{ paddingBottom: 20 }}
-    >
-      <FormField
-        value={username}
-        placeholder="Username"
-        handleChangeText={setUsername}
-        otherStyles="mt-0"
-        multiline={false}
-      />
-      <FormField
-        value={bio}
-        placeholder="Bio"
-        handleChangeText={setBio}
-        otherStyles="mt-2"
-        multiline={true}
-      />
-      <FormField
-        value={email}
-        placeholder="Email"
-        handleChangeText={setEmail}
-        otherStyles="mt-2"
-        multiline={false}
-      />
-      <Button title="Pick Birthday" onPress={() => setShowDatePicker(true)} />
-      <Text>Selected Birthday: {formattedBirthday}</Text>
-      <DateTimePickerModal
-        isVisible={showDatePicker}
-        mode="date"
-        date={birthday}
-        onConfirm={(date) => {
-          setBirthday(date);
-          setFormattedBirthday(date.toDateString());
-          setShowDatePicker(false);
-        }}
-        onCancel={() => setShowDatePicker(false)}
-      />
-      <FormField
-        value={spotifyUrl}
-        placeholder="Spotify URL"
-        handleChangeText={setSpotifyUrl}
-        otherStyles="mt-2"
-        multiline={false}
-      />
-      <FormField
-        value={imdbUrl}
-        placeholder="IMDb URL"
-        handleChangeText={setImdbUrl}
-        otherStyles="mt-2"
-        multiline={false}
-      />
-      <FormField
-        value={websiteUrl}
-        placeholder="Website URL"
-        handleChangeText={setWebsiteUrl}
-        otherStyles="mt-2"
-        multiline={false}
-      />
-      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginVertical: 10 }}>
-        <Text>Private Account</Text>
-        <Switch
-          value={privacyFlag}
-          onValueChange={setPrivacyFlag}
-        />
-      </View>
-      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginVertical: 10 }}>
-        <Text>Enable Notifications</Text>
-        <Switch
-          value={notificationFlag}
-          onValueChange={setNotificationFlag}
-        />
-      </View>
+    <KeyboardAwareScrollView extraScrollHeight={100} contentContainerStyle={{ paddingBottom: 20 }}>
       <Button title="Pick an image from camera roll" onPress={pickImage} />
-      {image && (
-        <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />
-      )}
+      {image && <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
+
+      <FormField
+        title="Username"
+        value={formData.username}
+        placeholder="Enter your username"
+        handleChangeText={(value) => handleInputChange('username', value)}
+      />
+      <FormField
+        title="Bio"
+        value={formData.bio}
+        placeholder="Enter your bio"
+        handleChangeText={(value) => handleInputChange('bio', value)}
+        multiline
+      />
+      <FormField
+        title="Spotify URL"
+        value={formData.spotify_url}
+        placeholder="Enter your Spotify URL"
+        handleChangeText={(value) => handleInputChange('spotify_url', value)}
+        isURL
+      />
+      <FormField
+        title="IMDb URL"
+        value={formData.imdb_url}
+        placeholder="Enter your IMDb URL"
+        handleChangeText={(value) => handleInputChange('imdb_url', value)}
+        isURL
+      />
+      <FormField
+        title="Email"
+        value={formData.email}
+        placeholder="Enter your email"
+        handleChangeText={(value) => handleInputChange('email', value)}
+      />
+      
+      <View>
+        <Text>Birthday</Text>
+        <Button title={birthday.toDateString()} onPress={showDatePicker} />
+        <DateTimePickerModal
+          isVisible={isDatePickerVisible}
+          mode="date"
+          onConfirm={handleConfirm}
+          onCancel={hideDatePicker}
+          date={birthday}
+        />
+      </View>
+
+      <Text>Location</Text>
+      <TextInput
+        value={formData.location}
+        placeholder="Enter your location"
+        onChangeText={(value) => handleInputChange('location', value)}
+      />
+      <Text>Website URL</Text>
+      <TextInput
+        value={formData.website_url}
+        placeholder="Enter your website URL"
+        onChangeText={(value) => handleInputChange('website_url', value)}
+      />
+      <Text>Privacy</Text>
+      <Switch
+        value={formData.privacy_flag}
+        onValueChange={(value) => handleInputChange('privacy_flag', value)}
+      />
+      <Text>Notifications</Text>
+      <Switch
+        value={formData.notification_flag}
+        onValueChange={(value) => handleInputChange('notification_flag', value)}
+      />
+      <Text>Auto Accept Challenges</Text>
+      <Switch
+        value={formData.auto_accept_challenges}
+        onValueChange={(value) => handleInputChange('auto_accept_challenges', value)}
+      />
       <CustomButton
         title="Submit"
         handlePress={handleSubmit}
