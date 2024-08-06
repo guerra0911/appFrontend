@@ -1,8 +1,8 @@
 import React from "react";
-import { Modal, View, TouchableOpacity, StyleSheet, PanResponder, ScrollView } from "react-native";
+import { Modal, View, Text, TouchableOpacity, StyleSheet, PanResponder, ScrollView, RefreshControl } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 
-const RenderModal = ({ modalVisible, setModalVisible, children }) => {
+const RenderModal = ({ modalVisible, setModalVisible, children, refreshing, onRefresh, modalTitle, modalTitleStyle }) => {
   return (
     <Modal
       animationType="slide"
@@ -17,7 +17,11 @@ const RenderModal = ({ modalVisible, setModalVisible, children }) => {
               <AntDesign name="downcircle" size={24} color="#69C3FF" />
             </TouchableOpacity>
           </View>
-          <ScrollView contentContainerStyle={styles.scrollViewContent}>
+          <Text style={modalTitleStyle}>{modalTitle}</Text>
+          <ScrollView contentContainerStyle={styles.scrollViewContent}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }>
             {children}
           </ScrollView>
         </View>

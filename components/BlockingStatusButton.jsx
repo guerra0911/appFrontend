@@ -9,13 +9,10 @@ const BlockingStatusButton = ({ type }) => {
   const [blockModalVisible, setBlockModalVisible] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const navigation = useNavigation();
+  const [refreshing, setRefreshing] = useState(false);
 
-  const {
-    blockedBy,
-    blocking,
-    fetchBlockedBy,
-    fetchBlocking,
-  } = useFollowBlockActions();
+  const { blockedBy, blocking, fetchBlockedBy, fetchBlocking } =
+    useFollowBlockActions();
 
   const openBlockedByModal = () => {
     setModalTitle("Blocked By");
@@ -34,6 +31,13 @@ const BlockingStatusButton = ({ type }) => {
     navigation.navigate("otherProfile", { userId });
   };
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    fetchBlockedBy();
+    fetchBlocking();
+    setRefreshing(false);
+  }, [blockedBy, blocking]);
+
   return (
     <View>
       {type === "Blocked By" ? (
@@ -46,20 +50,31 @@ const BlockingStatusButton = ({ type }) => {
         </TouchableOpacity>
       )}
 
-      <RenderModal modalVisible={blockModalVisible} setModalVisible={setBlockModalVisible}>
-        <Text style={styles.modalTitle}>{modalTitle}</Text>
+      <RenderModal
+        modalVisible={blockModalVisible}
+        setModalVisible={setBlockModalVisible}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        modalTitle={modalTitle}
+        modalTitleStyle={styles.modalTitle}
+      >
         <ScrollView>
-          {(modalTitle === "Blocked By" ? blockedBy : blocking).map((user, index, array) => (
-            <View key={user.id}>
-              <TouchableOpacity onPress={() => navigateToProfile(user.id)}>
-                <View style={styles.userContainer}>
-                  <Image source={{ uri: user.profile.image }} style={styles.userImage} />
-                  <Text style={styles.userName}>@{user.username}</Text>
-                </View>
-              </TouchableOpacity>
-              {index < array.length - 1 && <View style={styles.separator} />}
-            </View>
-          ))}
+          {(modalTitle === "Blocked By" ? blockedBy : blocking).map(
+            (user, index, array) => (
+              <View key={user.id}>
+                <TouchableOpacity onPress={() => navigateToProfile(user.id)}>
+                  <View style={styles.userContainer}>
+                    <Image
+                      source={{ uri: user.profile.image }}
+                      style={styles.userImage}
+                    />
+                    <Text style={styles.userName}>@{user.username}</Text>
+                  </View>
+                </TouchableOpacity>
+                {index < array.length - 1 && <View style={styles.separator} />}
+              </View>
+            )
+          )}
         </ScrollView>
       </RenderModal>
     </View>

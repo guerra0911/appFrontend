@@ -9,6 +9,7 @@ const FollowStatusButton = ({ type }) => {
   const [requestModalVisible, setRequestModalVisible] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const navigation = useNavigation();
+  const [refreshing, setRefreshing] = useState(false);
 
   const {
     requests,
@@ -36,6 +37,13 @@ const FollowStatusButton = ({ type }) => {
     navigation.navigate("otherProfile", { userId });
   };
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    fetchRequests();
+    fetchRequesting();
+    setRefreshing(false);
+  }, [requests, requesting]);
+
   return (
     <View>
       {type === "Requests" ? (
@@ -48,8 +56,7 @@ const FollowStatusButton = ({ type }) => {
         </TouchableOpacity>
       )}
 
-      <RenderModal modalVisible={requestModalVisible} setModalVisible={setRequestModalVisible}>
-        <Text style={styles.modalTitle}>{modalTitle}</Text>
+      <RenderModal modalVisible={requestModalVisible} setModalVisible={setRequestModalVisible} refreshing={refreshing} onRefresh={onRefresh} modalTitle={modalTitle}  modalTitleStyle={styles.modalTitle}>
         <ScrollView>
           {(modalTitle === "Requests" ? requests : requesting).map((user, index, array) => (
             <View key={user.id}>

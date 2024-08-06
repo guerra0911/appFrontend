@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import React, { useState, useCallback } from "react";
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, RefreshControl } from "react-native";
 import RenderModal from "../app/(tabs)/renderModal";
 import ChallengeCardStacked from "./ChallengeCardStacked";
 import useChallengeActions from "../hooks/useChallengeActions";
@@ -8,6 +8,7 @@ import StatusActionButton from "./StatusActionButton";
 const ChallengeStatusButton = ({ type }) => {
   const [challengeModalVisible, setChallengeModalVisible] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
 
   const {
     challengeRequests,
@@ -36,6 +37,14 @@ const ChallengeStatusButton = ({ type }) => {
     fetchChallengesDeclined();
     setChallengeModalVisible(true);
   };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    fetchChallengeRequests();
+    fetchRequestingChallenges();
+    fetchChallengesDeclined();
+    setRefreshing(false);
+  }, [challengeRequests, challengesDeclined, requestingChallenges]);
 
   const handleAcceptAll = async () => {
     try {
@@ -71,9 +80,10 @@ const ChallengeStatusButton = ({ type }) => {
         </TouchableOpacity>
       )}
 
-      <RenderModal modalVisible={challengeModalVisible} setModalVisible={setChallengeModalVisible}>
-        <Text style={styles.modalTitle}>{modalTitle}</Text>
-        <ScrollView>
+      <RenderModal modalVisible={challengeModalVisible} setModalVisible={setChallengeModalVisible} refreshing={refreshing} onRefresh={onRefresh} modalTitle={modalTitle}  modalTitleStyle={styles.modalTitle}>
+        <ScrollView
+        contentContainerStyle={{ flexGrow: 1, padding: 16, paddingBottom: 50 }}
+      >
           {modalTitle === "Challenge Requests" && (
             <>
               <View style={styles.actionButtons}>
