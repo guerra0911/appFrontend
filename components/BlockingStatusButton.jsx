@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { View, Text, ScrollView, Image, StyleSheet } from "react-native";
 import RenderModal from "../app/(tabs)/renderModal";
 import { useNavigation } from "@react-navigation/native";

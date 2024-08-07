@@ -21,7 +21,7 @@ if (Platform.OS === "android") {
 
 const screenWidth = Dimensions.get("window").width;
 
-const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate, isRequestView = false }) => {
+const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate, isRequestView = false, setScrollEnabled = () => {} }) => {
   const [flipped, setFlipped] = useState(false);
   const [originalHeight, setOriginalHeight] = useState(0);
   const [challengerHeight, setChallengerHeight] = useState(0);
@@ -81,7 +81,14 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate, isRequestView = 
 
   const panResponder = useRef(
     PanResponder.create({
-      onMoveShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (e, gestureState) => {
+        if (Math.abs(gestureState.dx) > Math.abs(gestureState.dy)) {
+          setScrollEnabled(false); // Disable vertical scroll on horizontal swipe
+          return true;
+        }
+        setScrollEnabled(true); // Enable vertical scroll otherwise
+        return false;
+      },
       onPanResponderMove: (e, gestureState) => {
         setDxValue(gestureState.dx);
         Animated.event([null, { dx: translateX }], {
@@ -89,6 +96,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate, isRequestView = 
         })(e, gestureState);
       },
       onPanResponderRelease: (e, { dx }) => {
+        setScrollEnabled(true); // Re-enable vertical scroll after swipe
         if (Math.abs(dx) > screenWidth / 4) {
           // If successful swipe, start growing Background card into size of the New Front Card
           if (flippedRef.current) {
@@ -97,26 +105,26 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate, isRequestView = 
             setBackCardHeight(originalHeightRef.current);
           }
 
-          //If Successful Swipe, Set Card to height of Next Card to Show up
+          // If Successful Swipe, Set Card to height of Next Card to Show up
           if (flippedRef.current) {
             setSwipingHeight(challengerHeightRef.current);
           } else {
             setSwipingHeight(originalHeightRef.current);
           }
           Animated.parallel([
-            //Front Card Swiping off of Screen After Complete Swipe
+            // Front Card Swiping off of Screen After Complete Swipe
             Animated.timing(translateX, {
               toValue: dx > 0 ? screenWidth + 175 : -screenWidth - 250,
               duration: 300,
               useNativeDriver: false,
             }),
-            //Background Card Moving Up
+            // Background Card Moving Up
             Animated.timing(translateYBack, {
               toValue: 0,
               duration: 300,
               useNativeDriver: false,
             }),
-            //Background Card Moving Right
+            // Background Card Moving Right
             Animated.timing(translateXBack, {
               toValue: 0,
               duration: 300,
@@ -149,7 +157,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate, isRequestView = 
             });
           });
         } else {
-          //If Unsuccessful Swipe, just revert back to original size
+          // If Unsuccessful Swipe, just revert back to original size
           if (flippedRef.current) {
             setSwipingHeight(originalHeightRef.current);
           } else {
@@ -165,7 +173,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate, isRequestView = 
     })
   ).current;
 
-  //Set the Minimum Height for the Entry and Background Card on Loadup
+  // Set the Minimum Height for the Entry and Background Card on Loadup
   useEffect(() => {
     if (originalHeight > 0 && challengerHeight > 0) {
       const minHeight = Math.min(originalHeight, challengerHeight);
@@ -175,7 +183,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate, isRequestView = 
     setIsLoading(false);
   }, [originalHeight, challengerHeight]);
 
-  //As the user swipes away, decrease card height to minimum height in real time
+  // As the user swipes away, decrease card height to minimum height in real time
   useEffect(() => {
     const calculateSwipingHeight = () => {
       const clampedDxValue = Math.max(
@@ -196,7 +204,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate, isRequestView = 
     calculateSwipingHeight();
   }, [dxValue]);
 
-  //Render and Measure cards off screen on loadup to get Default height values
+  // Render and Measure cards off screen on loadup to get Default height values
   const measureCardHeight = (event, type) => {
     const { height } = event.nativeEvent.layout;
     if (type === "original") {
@@ -206,7 +214,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate, isRequestView = 
     }
   };
 
-  //Callable function to check and see if a user has made a winner selection for this specific challenger
+  // Callable function to check and see if a user has made a winner selection for this specific challenger
   const fetchUserPickStatus = async () => {
     try {
       const response = await api.get(`api/challenges/${challenge.id}/has_user_selected_winner/`);
@@ -222,12 +230,12 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate, isRequestView = 
     }
   };
 
-  //onMount function, called when the component is rendered initially
+  // onMount function, called when the component is rendered initially
   useEffect(() => {
     fetchUserPickStatus();
   }, [challenge.id]);
 
-  //Allow users to pick which post is the winner
+  // Allow users to pick which post is the winner
   const handlePickUpdate = async (pickType) => {
     if (isRequestView) {
       return;
@@ -237,7 +245,7 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate, isRequestView = 
         ? `api/challenges/${challenge.id}/pick_original/`
         : `api/challenges/${challenge.id}/pick_challenger/`;
       await api.post(endpoint);
-      fetchUserPickStatus(); //Refresh the pick status after updating
+      fetchUserPickStatus(); // Refresh the pick status after updating
     } catch (error) {
       console.error("Error updating pick", error);
     }

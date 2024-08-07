@@ -11,10 +11,16 @@ import {
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 
-const RenderModal = ({
+const ChallengeStatusModal = ({
   modalVisible,
   setModalVisible,
   children,
+  refreshing,
+  onRefresh,
+  modalTitle,
+  modalTitleStyle,
+  scrollViewRef,
+  scrollEnabled,
 }) => {
   return (
     <Modal
@@ -30,9 +36,21 @@ const RenderModal = ({
               <AntDesign name="downcircle" size={24} color="#69C3FF" />
             </TouchableOpacity>
           </View>
-          <ScrollView contentContainerStyle={styles.scrollViewContent}>
-         {children}
-        </ScrollView>
+          <Text style={modalTitleStyle}>{modalTitle}</Text>
+          <ScrollView
+            contentContainerStyle={{
+              flexGrow: 1,
+              padding: 16,
+              paddingBottom: 50,
+            }}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+            ref={scrollViewRef}
+            scrollEnabled={scrollEnabled}
+          >
+            {children}
+          </ScrollView>
         </View>
       </View>
     </Modal>
@@ -73,4 +91,4 @@ const styles = StyleSheet.create({
   // ... other styles
 });
 
-export default RenderModal;
+export default ChallengeStatusModal;
