@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import api from "../api"; // Make sure this is the correct path to your api.js
+import api from "../api";
 
 const GlobalContext = createContext();
 export const useGlobalContext = () => useContext(GlobalContext);
@@ -10,6 +10,9 @@ const GlobalProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState([]);
+  const [cachedPosts, setCachedPosts] = useState({});
+  const [pickStatus, setPickStatus] = useState({});
+  const [pickCounts, setPickCounts] = useState({});
 
   const checkCurrentUser = async () => {
     setLoading(true);
@@ -39,52 +42,109 @@ const GlobalProvider = ({ children }) => {
   };
 
   const fetchPosts = async (userId, sortBy = 'created_at') => {
+    const cacheKey = `posts-${userId || 'all'}-${sortBy}`;
+    if (cachedPosts[cacheKey]) {
+      setPosts(cachedPosts[cacheKey]);
+      return;
+    }
+
     try {
       const response = userId
         ? await api.get(`/api/notes/user/${userId}/?sort_by=${sortBy}`)
         : await api.get(`/api/notes/all/?sort_by=${sortBy}`);
       setPosts(response.data);
+      setCachedPosts((prev) => ({ ...prev, [cacheKey]: response.data }));
     } catch (error) {
       console.error('Error fetching posts:', error);
     }
   };
 
   const fetchFollowingPosts = async (sortBy = 'created_at') => {
+    const cacheKey = `followingPosts-${sortBy}`;
+    if (cachedPosts[cacheKey]) {
+      setPosts(cachedPosts[cacheKey]);
+      return;
+    }
+
     try {
       const response = await api.get(`/api/notes/following/?sort_by=${sortBy}`);
       setPosts(response.data);
+      setCachedPosts((prev) => ({ ...prev, [cacheKey]: response.data }));
     } catch (error) {
       console.error('Error fetching following posts:', error);
     }
   };
 
   const fetchAllCombinedPosts = async (sortBy = 'created_at') => {
+    const cacheKey = `allCombinedPosts-${sortBy}`;
+    if (cachedPosts[cacheKey]) {
+      setPosts(cachedPosts[cacheKey]);
+      return;
+    }
+
     try {
       const response = await api.get(`/api/notes/all/combined/?sort_by=${sortBy}`);
       setPosts(response.data);
+      setCachedPosts((prev) => ({ ...prev, [cacheKey]: response.data }));
     } catch (error) {
       console.error('Error fetching all combined posts:', error);
     }
   };
 
   const fetchUserCombinedPosts = async (userId, sortBy = 'created_at') => {
+    const cacheKey = `userCombinedPosts-${userId}-${sortBy}`;
+    if (cachedPosts[cacheKey]) {
+      setPosts(cachedPosts[cacheKey]);
+      return;
+    }
+
     try {
       const response = await api.get(`/api/notes/user/${userId}/combined/?sort_by=${sortBy}`);
       setPosts(response.data);
+      setCachedPosts((prev) => ({ ...prev, [cacheKey]: response.data }));
     } catch (error) {
       console.error('Error fetching user combined posts:', error);
     }
   };
 
   const fetchFollowingCombinedPosts = async (sortBy = 'created_at') => {
+    const cacheKey = `followingCombinedPosts-${sortBy}`;
+    if (cachedPosts[cacheKey]) {
+      setPosts(cachedPosts[cacheKey]);
+      return;
+    }
+
     try {
       const response = await api.get(`/api/notes/following/combined/?sort_by=${sortBy}`);
       setPosts(response.data);
+      setCachedPosts((prev) => ({ ...prev, [cacheKey]: response.data }));
     } catch (error) {
       console.error('Error fetching following combined posts:', error);
     }
   };
-  
+
+  const updatePickStatus = async (challengeId, pickType) => {
+    const endpoint = pickType === 'original' 
+      ? `api/challenges/${challengeId}/pick_original/`
+      : `api/challenges/${challengeId}/pick_challenger/`;
+    
+    try {
+      const response = await api.post(endpoint);
+      const { original_picks, challenger_picks } = response.data;
+      
+      setPickCounts((prev) => ({
+        ...prev,
+        [challengeId]: { originalPicks: original_picks, challengerPicks: challenger_picks }
+      }));
+
+      setPickStatus((prev) => ({
+        ...prev,
+        [challengeId]: true
+      }));
+    } catch (error) {
+      console.error("Error updating pick status", error);
+    }
+  };
 
   useEffect(() => {
     checkCurrentUser();
@@ -107,6 +167,9 @@ const GlobalProvider = ({ children }) => {
         fetchAllCombinedPosts,
         fetchUserCombinedPosts,
         fetchFollowingCombinedPosts,
+        updatePickStatus,
+        pickStatus,
+        pickCounts,
       }}
     >
       {children}

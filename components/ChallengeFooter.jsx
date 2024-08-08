@@ -1,9 +1,10 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { View, Text, StyleSheet, Animated, Dimensions, Image } from "react-native";
+import StatusButtonBar from "./StatusButtonBar";
 
 const screenWidth = Dimensions.get("window").width;
 
-const ChallengeFooter = ({ hasCurrentUserSelectedWinner, originalPost, challengerPost, originalPicks, challengerPicks, isRequestView }) => {
+const ChallengeFooter = ({ hasCurrentUserSelectedWinner, originalPost, challengerPost, originalPicks, challengerPicks, isRequestView, challengeId, buttonTypes }) => {
   const widthAnim = useRef(new Animated.Value(hasCurrentUserSelectedWinner ? screenWidth - 38 : 36)).current;
 
   useEffect(() => {
@@ -22,31 +23,40 @@ const ChallengeFooter = ({ hasCurrentUserSelectedWinner, originalPost, challenge
     }
   }, [hasCurrentUserSelectedWinner, widthAnim]);
 
-  const totalPicks = originalPicks.length + challengerPicks.length;
-  const originalPercentage = totalPicks > 0 ? ((originalPicks.length / totalPicks) * 100).toFixed(1) : 0;
-  const challengerPercentage = totalPicks > 0 ? ((challengerPicks.length / totalPicks) * 100).toFixed(1) : 0;
+  const totalPicks = originalPicks + challengerPicks;
+  const originalPercentage = totalPicks > 0 ? ((originalPicks / totalPicks) * 100).toFixed(1) : 0;
+  const challengerPercentage = totalPicks > 0 ? ((challengerPicks / totalPicks) * 100).toFixed(1) : 0;
 
   return (
-    <Animated.View style={[styles.footer, { width: widthAnim }]}>
-      {hasCurrentUserSelectedWinner && (
-        <View style={styles.contentContainer}>
-          <Image
-            source={{ uri: originalPost.author.profile.image }}
-            style={styles.profilePicture}
-          />
-          <Text style={styles.pickText}>{originalPicks.length} ({originalPercentage}%)</Text>
-          <Text style={styles.vsText}>VS</Text>
-          <Text style={styles.pickText}>{challengerPicks.length} ({challengerPercentage}%)</Text>
-          <Image
-            source={{ uri: challengerPost.author.profile.image }}
-            style={styles.profilePicture}
-          />
-        </View>
+    <>
+      {isRequestView ? (
+        <>
+        <View style={styles.footer} >
+          <StatusButtonBar challengeId={challengeId} buttonTypes={buttonTypes} />
+          </View>
+        </>
+      ) : (
+        <Animated.View style={[styles.footer, { width: widthAnim }]}>
+          {hasCurrentUserSelectedWinner ? (
+            <View style={styles.contentContainer}>
+              <Image
+                source={{ uri: originalPost.author.profile.image }}
+                style={styles.profilePicture}
+              />
+              <Text style={styles.pickText}>{originalPicks} ({originalPercentage}%)</Text>
+              <Text style={styles.vsText}>VS</Text>
+              <Text style={styles.pickText}>{challengerPicks} ({challengerPercentage}%)</Text>
+              <Image
+                source={{ uri: challengerPost.author.profile.image }}
+                style={styles.profilePicture}
+              />
+            </View>
+          ) : (
+            <Text style={styles.vsText}>VS</Text>
+          )}
+        </Animated.View>
       )}
-      {!hasCurrentUserSelectedWinner && (
-        <Text style={styles.vsText}>VS</Text>
-      )}
-    </Animated.View>
+    </>
   );
 };
 

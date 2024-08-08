@@ -41,15 +41,11 @@ const RenderModal = ({
 
 const styles = StyleSheet.create({
   modalOverlay: {
-    borderColor: "purple",
-    borderWidth: 1,
     flex: 1,
     justifyContent: "flex-end",
     backgroundColor: "rgba(0, 0, 0, 0.6)",
   },
   modalContent: {
-    borderColor: "green",
-    borderWidth: 1,
     width: "100%",
     height: "87%",
     backgroundColor: "#F5F5F5",
@@ -62,8 +58,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   scrollViewContent: {
-    borderColor: "brown",
-    borderWidth: 1,
     paddingBottom: 20,
   },
   modalText: {

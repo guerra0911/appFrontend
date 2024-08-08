@@ -11,9 +11,6 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import PostCard from "./PostCard";
-import ChallengeCard from "./ChallengeCard";
-import ChallengeCardAnimated from "./ChallengeCardAnimated";
-import ChallengeCardFlip from "./ChallengeCardFlip";
 import ChallengeCardStacked from "./ChallengeCardStacked";
 import SubCard from "./SubCard";
 import { useGlobalContext } from "../context/GlobalProvider";
@@ -28,7 +25,7 @@ const PostList = ({ userId = null }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [sortBy, setSortBy] = useState("created_at");
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState("all"); // Add view state
+  const [view, setView] = useState("all");
 
   useEffect(() => {
     const loadPreferences = async () => {
@@ -69,7 +66,7 @@ const PostList = ({ userId = null }) => {
   useFocusEffect(
     useCallback(() => {
       fetchData(sortBy);
-    }, [sortBy, userId, view]) // Add view as a dependency
+    }, [sortBy, userId, view])
   );
 
   const handleSortChange = (newSortBy) => {

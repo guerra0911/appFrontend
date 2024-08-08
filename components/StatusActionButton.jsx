@@ -11,15 +11,17 @@ const StatusActionButton = ({ text, color, onPress }) => {
 
 const styles = StyleSheet.create({
   button: {
-    margin: 5,
-    padding: 10,
-    borderRadius: 5,
+    marginHorizontal: 3,
+    paddingVertical: 4,
+    paddingHorizontal: 10, // Reduce padding to a smaller value
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
+    alignSelf: 'flex-start' // Allow button to wrap its content
   },
   buttonText: {
     color: "#FFF",
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "bold",
   },
 });

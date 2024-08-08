@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import ChallengeCard from "./ChallengeCard";
 import ChallengeFooter from "./ChallengeFooter";
-import api from "../api";
+import { useGlobalContext } from "../context/GlobalProvider";
 import Loader from "./Loader";
 
 if (Platform.OS === "android") {
@@ -21,7 +21,8 @@ if (Platform.OS === "android") {
 
 const screenWidth = Dimensions.get("window").width;
 
-const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate, isRequestView = false, setScrollEnabled = () => {} }) => {
+const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate, isRequestView = false, setScrollEnabled = () => {}, buttonTypes = [] }) => {
+  const { updatePickStatus, pickStatus, pickCounts } = useGlobalContext();
   const [flipped, setFlipped] = useState(false);
   const [originalHeight, setOriginalHeight] = useState(0);
   const [challengerHeight, setChallengerHeight] = useState(0);
@@ -33,11 +34,8 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate, isRequestView = 
   const [dxValue, setDxValue] = useState(0);
   const [swipingHeight, setSwipingHeight] = useState(0);
   const [backCardHeight, setBackCardHeight] = useState(0);
-
-  const [hasCurrentUserSelectedWinner, setHasCurrentUserSelectedWinner] = useState(false);
-  const [originalPicks, setOriginalPicks] = useState([]);
-  const [challengerPicks, setChallengerPicks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
 
   const originalPost = challenge.original_note;
   const challengerPost = challenge.challenger_note;
@@ -214,38 +212,13 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate, isRequestView = 
     }
   };
 
-  // Callable function to check and see if a user has made a winner selection for this specific challenger
-  const fetchUserPickStatus = async () => {
-    try {
-      const response = await api.get(`api/challenges/${challenge.id}/has_user_selected_winner/`);
-      setHasCurrentUserSelectedWinner(response.data.has_picked);
-      
-      const originalResponse = await api.get(`api/challenges/${challenge.id}/get_original_picks/`);
-      setOriginalPicks(originalResponse.data);
-      
-      const challengerResponse = await api.get(`api/challenges/${challenge.id}/get_challenger_picks/`);
-      setChallengerPicks(challengerResponse.data);
-    } catch (error) {
-      console.error("Error fetching user pick status", error);
-    }
-  };
-
-  // onMount function, called when the component is rendered initially
-  useEffect(() => {
-    fetchUserPickStatus();
-  }, [challenge.id]);
-
   // Allow users to pick which post is the winner
   const handlePickUpdate = async (pickType) => {
     if (isRequestView) {
       return;
     }
     try {
-      const endpoint = pickType === 'original' 
-        ? `api/challenges/${challenge.id}/pick_original/`
-        : `api/challenges/${challenge.id}/pick_challenger/`;
-      await api.post(endpoint);
-      fetchUserPickStatus(); // Refresh the pick status after updating
+      await updatePickStatus(challenge.id, pickType); // Update the pick status and counts in the global state
     } catch (error) {
       console.error("Error updating pick", error);
     }
@@ -380,12 +353,14 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate, isRequestView = 
       </View>
 
       <ChallengeFooter
-        hasCurrentUserSelectedWinner={hasCurrentUserSelectedWinner}
+        hasCurrentUserSelectedWinner={pickStatus[challenge.id]}
         originalPost={originalPost}
         challengerPost={challengerPost}
-        originalPicks={originalPicks}
-        challengerPicks={challengerPicks}
+        originalPicks={pickCounts[challenge.id]?.originalPicks || 0}
+        challengerPicks={pickCounts[challenge.id]?.challengerPicks || 0}
         isRequestView={isRequestView}
+        challengeId={challenge.id}
+        buttonTypes={buttonTypes}
       />
     </View>
   );
@@ -426,23 +401,6 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: "#F5F5F5",
     overflow: "hidden",
-  },
-  vsCircle: {
-    position: "absolute",
-    bottom: -20,
-    left: 10,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: "#F5F5F5",
-    borderColor: "#DCDCDC",
-    borderWidth: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  vsText: {
-    fontSize: 10,
-    color: "#000",
   },
 });
 
