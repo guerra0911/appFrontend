@@ -21,7 +21,7 @@ if (Platform.OS === "android") {
 
 const screenWidth = Dimensions.get("window").width;
 
-const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate, isRequestView = false, setScrollEnabled = () => {}, buttonTypes = [] }) => {
+const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate, isRequestView = false, setScrollEnabled = () => {}, buttonTypes = [], onMeasurement}) => {
   const { updatePickStatus, pickStatus, pickCounts } = useGlobalContext();
   const [flipped, setFlipped] = useState(false);
   const [originalHeight, setOriginalHeight] = useState(0);
@@ -177,9 +177,11 @@ const ChallengeCardStacked = ({ challenge, onLikeDislikeUpdate, isRequestView = 
       const minHeight = Math.min(originalHeight, challengerHeight);
       setMinHeight(minHeight);
       setMeasured(true);
+      onMeasurement();
     }
     setIsLoading(false);
   }, [originalHeight, challengerHeight]);
+
 
   // As the user swipes away, decrease card height to minimum height in real time
   useEffect(() => {
